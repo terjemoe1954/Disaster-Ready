@@ -84,12 +84,27 @@ enum PreparednessScenario: String, CaseIterable, Identifiable {
     }
 }
 
-struct HouseholdRole: Identifiable {
-    let id = UUID()
-    let title: String
-    let person: String
-    let task: String
-    let systemImage: String
+@Model
+final class HouseholdRole {
+    var id: UUID
+    var title: String
+    var person: String
+    var task: String
+    var systemImage: String
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        person: String,
+        task: String,
+        systemImage: String
+    ) {
+        self.id = id
+        self.title = title
+        self.person = person
+        self.task = task
+        self.systemImage = systemImage
+    }
 }
 
 struct Drill: Identifiable {
@@ -164,6 +179,7 @@ final class SupplyItem {
 @Model
 final class HouseholdPlan {
     var id: UUID
+    var scenarioIdentifier: String?
     var reunionPoint: String
     var evacuationDestination: String
     var shelterZone: String
@@ -174,6 +190,7 @@ final class HouseholdPlan {
 
     init(
         id: UUID = UUID(),
+        scenarioIdentifier: String? = nil,
         reunionPoint: String,
         evacuationDestination: String,
         shelterZone: String,
@@ -183,6 +200,7 @@ final class HouseholdPlan {
         familyPassword: String
     ) {
         self.id = id
+        self.scenarioIdentifier = scenarioIdentifier
         self.reunionPoint = reunionPoint
         self.evacuationDestination = evacuationDestination
         self.shelterZone = shelterZone

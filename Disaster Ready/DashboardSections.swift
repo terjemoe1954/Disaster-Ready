@@ -5,6 +5,26 @@
 
 import SwiftUI
 
+private enum DashboardPalette {
+    static func cardFill(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 0.12, green: 0.15, blue: 0.18).opacity(0.94)
+            : Color.white.opacity(0.92)
+    }
+
+    static func insetFill(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.white.opacity(0.08)
+            : Color.black.opacity(0.04)
+    }
+
+    static func secondaryPanelFill(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 0.17, green: 0.20, blue: 0.24).opacity(0.92)
+            : Color.white.opacity(0.88)
+    }
+}
+
 struct HeroCardSection: View {
     let language: AppLanguage
 
@@ -60,6 +80,7 @@ struct HeroCardSection: View {
 }
 
 struct ScenarioSelectorSection: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var selectedScenario: PreparednessScenario
     let language: AppLanguage
 
@@ -95,7 +116,7 @@ struct ScenarioSelectorSection: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(Color.white.opacity(0.88))
+                    .fill(DashboardPalette.secondaryPanelFill(for: colorScheme))
                     .overlay {
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .stroke(selectedScenario.tint.opacity(0.5), lineWidth: 1.5)
@@ -161,11 +182,20 @@ struct HouseholdPlanSection: View {
     @Bindable var plan: HouseholdPlan
     let summary: String
     let language: AppLanguage
+    let scenarioName: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.text("household_plan", language: language))
-                .font(.title3.weight(.bold))
+            HStack {
+                Text(L10n.text("household_plan", language: language))
+                    .font(.title3.weight(.bold))
+                Spacer()
+                Text(scenarioName)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(.orange.opacity(0.14), in: Capsule())
+            }
 
             Text(L10n.text("household_plan_subtitle", language: language))
                 .font(.subheadline)
@@ -195,7 +225,7 @@ struct HouseholdPlanSection: View {
                     .foregroundStyle(.secondary)
             }
             .padding(14)
-            .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(InsetCardBackground())
         }
         .padding(20)
         .background(DashboardCardBackground())
@@ -318,7 +348,7 @@ struct MessageTemplatesSection: View {
                     }
                 }
                 .padding(14)
-                .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(InsetCardBackground())
             }
         }
         .padding(20)
@@ -329,30 +359,38 @@ struct MessageTemplatesSection: View {
 struct RolesSection: View {
     let roles: [HouseholdRole]
     let language: AppLanguage
+    let addRole: () -> Void
+    let deleteRole: (HouseholdRole) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.text("household_roles", language: language))
-                .font(.title3.weight(.bold))
+            HStack {
+                Text(L10n.text("household_roles", language: language))
+                    .font(.title3.weight(.bold))
+                Spacer()
+                Button(roleAddTitle, action: addRole)
+                    .font(.caption.weight(.semibold))
+            }
 
             ForEach(roles) { role in
-                HStack(alignment: .top, spacing: 14) {
-                    Image(systemName: role.systemImage)
-                        .font(.title3)
-                        .foregroundStyle(.orange)
-                        .frame(width: 28)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(role.title) • \(role.person)")
-                            .font(.headline)
-                        Text(role.task)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                HouseholdRoleEditor(
+                    role: role,
+                    language: language,
+                    deleteAction: { deleteRole(role) }
+                )
             }
         }
         .padding(20)
         .background(DashboardCardBackground())
+    }
+
+    private var roleAddTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Add role",
+            norwegian: "Legg til rolle",
+            thai: "เพิ่มบทบาท"
+        )
     }
 }
 
@@ -430,7 +468,7 @@ struct DrillsSection: View {
                         .foregroundStyle(.purple)
                 }
                 .padding(14)
-                .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(InsetCardBackground())
             }
         }
         .padding(20)
@@ -537,7 +575,7 @@ private struct FamilyContactEditor: View {
             }
         }
         .padding(14)
-        .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(InsetCardBackground())
     }
 }
 
@@ -572,7 +610,75 @@ private struct ImportantNumberEditor: View {
             }
         }
         .padding(14)
-        .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(InsetCardBackground())
+    }
+}
+
+private struct HouseholdRoleEditor: View {
+    @Bindable var role: HouseholdRole
+    let language: AppLanguage
+    let deleteAction: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            header(title: roleHeaderTitle, deleteAction: deleteAction)
+
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: role.systemImage)
+                    .font(.title3)
+                    .foregroundStyle(.orange)
+                    .frame(width: 28)
+                    .padding(.top, 8)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    TextField(roleTitlePlaceholder, text: $role.title)
+                        .textFieldStyle(.roundedBorder)
+                    TextField(rolePersonPlaceholder, text: $role.person)
+                        .textFieldStyle(.roundedBorder)
+                    TextField(roleTaskPlaceholder, text: $role.task, axis: .vertical)
+                        .textFieldStyle(.roundedBorder)
+                        .lineLimit(2...4)
+                }
+            }
+        }
+        .padding(14)
+        .background(InsetCardBackground())
+    }
+
+    private var roleHeaderTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Household role",
+            norwegian: "Husholdningsrolle",
+            thai: "บทบาทในครัวเรือน"
+        )
+    }
+
+    private var roleTitlePlaceholder: String {
+        L10n.pick(
+            language: language,
+            english: "Role title",
+            norwegian: "Rollenavn",
+            thai: "ชื่อบทบาท"
+        )
+    }
+
+    private var rolePersonPlaceholder: String {
+        L10n.pick(
+            language: language,
+            english: "Assigned person",
+            norwegian: "Ansvarlig person",
+            thai: "ผู้รับผิดชอบ"
+        )
+    }
+
+    private var roleTaskPlaceholder: String {
+        L10n.pick(
+            language: language,
+            english: "Primary task",
+            norwegian: "Hovedoppgave",
+            thai: "งานหลัก"
+        )
     }
 }
 
@@ -644,14 +750,29 @@ private struct SupplyItemEditor: View {
                 .lineLimit(2...4)
         }
         .padding(14)
-        .background(Color.black.opacity(0.04), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(InsetCardBackground())
     }
 }
 
 struct DashboardCardBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .fill(Color.white.opacity(0.92))
+            .fill(DashboardPalette.cardFill(for: colorScheme))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(Color.white.opacity(colorScheme == .dark ? 0.10 : 0.22), lineWidth: 1)
+            }
+    }
+}
+
+struct InsetCardBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .fill(DashboardPalette.insetFill(for: colorScheme))
     }
 }
 

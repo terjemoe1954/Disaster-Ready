@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum AppLanguage: String, CaseIterable, Identifiable {
     case english = "en"
@@ -48,6 +49,36 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
     static func locale(for language: AppLanguage) -> Locale {
         Locale(identifier: language.rawValue)
+    }
+}
+
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var preferredColorScheme: ColorScheme? {
+        switch self {
+        case .system:
+            return nil
+        case .light:
+            return .light
+        case .dark:
+            return .dark
+        }
+    }
+
+    func title(in language: AppLanguage) -> String {
+        switch self {
+        case .system:
+            return L10n.pick(language: language, english: "System", norwegian: "System", thai: "ระบบ")
+        case .light:
+            return L10n.pick(language: language, english: "Light", norwegian: "Lys", thai: "สว่าง")
+        case .dark:
+            return L10n.pick(language: language, english: "Dark", norwegian: "Mørk", thai: "มืด")
+        }
     }
 }
 

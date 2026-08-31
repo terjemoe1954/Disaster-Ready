@@ -10,8 +10,10 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DisasterDashboardView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
     @AppStorage("preferredLanguageCode") private var preferredLanguageCode = AppLanguage.current.rawValue
+    @AppStorage("preferredAppearance") private var preferredAppearance = AppAppearance.system.rawValue
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("includePlanSummaryInMessages") private var includePlanSummaryInMessages = true
     @AppStorage("showOnlyMissingSupplies") private var showOnlyMissingSupplies = false
@@ -19,6 +21,7 @@ struct DisasterDashboardView: View {
     @Query(sort: \FamilyContact.name) private var familyContacts: [FamilyContact]
     @Query(sort: \ImportantNumber.label) private var importantNumbers: [ImportantNumber]
     @Query(sort: \HouseholdPlan.id) private var householdPlans: [HouseholdPlan]
+    @Query(sort: \HouseholdRole.title) private var householdRoles: [HouseholdRole]
     @Query(
         filter: #Predicate<SupplyItem> { item in
             item.storageLocation == "Home"
@@ -56,11 +59,12 @@ struct DisasterDashboardView: View {
                         language: selectedLanguage
                     )
 
-                    if let plan = householdPlans.first {
+                    if let plan = currentHouseholdPlan {
                         HouseholdPlanSection(
                             plan: plan,
                             summary: planSummary(for: plan),
-                            language: selectedLanguage
+                            language: selectedLanguage,
+                            scenarioName: selectedScenario.localizedName(in: selectedLanguage)
                         )
                     }
 
@@ -82,7 +86,9 @@ struct DisasterDashboardView: View {
 
                     RolesSection(
                         roles: householdRoles,
-                        language: selectedLanguage
+                        language: selectedLanguage,
+                        addRole: addHouseholdRole,
+                        deleteRole: deleteHouseholdRole
                     )
 
                     SuppliesSection(
@@ -146,10 +152,10 @@ struct DisasterDashboardView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsSheet(
                 selectedLanguage: $selectedLanguage,
+                selectedAppearance: $preferredAppearance,
                 includePlanSummaryInMessages: $includePlanSummaryInMessages,
                 showOnlyMissingSupplies: $showOnlyMissingSupplies,
                 offlineFirstMode: $offlineFirstMode,
-                reopenOnboarding: { showingOnboarding = true },
                 exportBackup: prepareBackupExport,
                 importBackup: { showingBackupImporter = true },
                 language: selectedLanguage
@@ -167,6 +173,7 @@ struct DisasterDashboardView: View {
         }
         .task {
             seedDataIfNeeded()
+            ensureScenarioPlans()
             selectedLanguage = AppLanguage(rawValue: preferredLanguageCode) ?? .current
             if !hasSeenOnboarding {
                 showingOnboarding = true
@@ -194,48 +201,28 @@ struct DisasterDashboardView: View {
         .onChange(of: selectedLanguage) { _, newValue in
             preferredLanguageCode = newValue.rawValue
         }
+        .onChange(of: selectedScenario) { _, _ in
+            ensureScenarioPlans()
+        }
     }
 
     private var backgroundGradient: some View {
         LinearGradient(
-            colors: [
-                Color(red: 0.95, green: 0.92, blue: 0.86),
-                Color(red: 0.80, green: 0.86, blue: 0.86),
-                Color(red: 0.22, green: 0.29, blue: 0.34)
-            ],
+            colors: colorScheme == .dark
+                ? [
+                    Color(red: 0.08, green: 0.11, blue: 0.14),
+                    Color(red: 0.12, green: 0.18, blue: 0.22),
+                    Color(red: 0.20, green: 0.16, blue: 0.12)
+                ]
+                : [
+                    Color(red: 0.95, green: 0.92, blue: 0.86),
+                    Color(red: 0.80, green: 0.86, blue: 0.86),
+                    Color(red: 0.22, green: 0.29, blue: 0.34)
+                ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
-    }
-
-    private var householdRoles: [HouseholdRole] {
-        [
-            HouseholdRole(
-                title: L10n.text("medical", language: selectedLanguage),
-                person: "Alex",
-                task: L10n.text("role_medical_task", language: selectedLanguage),
-                systemImage: "cross.case.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("utilities", language: selectedLanguage),
-                person: "Jordan",
-                task: L10n.text("role_utilities_task", language: selectedLanguage),
-                systemImage: "wrench.adjustable.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("pets", language: selectedLanguage),
-                person: "Sam",
-                task: L10n.text("role_pets_task", language: selectedLanguage),
-                systemImage: "pawprint.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("communications", language: selectedLanguage),
-                person: "Taylor",
-                task: L10n.text("role_comms_task", language: selectedLanguage),
-                systemImage: "message.fill"
-            )
-        ]
     }
 
     private var drills: [Drill] {
@@ -322,7 +309,7 @@ struct DisasterDashboardView: View {
             "\(L10n.text("action", language: selectedLanguage)): \(selectedScenario.recommendedAction(in: selectedLanguage))"
         ]
 
-        if includePlanSummaryInMessages, let plan = householdPlans.first {
+        if includePlanSummaryInMessages, let plan = currentHouseholdPlan {
             lines.append(planSummary(for: plan))
         }
 
@@ -343,6 +330,17 @@ struct DisasterDashboardView: View {
         )
     }
 
+    private func addHouseholdRole() {
+        modelContext.insert(
+            HouseholdRole(
+                title: "",
+                person: "",
+                task: "",
+                systemImage: "person.fill"
+            )
+        )
+    }
+
     private func deleteFamilyContact(_ contact: FamilyContact) {
         modelContext.delete(contact)
     }
@@ -353,6 +351,10 @@ struct DisasterDashboardView: View {
 
     private func deleteSupplyItem(_ item: SupplyItem) {
         modelContext.delete(item)
+    }
+
+    private func deleteHouseholdRole(_ role: HouseholdRole) {
+        modelContext.delete(role)
     }
 
     private func prepareBackupExport() {
@@ -376,6 +378,7 @@ struct DisasterDashboardView: View {
                 },
                 householdPlans: householdPlans.map {
                     HouseholdPlanSnapshot(
+                        scenarioIdentifier: $0.scenarioIdentifier,
                         reunionPoint: $0.reunionPoint,
                         evacuationDestination: $0.evacuationDestination,
                         shelterZone: $0.shelterZone,
@@ -383,6 +386,14 @@ struct DisasterDashboardView: View {
                         medicalLead: $0.medicalLead,
                         petLead: $0.petLead,
                         familyPassword: $0.familyPassword
+                    )
+                },
+                householdRoles: householdRoles.map {
+                    HouseholdRoleSnapshot(
+                        title: $0.title,
+                        person: $0.person,
+                        task: $0.task,
+                        systemImage: $0.systemImage
                     )
                 },
                 supplies: (homeSupplies + carSupplies).map {
@@ -465,6 +476,7 @@ struct DisasterDashboardView: View {
         familyContacts.forEach(modelContext.delete)
         importantNumbers.forEach(modelContext.delete)
         householdPlans.forEach(modelContext.delete)
+        householdRoles.forEach(modelContext.delete)
         homeSupplies.forEach(modelContext.delete)
         carSupplies.forEach(modelContext.delete)
 
@@ -477,6 +489,7 @@ struct DisasterDashboardView: View {
         payload.householdPlans
             .map {
                 HouseholdPlan(
+                    scenarioIdentifier: $0.scenarioIdentifier,
                     reunionPoint: $0.reunionPoint,
                     evacuationDestination: $0.evacuationDestination,
                     shelterZone: $0.shelterZone,
@@ -484,6 +497,16 @@ struct DisasterDashboardView: View {
                     medicalLead: $0.medicalLead,
                     petLead: $0.petLead,
                     familyPassword: $0.familyPassword
+                )
+            }
+            .forEach(modelContext.insert)
+        payload.householdRoles
+            .map {
+                HouseholdRole(
+                    title: $0.title,
+                    person: $0.person,
+                    task: $0.task,
+                    systemImage: $0.systemImage
                 )
             }
             .forEach(modelContext.insert)
@@ -500,13 +523,14 @@ struct DisasterDashboardView: View {
     }
 
     private func seedDataIfNeeded() {
-        guard familyContacts.isEmpty, importantNumbers.isEmpty, householdPlans.isEmpty, homeSupplies.isEmpty, carSupplies.isEmpty else {
+        guard familyContacts.isEmpty, importantNumbers.isEmpty, householdPlans.isEmpty, householdRoles.isEmpty, homeSupplies.isEmpty, carSupplies.isEmpty else {
             return
         }
 
         defaultFamilyContacts.forEach(modelContext.insert)
         defaultImportantNumbers.forEach(modelContext.insert)
-        modelContext.insert(defaultHouseholdPlan)
+        defaultHouseholdPlans.forEach(modelContext.insert)
+        defaultHouseholdRoles.forEach(modelContext.insert)
         defaultHomeSupplies.forEach(modelContext.insert)
         defaultCarSupplies.forEach(modelContext.insert)
     }
@@ -537,33 +561,142 @@ struct DisasterDashboardView: View {
     private var defaultImportantNumbers: [ImportantNumber] {
         [
             ImportantNumber(
-                label: L10n.text("seed_emergency_contact", language: selectedLanguage),
+                label: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Ambulance",
+                    norwegian: "Ambulanse",
+                    thai: "รถพยาบาล"
+                ),
+                phoneNumber: "113",
+                notes: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Medical emergency dispatch.",
+                    norwegian: "Medisinsk nødtelefon.",
+                    thai: "สายด่วนเหตุฉุกเฉินทางการแพทย์"
+                )
+            ),
+            ImportantNumber(
+                label: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Fire",
+                    norwegian: "Brann",
+                    thai: "ดับเพลิง"
+                ),
+                phoneNumber: "110",
+                notes: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Fire and rescue emergency dispatch.",
+                    norwegian: "Nødtelefon for brann og redning.",
+                    thai: "สายด่วนเหตุฉุกเฉินด้านเพลิงไหม้และกู้ภัย"
+                )
+            ),
+            ImportantNumber(
+                label: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Police",
+                    norwegian: "Politi",
+                    thai: "ตำรวจ"
+                ),
                 phoneNumber: "112",
-                notes: L10n.text("seed_emergency_contact_note", language: selectedLanguage)
+                notes: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Police emergency dispatch.",
+                    norwegian: "Politiets nødtelefon.",
+                    thai: "สายด่วนเหตุตำรวจ"
+                )
             ),
             ImportantNumber(
-                label: L10n.text("seed_poison_info", language: selectedLanguage),
+                label: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Poison information",
+                    norwegian: "Giftinformasjon",
+                    thai: "ข้อมูลพิษวิทยา"
+                ),
                 phoneNumber: "22 59 13 00",
-                notes: L10n.text("seed_poison_info_note", language: selectedLanguage)
-            ),
-            ImportantNumber(
-                label: L10n.text("seed_neighborhood_checkin", language: selectedLanguage),
-                phoneNumber: "+47 900 88 999",
-                notes: L10n.text("seed_neighborhood_checkin_note", language: selectedLanguage)
+                notes: L10n.pick(
+                    language: selectedLanguage,
+                    english: "Poison information hotline.",
+                    norwegian: "Giftinformasjonens døgnåpne telefon.",
+                    thai: "สายด่วนข้อมูลพิษวิทยา"
+                )
             )
         ]
     }
 
-    private var defaultHouseholdPlan: HouseholdPlan {
-        HouseholdPlan(
-            reunionPoint: "",
-            evacuationDestination: "",
-            shelterZone: "",
-            gasShutoffNote: "",
-            medicalLead: "",
-            petLead: "",
-            familyPassword: ""
-        )
+    private var currentHouseholdPlan: HouseholdPlan? {
+        householdPlans.first { $0.scenarioIdentifier == selectedScenario.rawValue }
+            ?? householdPlans.first { $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true }
+    }
+
+    private var defaultHouseholdPlans: [HouseholdPlan] {
+        PreparednessScenario.allCases.map { scenario in
+            HouseholdPlan(
+                scenarioIdentifier: scenario.rawValue,
+                reunionPoint: "",
+                evacuationDestination: "",
+                shelterZone: "",
+                gasShutoffNote: "",
+                medicalLead: "",
+                petLead: "",
+                familyPassword: ""
+            )
+        }
+    }
+
+    private func ensureScenarioPlans() {
+        let legacyPlans = householdPlans.filter { $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true }
+        let templatePlan = householdPlans.first
+
+        if let firstLegacyPlan = legacyPlans.first {
+            firstLegacyPlan.scenarioIdentifier = PreparednessScenario.storm.rawValue
+        }
+
+        let assignedScenarios = Set(householdPlans.compactMap(\.scenarioIdentifier))
+
+        for scenario in PreparednessScenario.allCases where !assignedScenarios.contains(scenario.rawValue) {
+            let sourcePlan = templatePlan
+            modelContext.insert(
+                HouseholdPlan(
+                    scenarioIdentifier: scenario.rawValue,
+                    reunionPoint: sourcePlan?.reunionPoint ?? "",
+                    evacuationDestination: sourcePlan?.evacuationDestination ?? "",
+                    shelterZone: sourcePlan?.shelterZone ?? "",
+                    gasShutoffNote: sourcePlan?.gasShutoffNote ?? "",
+                    medicalLead: sourcePlan?.medicalLead ?? "",
+                    petLead: sourcePlan?.petLead ?? "",
+                    familyPassword: sourcePlan?.familyPassword ?? ""
+                )
+            )
+        }
+    }
+
+    private var defaultHouseholdRoles: [HouseholdRole] {
+        [
+            HouseholdRole(
+                title: L10n.text("medical", language: selectedLanguage),
+                person: "Alex",
+                task: L10n.text("role_medical_task", language: selectedLanguage),
+                systemImage: "cross.case.fill"
+            ),
+            HouseholdRole(
+                title: L10n.text("utilities", language: selectedLanguage),
+                person: "Jordan",
+                task: L10n.text("role_utilities_task", language: selectedLanguage),
+                systemImage: "wrench.adjustable.fill"
+            ),
+            HouseholdRole(
+                title: L10n.text("pets", language: selectedLanguage),
+                person: "Sam",
+                task: L10n.text("role_pets_task", language: selectedLanguage),
+                systemImage: "pawprint.fill"
+            ),
+            HouseholdRole(
+                title: L10n.text("communications", language: selectedLanguage),
+                person: "Taylor",
+                task: L10n.text("role_comms_task", language: selectedLanguage),
+                systemImage: "message.fill"
+            )
+        ]
     }
 
     private var defaultHomeSupplies: [SupplyItem] {

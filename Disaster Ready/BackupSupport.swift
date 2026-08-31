@@ -12,6 +12,7 @@ struct DisasterBackupPayload: Codable {
     var familyContacts: [FamilyContactSnapshot]
     var importantNumbers: [ImportantNumberSnapshot]
     var householdPlans: [HouseholdPlanSnapshot]
+    var householdRoles: [HouseholdRoleSnapshot]
     var supplies: [SupplyItemSnapshot]
 
     static let empty = DisasterBackupPayload(
@@ -19,6 +20,7 @@ struct DisasterBackupPayload: Codable {
         familyContacts: [],
         importantNumbers: [],
         householdPlans: [],
+        householdRoles: [],
         supplies: []
     )
 }
@@ -37,6 +39,7 @@ struct ImportantNumberSnapshot: Codable {
 }
 
 struct HouseholdPlanSnapshot: Codable {
+    var scenarioIdentifier: String?
     var reunionPoint: String
     var evacuationDestination: String
     var shelterZone: String
@@ -45,6 +48,13 @@ struct HouseholdPlanSnapshot: Codable {
     var petLead: String
     var familyPassword: String
 
+}
+
+struct HouseholdRoleSnapshot: Codable {
+    var title: String
+    var person: String
+    var task: String
+    var systemImage: String
 }
 
 struct SupplyItemSnapshot: Codable {

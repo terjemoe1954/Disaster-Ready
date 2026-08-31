@@ -113,10 +113,10 @@ struct SettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @Binding var selectedLanguage: AppLanguage
+    @Binding var selectedAppearance: String
     @Binding var includePlanSummaryInMessages: Bool
     @Binding var showOnlyMissingSupplies: Bool
     @Binding var offlineFirstMode: Bool
-    let reopenOnboarding: () -> Void
     let exportBackup: () -> Void
     let importBackup: () -> Void
     let language: AppLanguage
@@ -130,16 +130,27 @@ struct SettingsSheet: View {
                             Text(languageOption.displayName).tag(languageOption)
                         }
                     }
+                }
 
+                Section(appearanceTitle) {
+                    Picker(appearancePickerTitle, selection: $selectedAppearance) {
+                        ForEach(AppAppearance.allCases) { appearance in
+                            Text(appearance.title(in: language)).tag(appearance.rawValue)
+                        }
+                    }
+                }
+
+                Section(preferencesTitle) {
                     Toggle(includePlanSummaryTitle, isOn: $includePlanSummaryInMessages)
                     Toggle(showMissingOnlyTitle, isOn: $showOnlyMissingSupplies)
                     Toggle(offlineFirstModeTitle, isOn: $offlineFirstMode)
                 }
 
-                Section(onboardingTitle) {
-                    Button(reopenOnboardingTitle) {
-                        dismiss()
-                        reopenOnboarding()
+                Section(helpTitle) {
+                    NavigationLink {
+                        UserManualView(language: selectedLanguage)
+                    } label: {
+                        Label(userManualTitle, systemImage: "book.pages")
                     }
                 }
 
@@ -188,6 +199,18 @@ struct SettingsSheet: View {
         L10n.pick(language: language, english: "Include plan summary in family updates", norwegian: "Ta med plansammendrag i familieoppdateringer", thai: "รวมสรุปแผนในอัปเดตครอบครัว")
     }
 
+    private var appearanceTitle: String {
+        L10n.pick(language: language, english: "Appearance", norwegian: "Utseende", thai: "ลักษณะการแสดงผล")
+    }
+
+    private var appearancePickerTitle: String {
+        L10n.pick(language: language, english: "Theme", norwegian: "Tema", thai: "ธีม")
+    }
+
+    private var preferencesTitle: String {
+        L10n.pick(language: language, english: "Preferences", norwegian: "Valg", thai: "การตั้งค่าเพิ่มเติม")
+    }
+
     private var showMissingOnlyTitle: String {
         L10n.pick(language: language, english: "Show only missing supplies", norwegian: "Vis bare manglende utstyr", thai: "แสดงเฉพาะเสบียงที่ขาด")
     }
@@ -196,12 +219,8 @@ struct SettingsSheet: View {
         L10n.pick(language: language, english: "Keep local-only offline mode as primary", norwegian: "Behold lokal offline-modus som primær", thai: "ใช้โหมดออฟไลน์แบบในเครื่องเป็นหลัก")
     }
 
-    private var onboardingTitle: String {
-        L10n.pick(language: language, english: "Onboarding", norwegian: "Onboarding", thai: "การเริ่มต้นใช้งาน")
-    }
-
-    private var reopenOnboardingTitle: String {
-        L10n.pick(language: language, english: "Show onboarding again", norwegian: "Vis onboarding igjen", thai: "แสดงการแนะนำอีกครั้ง")
+    private var helpTitle: String {
+        L10n.pick(language: language, english: "Help", norwegian: "Hjelp", thai: "วิธีใช้")
     }
 
     private var releaseNotesTitle: String {
@@ -240,6 +259,221 @@ struct SettingsSheet: View {
 
     private var doneTitle: String {
         L10n.pick(language: language, english: "Done", norwegian: "Ferdig", thai: "เสร็จ")
+    }
+
+    private var userManualTitle: String {
+        L10n.pick(
+            language: language,
+            english: "User Manual",
+            norwegian: "Brukermanual",
+            thai: "คู่มือผู้ใช้"
+        )
+    }
+}
+
+struct UserManualView: View {
+    let language: AppLanguage
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(manualTitle)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+
+                Text(manualIntro)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+
+                manualSection(
+                    title: planTitle,
+                    body: planBody,
+                    systemImage: "house.fill"
+                )
+
+                manualSection(
+                    title: contactsTitle,
+                    body: contactsBody,
+                    systemImage: "person.2.fill"
+                )
+
+                manualSection(
+                    title: rolesTitle,
+                    body: rolesBody,
+                    systemImage: "person.crop.circle.badge.checkmark"
+                )
+
+                manualSection(
+                    title: suppliesTitle,
+                    body: suppliesBody,
+                    systemImage: "checklist.checked"
+                )
+
+                manualSection(
+                    title: backupTitle,
+                    body: backupBody,
+                    systemImage: "externaldrive.fill.badge.icloud"
+                )
+            }
+            .padding(20)
+        }
+        .navigationTitle(navigationTitle)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func manualSection(title: String, body: String, systemImage: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(title, systemImage: systemImage)
+                .font(.headline)
+            Text(body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(InsetCardBackground())
+    }
+
+    private var navigationTitle: String {
+        switch language {
+        case .english:
+            return "User Manual"
+        case .norwegian:
+            return "Brukermanual"
+        case .thai:
+            return "คู่มือผู้ใช้"
+        }
+    }
+
+    private var manualTitle: String {
+        switch language {
+        case .english:
+            return "Disaster Ready User Manual"
+        case .norwegian:
+            return "Brukermanual for Disaster Ready"
+        case .thai:
+            return "คู่มือผู้ใช้ Disaster Ready"
+        }
+    }
+
+    private var manualIntro: String {
+        switch language {
+        case .english:
+            return "Use Disaster Ready to keep your household plan, contacts, roles, and supply lists available on one device even when internet access is unreliable."
+        case .norwegian:
+            return "Bruk Disaster Ready til å ha husstandsplan, kontakter, roller og utstyrslister tilgjengelig på én enhet selv når internettilgangen er ustabil."
+        case .thai:
+            return "ใช้ Disaster Ready เพื่อเก็บแผนครัวเรือน รายชื่อติดต่อ บทบาท และรายการเสบียงไว้บนอุปกรณ์เครื่องเดียว แม้ในช่วงที่อินเทอร์เน็ตไม่เสถียร"
+        }
+    }
+
+    private var planTitle: String {
+        switch language {
+        case .english:
+            return "Household plan"
+        case .norwegian:
+            return "Husstandsplan"
+        case .thai:
+            return "แผนครัวเรือน"
+        }
+    }
+
+    private var planBody: String {
+        switch language {
+        case .english:
+            return "Fill in reunion point, evacuation destination, shelter zone, and family password. Keep these fields short so they can be reviewed quickly during an incident."
+        case .norwegian:
+            return "Fyll inn møtested, evakueringsmål, tilfluktssone og familiepassord. Hold feltene korte slik at de kan gjennomgås raskt under en hendelse."
+        case .thai:
+            return "กรอกจุดนัดพบ จุดหมายอพยพ พื้นที่หลบภัย และรหัสผ่านครอบครัว โดยควรเขียนให้สั้นเพื่อให้ตรวจทานได้เร็วเมื่อเกิดเหตุ"
+        }
+    }
+
+    private var contactsTitle: String {
+        switch language {
+        case .english:
+            return "Contacts"
+        case .norwegian:
+            return "Kontakter"
+        case .thai:
+            return "รายชื่อติดต่อ"
+        }
+    }
+
+    private var contactsBody: String {
+        switch language {
+        case .english:
+            return "Add family contacts and important numbers with notes. Use the call and text shortcuts to reach people directly from the app."
+        case .norwegian:
+            return "Legg til familiekontakter og viktige numre med notater. Bruk snarveiene for anrop og melding for å kontakte folk direkte fra appen."
+        case .thai:
+            return "เพิ่มรายชื่อติดต่อครอบครัวและหมายเลขสำคัญพร้อมบันทึก แล้วใช้ปุ่มลัดโทรและส่งข้อความเพื่อติดต่อได้ทันทีจากแอป"
+        }
+    }
+
+    private var rolesTitle: String {
+        switch language {
+        case .english:
+            return "Household roles"
+        case .norwegian:
+            return "Husholdningsroller"
+        case .thai:
+            return "บทบาทในครัวเรือน"
+        }
+    }
+
+    private var rolesBody: String {
+        switch language {
+        case .english:
+            return "Assign each preparedness role to a person and define the main task. Update roles whenever responsibilities change so nobody has to guess in a crisis."
+        case .norwegian:
+            return "Tildel hver beredskapsrolle til en person og beskriv hovedoppgaven. Oppdater rollene når ansvaret endres, så ingen trenger å gjette i en krise."
+        case .thai:
+            return "กำหนดแต่ละบทบาทด้านความพร้อมให้กับบุคคลและระบุหน้าที่หลัก อัปเดตบทบาททุกครั้งที่ความรับผิดชอบเปลี่ยน เพื่อไม่ให้ใครต้องเดาเมื่อเกิดวิกฤต"
+        }
+    }
+
+    private var suppliesTitle: String {
+        switch language {
+        case .english:
+            return "Supply tracking"
+        case .norwegian:
+            return "Sporing av utstyr"
+        case .thai:
+            return "ติดตามเสบียง"
+        }
+    }
+
+    private var suppliesBody: String {
+        switch language {
+        case .english:
+            return "Track items stored at home and in the car. Mark stocked items and use the missing-only filter in Settings when you need a quick restocking view."
+        case .norwegian:
+            return "Følg med på utstyr som er lagret hjemme og i bilen. Marker det som finnes, og bruk filteret for kun manglende utstyr i Innstillinger når du trenger en rask restockingsoversikt."
+        case .thai:
+            return "ติดตามสิ่งของที่เก็บไว้ที่บ้านและในรถ ทำเครื่องหมายของที่มีแล้ว และใช้ตัวกรองแสดงเฉพาะของที่ขาดในหน้าการตั้งค่าเมื่อต้องการตรวจเติมอย่างรวดเร็ว"
+        }
+    }
+
+    private var backupTitle: String {
+        switch language {
+        case .english:
+            return "Local backup"
+        case .norwegian:
+            return "Lokal sikkerhetskopi"
+        case .thai:
+            return "ข้อมูลสำรองในเครื่อง"
+        }
+    }
+
+    private var backupBody: String {
+        switch language {
+        case .english:
+            return "Use Settings to export a JSON backup of your contacts, plans, roles, and supplies. Import the file on the same or another device to restore your local data."
+        case .norwegian:
+            return "Bruk Innstillinger for å eksportere en JSON-sikkerhetskopi av kontakter, planer, roller og utstyr. Importer filen på samme eller en annen enhet for å gjenopprette lokale data."
+        case .thai:
+            return "ใช้หน้าการตั้งค่าเพื่อส่งออกข้อมูลสำรองแบบ JSON ของรายชื่อติดต่อ แผน บทบาท และเสบียง จากนั้นนำเข้าไฟล์บนอุปกรณ์เดิมหรือเครื่องอื่นเพื่อกู้คืนข้อมูลในเครื่อง"
+        }
     }
 }
 
