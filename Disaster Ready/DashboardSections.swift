@@ -89,36 +89,22 @@ struct ScenarioSelectorSection: View {
             Text(L10n.text("scenario", language: language))
                 .font(.title3.weight(.bold))
 
-            HStack(spacing: 14) {
-                Image(systemName: selectedScenario.icon)
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(selectedScenario.tint)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(selectedScenario.localizedName(in: language))
-                        .font(.headline)
-                    Text(selectedScenario.recommendedAction(in: language))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            Picker(L10n.text("scenario", language: language), selection: $selectedScenario) {
+                ForEach(PreparednessScenario.allCases) { scenario in
+                    Label(scenario.localizedName(in: language), systemImage: scenario.icon)
+                        .tag(scenario)
                 }
-
-                Spacer()
-
-                Picker(L10n.text("scenario", language: language), selection: $selectedScenario) {
-                    ForEach(PreparednessScenario.allCases) { scenario in
-                        Label(scenario.localizedName(in: language), systemImage: scenario.icon)
-                            .tag(scenario)
-                    }
-                }
-                .pickerStyle(.menu)
-                .tint(.primary)
             }
-            .padding(16)
+            .pickerStyle(.menu)
+            .tint(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
             .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                Capsule(style: .continuous)
                     .fill(DashboardPalette.secondaryPanelFill(for: colorScheme))
                     .overlay {
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        Capsule(style: .continuous)
                             .stroke(selectedScenario.tint.opacity(0.5), lineWidth: 1.5)
                     }
             )
@@ -132,16 +118,26 @@ struct DecisionCardSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Label(scenario.localizedName(in: language), systemImage: scenario.icon)
-                    .font(.title3.weight(.bold))
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: scenario.icon)
+                    .font(.title2.weight(.semibold))
                     .foregroundStyle(scenario.tint)
-                Spacer()
-                Text(scenario.recommendedAction(in: language).uppercased())
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(scenario.tint.opacity(0.16), in: Capsule())
+                    .frame(width: 28)
+                    .padding(.top, 2)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(scenario.localizedName(in: language))
+                        .font(.headline)
+                        .foregroundStyle(scenario.tint)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(scenario.recommendedAction(in: language))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(scenario.tint)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(scenario.tint.opacity(0.16), in: Capsule())
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             Text(scenario.summary(in: language))
