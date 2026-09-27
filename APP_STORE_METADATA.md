@@ -1,22 +1,119 @@
 # Disaster Ready – App Store metadata
 
-Prepared for Milestone 2. Replace every `TBD` value before submission.
+Prepared for Milestone 2. Remaining manual submission tasks are tracked in the checklist below.
 
 ## App information
 
 | Field | Value |
 |---|---|
 | Name | Disaster Ready |
-| Supported devices | iPhone only for version 1.0 |
+| Supported devices | iPhone only for version 1.0.1 |
+| Primary language | Norwegian Bokmål |
+| Additional localizations | English (U.S.), Thai |
 | Primary category | Lifestyle |
 | Secondary category | Utilities |
-| Privacy policy URL | TBD – required public URL |
-| Support URL | TBD – required public URL |
-| Marketing URL | TBD – optional |
+| Privacy policy URL | https://terjemoe1954.github.io/app-page/disaster-ready/privacy/ |
+| Support URL | https://terjemoe1954.github.io/app-page/disaster-ready/support/ |
+| Marketing URL | https://terjemoe1954.github.io/app-page/disaster-ready/ |
 | App privacy | No, this app does not collect data |
 | Tracking | No |
+| Copyright | © 2026 Terje Moe |
+| Version 1.0.1 availability | Norway only |
+| Price | Free |
+| In-App Purchases | None |
+| Release method | Automatically release after App Review approval |
+| License agreement | Apple's Standard Licensed Application End User License Agreement |
+
+## New App Store Connect record
+
+| Field | Value |
+|---|---|
+| Platform | iOS |
+| Name | Disaster Ready |
+| Primary language | Norwegian Bokmål |
+| Bundle ID | com.terjemoe.Disaster-Ready |
+| SKU | com.terjemoe.Disaster-Ready |
+| User access | Full Access (single-developer default) |
+
+The SKU is internal and is not shown on the App Store. Verify that the Bundle ID appears in the App Store Connect selector before creating the record.
+
+## Version 1.0.1 submission
+
+| Field | Value |
+|---|---|
+| Version | 1.0.1 |
+| Build | 2 |
+| Sign-in required | No |
+| Demo account | Not applicable |
+| Review notes | Use the prepared App Review notes below |
+| Attachment | None required |
+| Release method | Automatically release after approval |
+
+`What's New in This Version` is not required for the first App Store version. If a newer build is uploaded before submission, update the build value here to match the selected build in App Store Connect.
+
+Final archive validation:
+
+- Bundle ID: `com.terjemoe.Disaster-Ready`
+- Version/build: `1.0.1 (2)`
+- Device family: iPhone (`UIDeviceFamily = [1]`)
+- Export compliance: `ITSAppUsesNonExemptEncryption = false`
+- Code signature: valid and satisfies its designated requirement
+
+## App Review contact
+
+| Field | Value |
+|---|---|
+| First name | Terje |
+| Last name | Moe |
+| Email | terjemoe54@hotmail.com |
+| Phone | +47 99594576 |
 
 The app stores plans, contacts, roles, supplies, and preferences locally. A backup leaves the app only when the user explicitly exports it. Optional local notifications are used for supply reminders. External source links open in the browser.
+
+Version 1.0.1 should be distributed only in Norway because the default emergency numbers and official source links are Norwegian. Do not expand availability until emergency contacts and guidance are adapted to the selected country or region.
+
+## App Review notes
+
+Disaster Ready is an offline household-preparedness app. No account, login, subscription, purchase, or special hardware is required.
+
+All plans, contacts, roles, supplies, and preferences are stored locally on the device. The app does not collect or transmit personal data. Data leaves the app only when the user explicitly exports a JSON backup through the system share interface.
+
+Suggested review flow:
+
+1. Complete the short onboarding flow.
+2. Use the Overview tab to select a preparedness scenario and review the go/no-go guidance.
+3. Open Plan to edit meeting points and household roles.
+4. Open Supplies to mark items as packed or missing and review the home-preparedness guide.
+5. Open Contacts to review local emergency numbers and household contacts.
+6. Open Settings from the gear button to change language, test an optional local reminder, or export/import a backup.
+
+Notification permission is requested only when the reviewer enables or tests supply-review reminders. Fixed official source links open in the system browser and require connectivity; the core app remains usable offline.
+
+Review contact: Terje Moe, terjemoe54@hotmail.com, +47 99594576.
+
+## App Privacy response
+
+Use these values on the App Privacy page in App Store Connect:
+
+| Field | Response |
+|---|---|
+| Privacy Policy URL | https://terjemoe1954.github.io/app-page/disaster-ready/privacy/ |
+| User Privacy Choices URL | Leave blank (optional and not applicable) |
+| Data collection | No, we do not collect data from this app |
+| Tracking | No |
+
+After saving, review the product-page preview and click **Publish**. If analytics, advertising, cloud sync, crash reporting, or another third-party SDK is added later, reassess these answers before submitting an update.
+
+## Content rights declaration
+
+Recommended App Store Connect response:
+
+| Question | Response |
+|---|---|
+| Does the app contain, show, or access third-party content? | Yes |
+| Rights confirmation | Confirm only after verifying that the app may link to and identify the public DSB preparedness source |
+
+The app does not embed DSB webpages, logos, images, video, or copied publications. It contains original preparedness summaries and a fixed external link to `https://www.dsb.no/egenberedskap`, identified as official advice from DSB. Keep the wording and attribution accurate, and reassess this declaration if third-party material is embedded later.
 
 ## English (U.S.)
 
@@ -129,6 +226,14 @@ Disaster Ready ไม่ติดตามคุณและไม่ส่ง�
 
 ฉุกเฉิน,ภัยพิบัติ,ออฟไลน์,แผน
 
+## Metadata length preflight
+
+| Localization | Name | Subtitle | Promotional text | Description | Keywords |
+|---|---:|---:|---:|---:|---:|
+| English (U.S.) | 14 / 30 characters | 30 / 30 characters | 124 / 170 characters | 1,282 / 4,000 characters | 88 / 100 bytes |
+| Norwegian (Bokmål) | 14 / 30 characters | 23 / 30 characters | 123 / 170 characters | 1,259 / 4,000 characters | 83 / 100 bytes |
+| Thai | 14 / 30 characters | 28 / 30 characters | 97 / 170 characters | 1,036 / 4,000 characters | 81 / 100 bytes |
+
 ## Screenshot plan
 
 Capture clean screenshots without alerts, keyboards, or personal information. Use representative sample data only.
@@ -143,6 +248,13 @@ Capture clean screenshots without alerts, keyboards, or personal information. Us
 | 6 | Contacts and family updates | Keep important people and messages ready |
 
 Recommended screenshot localizations: English, Norwegian Bokmål, and Thai. Capture both a current large iPhone size and the smallest supported iPhone size to verify the compositions.
+
+Screenshot asset status:
+
+- Norwegian 6.3-inch reference set: `AppStoreScreenshots/nb/` (1206 × 2622)
+- Norwegian 6.9-inch draft set: `AppStoreScreenshots/nb-6.9/` (1320 × 2868)
+- The 6.9-inch draft is correctly sized but should be replaced with native-resolution captures before upload; screenshots 03 and 05 also need cleaner top positioning.
+- English and Thai localized sets have not been captured.
 
 ## Age-rating questionnaire
 
@@ -179,16 +291,33 @@ Prepared response set for App Store Connect. Expected global rating: **4+**.
 ## Submission checklist
 
 - [x] 1024 × 1024 RGB app icon without alpha
-- [x] iPhone-only device family configured for version 1.0
+- [x] iPhone-only device family configured for version 1.0.1
 - [x] Privacy manifest declares no tracking or collected data
 - [x] Localized in-app privacy explanation
-- [ ] Host and enter a public privacy policy URL
-- [ ] Host and enter a support URL
+- [x] Localized metadata validated against App Store length limits
+- [x] Public privacy policy URL verified and recorded
+- [x] Public support URL verified and recorded
+- [x] Publish the prepared App Privacy response in App Store Connect
+- [x] Configure App Accessibility for iPhone: Larger Text
+- [x] Confirm the prepared content-rights declaration in App Store Connect
 - [ ] Review Thai marketing copy with a native speaker
-- [ ] Capture and upload localized screenshots
-- [ ] Submit age-rating questionnaire in App Store Connect (4+ responses prepared above)
+- [x] Capture and upload Norwegian App Store screenshots
+- [x] Submit age-rating questionnaire in App Store Connect (calculated rating: 4+)
 - [x] Confirm export-compliance answers (`ITSAppUsesNonExemptEncryption = NO`)
-- [ ] Enter copyright and contact information
+- [x] Copyright and App Review contact information prepared
+- [x] Version 1.0.1 availability decided: Norway only
+- [x] Version 1.0.1 pricing decided: Free, with no In-App Purchases
+- [x] App Store Connect price and availability configured: Free, Norway only
+- [x] Release method decided: Automatic after approval
+- [x] License agreement decided: Apple's standard EULA
+- [x] Categories confirmed: Lifestyle primary, Utilities secondary
+- [x] Primary language confirmed: Norwegian Bokmål
+- [x] New App Store Connect record fields prepared
+- [x] Version 1.0.1 submission fields prepared for build 2
+- [x] Build 1.0.1 (2) uploaded to App Store Connect
+- [x] Build 1.0.1 (2) selected for iOS App Distribution and added to TestFlight
+- [x] Install build 1.0.1 (2) from TestFlight and complete the release smoke test
 - [x] Run final release-build QA
+- [x] Submit version 1.0.1 (build 2) to App Review (Waiting for Review)
 
 Apple currently limits the localized app name and subtitle to 30 characters, promotional text to 170 characters, description to 4,000 characters, and keywords to 100 bytes. Recheck limits in App Store Connect before submission.

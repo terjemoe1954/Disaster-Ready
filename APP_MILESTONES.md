@@ -2,7 +2,7 @@
 
 ## Milestone 1: Local Offline Core
 
-Status: In progress
+Status: Complete
 
 Goal:
 Ship a strong single-device preparedness app that works without internet and helps a household make decisions quickly.
@@ -22,7 +22,12 @@ Exit criteria:
 
 ## Milestone 2: App Store Release Preparation
 
-Status: Next
+Status: In progress
+
+Remaining before completion:
+- Native-resolution App Store screenshots and upload
+- App Store Connect age-rating submission
+- Native-speaker review of Thai marketing copy
 
 Goal:
 Prepare the local-first app for a public App Store release.
@@ -42,7 +47,15 @@ Exit criteria:
 
 ## Milestone 3: Local-First Hardening
 
-Status: Future
+Status: In progress
+
+Completed in this milestone:
+- Local JSON backup export and import
+- Reset confirmation and local recovery controls
+
+Remaining:
+- Explicit SwiftData migration strategy and migration tests for future schema versions
+- Additional offline reference coverage where useful
 
 Goal:
 Improve trust and resilience for offline use before adding collaboration.
