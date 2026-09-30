@@ -2386,6 +2386,918 @@
         }
       }
     },
+    "myplan.actions.during.detail" : {
+      "comment" : "Safety-critical actual-event guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Use this plan only when it fits the situation. Move away from immediate danger, contact emergency services when needed, and follow current authority instructions."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bruk planen bare når den passer til situasjonen. Kom dere bort fra umiddelbar fare, kontakt nødetatene ved behov, og følg gjeldende instrukser fra myndighetene."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ใช้แผนนี้เฉพาะเมื่อเหมาะกับสถานการณ์ ออกจากบริเวณที่มีอันตรายเฉพาะหน้า ติดต่อหน่วยบริการฉุกเฉินเมื่อจำเป็น และปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานที่เกี่ยวข้อง"
+          }
+        }
+      }
+    },
+    "myplan.actions.during.title" : {
+      "comment" : "Actual-event guidance category title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "During an actual emergency"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Under en faktisk nødsituasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ระหว่างเกิดเหตุฉุกเฉินจริง"
+          }
+        }
+      }
+    },
+    "myplan.actions.now.detail" : {
+      "comment" : "Offline preparedness category description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Complete these household preparations before an emergency occurs."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjør disse forberedelsene i husstanden før en nødsituasjon oppstår."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมของครัวเรือนเหล่านี้ให้เรียบร้อยก่อนเกิดเหตุฉุกเฉิน"
+          }
+        }
+      }
+    },
+    "myplan.actions.now.title" : {
+      "comment" : "Actions possible before an emergency",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare now"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere nå"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมตั้งแต่ตอนนี้"
+          }
+        }
+      }
+    },
+    "myplan.actions.official.detail" : {
+      "comment" : "Safety-critical authority-dependent category",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These decisions depend on current information and instructions from authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disse avgjørelsene avhenger av aktuell informasjon og gjeldende instrukser fra myndighetene."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การตัดสินใจเหล่านี้ขึ้นอยู่กับข้อมูลล่าสุดและคำแนะนำจากหน่วยงานที่เกี่ยวข้อง"
+          }
+        }
+      }
+    },
+    "myplan.actions.official.title" : {
+      "comment" : "Authority-dependent action category",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Requires current official information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krever aktuell offisiell informasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ต้องใช้ข้อมูลทางการล่าสุด"
+          }
+        }
+      }
+    },
+    "myplan.actions.title" : {
+      "comment" : "Guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "What should I do?"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hva bør jeg gjøre?"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ฉันควรทำอย่างไร"
+          }
+        }
+      }
+    },
+    "myplan.contacts.manage" : {
+      "comment" : "Button opening the existing Contacts tab",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "View or edit existing contacts"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vis eller rediger eksisterende kontakter"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดูหรือแก้ไขผู้ติดต่อที่มีอยู่"
+          }
+        }
+      }
+    },
+    "myplan.contacts.reuse_notice" : {
+      "comment" : "Contact compatibility notice",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This plan uses your existing contacts. Opening them here does not create copies."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planen bruker de eksisterende kontaktene. Det opprettes ingen kopier når du åpner dem her."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แผนนี้ใช้ผู้ติดต่อที่มีอยู่ของคุณ การเปิดจากที่นี่จะไม่สร้างสำเนา"
+          }
+        }
+      }
+    },
+    "myplan.contacts.title" : {
+      "comment" : "Guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Contacts"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kontakter"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ผู้ติดต่อ"
+          }
+        }
+      }
+    },
+    "myplan.contacts.unnamed" : {
+      "comment" : "Fallback label for an existing blank contact",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Unnamed contact"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kontakt uten navn"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ผู้ติดต่อที่ไม่มีชื่อ"
+          }
+        }
+      }
+    },
+    "myplan.context.official.detail" : {
+      "comment" : "Safety-critical distinction from live information",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Obtain current instructions from emergency services and public authorities. This plan is not a live alert."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hent gjeldende instrukser fra nødetatene og offentlige myndigheter. Planen inneholder ikke direktevarsler."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ขอรับคำแนะนำล่าสุดจากหน่วยบริการฉุกเฉินและหน่วยงานภาครัฐ แผนนี้ไม่ใช่การแจ้งเตือนแบบเรียลไทม์"
+          }
+        }
+      }
+    },
+    "myplan.context.official.title" : {
+      "comment" : "Authority information category",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Official current information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjeldende offisiell informasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลทางการล่าสุด"
+          }
+        }
+      }
+    },
+    "myplan.context.personal.detail" : {
+      "comment" : "Required safety distinction",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A place you enter for household planning. It is not verified or officially approved."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Et sted du selv oppgir for planlegging i husstanden. Det er ikke kontrollert eller offisielt godkjent."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สถานที่ที่คุณระบุเพื่อใช้วางแผนสำหรับครัวเรือน สถานที่นี้ไม่ได้ผ่านการตรวจสอบหรือรับรองอย่างเป็นทางการ"
+          }
+        }
+      }
+    },
+    "myplan.context.personal.title" : {
+      "comment" : "User-entered location category",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Personal planning location"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Personlig planleggingssted"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สถานที่สำหรับการวางแผนส่วนตัว"
+          }
+        }
+      }
+    },
+    "myplan.context.preparedness.detail" : {
+      "comment" : "Required safety distinction",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Offline advice bundled with Disaster Ready for planning before an emergency."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offline-råd som følger med Disaster Ready, for planlegging før en nødsituasjon."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำแนะนำแบบออฟไลน์ที่มาพร้อมกับ Disaster Ready สำหรับใช้วางแผนก่อนเกิดเหตุฉุกเฉิน"
+          }
+        }
+      }
+    },
+    "myplan.context.preparedness.title" : {
+      "comment" : "Bundled offline guidance category",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Preparedness guidance"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Beredskapsveiledning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำแนะนำเพื่อการเตรียมพร้อม"
+          }
+        }
+      }
+    },
+    "myplan.country_template_unavailable.detail" : {
+      "comment" : "Non-emergency configuration message",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select a supported country in Household Profile to use country-adapted offline guidance."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Velg et støttet land i Husstandsprofil for å bruke landstilpasset offline-veiledning."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เลือกประเทศที่รองรับในโปรไฟล์ครัวเรือนเพื่อใช้คำแนะนำแบบออฟไลน์ที่ปรับให้เหมาะกับประเทศนั้น"
+          }
+        }
+      }
+    },
+    "myplan.country_template_unavailable.title" : {
+      "comment" : "Shown when no offline country template provider exists",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Country guidance unavailable"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Landveiledning er ikke tilgjengelig"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไม่มีคำแนะนำสำหรับประเทศนี้"
+          }
+        }
+      }
+    },
+    "myplan.location.alternative" : {
+      "comment" : "Personal evacuation planning field",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Alternative accommodation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Alternativ overnatting"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่พักทางเลือก"
+          }
+        }
+      }
+    },
+    "myplan.location.evacuation_legacy" : {
+      "comment" : "Preserved legacy evacuationDestination field",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Existing evacuation destination"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Eksisterende evakueringsmål"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "จุดหมายอพยพที่มีอยู่"
+          }
+        }
+      }
+    },
+    "myplan.location.family_friend" : {
+      "comment" : "Personal evacuation planning field",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Family or friend location"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sted hos familie eller venner"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บ้านของครอบครัวหรือเพื่อน"
+          }
+        }
+      }
+    },
+    "myplan.location.meeting_point" : {
+      "comment" : "Maps to legacy reunionPoint",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Household meeting point"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Husstandens møtested"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "จุดนัดพบของสมาชิกในครัวเรือน"
+          }
+        }
+      }
+    },
+    "myplan.location.personal_note" : {
+      "comment" : "User-defined note; never an official designation",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Personal safe-place note"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Personlig notat om et mulig oppholdssted"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกส่วนตัวเกี่ยวกับสถานที่ที่อาจใช้พักพิง"
+          }
+        }
+      }
+    },
+    "myplan.location.secondary_home" : {
+      "comment" : "Personal evacuation planning field",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cabin or secondary home"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hytte eller sekundærbolig"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บ้านพักตากอากาศหรือบ้านอีกหลัง"
+          }
+        }
+      }
+    },
+    "myplan.location.shelter_legacy" : {
+      "comment" : "Preserved legacy shelterZone field; not official",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Existing shelter or safe-place note"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Eksisterende personlig notat om sted for dekning eller opphold"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกส่วนตัวที่มีอยู่เกี่ยวกับที่กำบังหรือสถานที่ที่อาจใช้พักพิง"
+          }
+        }
+      }
+    },
+    "myplan.locations.personal_notice" : {
+      "comment" : "Required safety notice above user location fields",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "These are personal planning notes. They are not official evacuation centres, civil-defence shelters, or verified safe places."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dette er personlige planleggingsnotater. De er ikke offisielle evakueringssentre, tilfluktsrom eller steder som er bekreftet som trygge."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อความเหล่านี้เป็นบันทึกสำหรับการวางแผนส่วนบุคคล ไม่ใช่ศูนย์อพยพอย่างเป็นทางการ ที่หลบภัยป้องกันภัยฝ่ายพลเรือน หรือสถานที่ที่ผ่านการตรวจสอบว่าปลอดภัย"
+          }
+        }
+      }
+    },
+    "myplan.locations.title" : {
+      "comment" : "Guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "My meeting and location planning"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Min plan for møtested og andre steder"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การวางแผนจุดนัดพบและสถานที่ของฉัน"
+          }
+        }
+      }
+    },
+    "myplan.safety_context.title" : {
+      "comment" : "Heading explaining the three information categories",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Understand the information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forstå informasjonen"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ทำความเข้าใจข้อมูล"
+          }
+        }
+      }
+    },
+    "myplan.save.button" : {
+      "comment" : "Explicit local-save button",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save plan on this device"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Lagre planen på denne enheten"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกแผนไว้ในอุปกรณ์เครื่องนี้"
+          }
+        }
+      }
+    },
+    "myplan.save.failure" : {
+      "comment" : "Non-destructive persistence error status",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The plan could not be saved. Your current entries remain visible; try again."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planen kunne ikke lagres. De nåværende oppføringene er fortsatt synlige. Prøv igjen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไม่สามารถบันทึกแผนได้ ข้อมูลที่คุณป้อนไว้ยังคงแสดงอยู่ โปรดลองอีกครั้ง"
+          }
+        }
+      }
+    },
+    "myplan.save.success" : {
+      "comment" : "Successful local persistence status",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan saved on this device."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planen er lagret på denne enheten."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกแผนไว้ในอุปกรณ์เครื่องนี้แล้ว"
+          }
+        }
+      }
+    },
+    "myplan.save.title" : {
+      "comment" : "Final guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save or update plan"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Lagre eller oppdater planen"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกหรืออัปเดตแผน"
+          }
+        }
+      }
+    },
+    "myplan.shelter.title" : {
+      "comment" : "Guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Where should I shelter or go?"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hvor bør jeg søke dekning eller dra?"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ฉันควรหลบภัยหรือไปที่ไหน"
+          }
+        }
+      }
+    },
+    "myplan.supplies.evacuation" : {
+      "comment" : "Evacuation supply preview heading",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Evacuation and grab-list priorities"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Prioriteringer for evakuering og pakkeliste"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สิ่งสำคัญสำหรับการอพยพและรายการของที่ต้องหยิบ"
+          }
+        }
+      }
+    },
+    "myplan.supplies.home" : {
+      "comment" : "Home supply preview heading",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Home priorities"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Prioriteringer hjemme"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สิ่งสำคัญสำหรับบ้าน"
+          }
+        }
+      }
+    },
+    "myplan.supplies.preview_notice" : {
+      "comment" : "Milestone 4 lightweight preview notice",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Read-only priorities from the offline emergency template. Your existing supply records are not changed."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Skrivebeskyttede prioriteringer fra beredskapsmalen som er tilgjengelig uten internett. De eksisterende registreringene av forsyninger endres ikke."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แสดงรายการสำคัญแบบอ่านอย่างเดียวจากแม่แบบฉุกเฉินออฟไลน์ โดยไม่เปลี่ยนแปลงข้อมูลเสบียงที่คุณบันทึกไว้"
+          }
+        }
+      }
+    },
+    "myplan.supplies.title" : {
+      "comment" : "Guided plan step title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Supplies preview"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forhåndsvisning av forsyninger"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ตัวอย่างเสบียง"
+          }
+        }
+      }
+    },
     "name" : {
       "extractionState" : "stale",
       "localizations" : {

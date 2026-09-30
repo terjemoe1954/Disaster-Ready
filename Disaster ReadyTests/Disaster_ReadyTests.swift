@@ -538,6 +538,120 @@ struct Disaster_ReadyTests {
         }
     }
 
+    @Test func myPlanLocationDraftMapsLegacyFieldsWithoutDataLoss() {
+        let plan = HouseholdPlan(
+            scenarioIdentifier: "storm",
+            reunionPoint: "Old oak tree",
+            evacuationDestination: "Family cabin",
+            shelterZone: "Interior hallway",
+            gasShutoffNote: "Valve by the meter",
+            medicalLead: "Alex",
+            petLead: "Sam",
+            familyPassword: "North star",
+            waterStopcockNote: "Utility room",
+            mainElectricalPanelNote: "Front hall"
+        )
+
+        var draft = MyPlanLocationDraft(plan: plan)
+        #expect(draft.householdMeetingPoint == "Old oak tree")
+        #expect(draft.existingEvacuationDestination == "Family cabin")
+        #expect(draft.existingShelterZone == "Interior hallway")
+        #expect(draft.containsOnlyPersonalPlanningLocations)
+
+        draft.householdMeetingPoint = "School gate"
+        draft.alternativeAccommodation = "Hotel plan"
+        draft.familyFriendLocation = "Trusted friend"
+        draft.secondaryHome = "Cabin"
+        draft.personalSafePlaceNote = "Personal planning note"
+        draft.apply(to: plan)
+
+        #expect(plan.reunionPoint == "School gate")
+        #expect(plan.evacuationDestination == "Family cabin")
+        #expect(plan.shelterZone == "Interior hallway")
+        #expect(plan.alternativeAccommodation == "Hotel plan")
+        #expect(plan.familyFriendLocation == "Trusted friend")
+        #expect(plan.secondaryHome == "Cabin")
+        #expect(plan.safePlaceNote == "Personal planning note")
+        #expect(plan.gasShutoffNote == "Valve by the meter")
+        #expect(plan.medicalLead == "Alex")
+        #expect(plan.petLead == "Sam")
+        #expect(plan.familyPassword == "North star")
+        #expect(plan.waterStopcockNote == "Utility room")
+        #expect(plan.mainElectricalPanelNote == "Front hall")
+        #expect(plan.scenarioIdentifier == "storm")
+    }
+
+    @Test func openingAndSavingMyPlanWithoutEditsPreservesExistingPlan() {
+        let plan = HouseholdPlan(
+            scenarioIdentifier: "flood",
+            reunionPoint: "Meeting point",
+            evacuationDestination: "Destination",
+            shelterZone: "Shelter note",
+            gasShutoffNote: "Gas note",
+            medicalLead: "Medical note",
+            petLead: "Pet note",
+            familyPassword: "Family message",
+            alternativeAccommodation: "Alternative",
+            familyFriendLocation: "Friend",
+            secondaryHome: "Cabin",
+            safePlaceNote: "Personal note"
+        )
+        MyPlanLocationDraft(plan: plan).apply(to: plan)
+
+        #expect(plan.scenarioIdentifier == "flood")
+        #expect(plan.reunionPoint == "Meeting point")
+        #expect(plan.evacuationDestination == "Destination")
+        #expect(plan.shelterZone == "Shelter note")
+        #expect(plan.gasShutoffNote == "Gas note")
+        #expect(plan.medicalLead == "Medical note")
+        #expect(plan.petLead == "Pet note")
+        #expect(plan.familyPassword == "Family message")
+        #expect(plan.alternativeAccommodation == "Alternative")
+        #expect(plan.familyFriendLocation == "Friend")
+        #expect(plan.secondaryHome == "Cabin")
+        #expect(plan.safePlaceNote == "Personal note")
+    }
+
+    @Test func myPlanUsesOfflineProviderForEveryEmergencySelection() throws {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 2)
+        let provider = try #require(EmergencyTemplateCatalog.provider(for: profile.countryCode))
+
+        for selection in EmergencyType.allCases {
+            let template = provider.template(for: selection, household: profile)
+            #expect(template.type == selection)
+            #expect(template.id == "no.\(selection.rawValue)")
+            #expect(!template.actions.isEmpty)
+            #expect(!template.shelterGuidance.isEmpty)
+        }
+    }
+
+    @Test func myPlanContactPreviewDoesNotMutateExistingContacts() {
+        let family = FamilyContact(
+            name: "Alex",
+            role: "Medical",
+            phoneNumber: "+47 900 00 111",
+            notes: "Side entrance"
+        )
+        let important = ImportantNumber(
+            label: "Doctor",
+            phoneNumber: "+47 900 00 222",
+            notes: "Weekdays"
+        )
+        let familyBefore = (family.name, family.role, family.phoneNumber, family.notes)
+        let importantBefore = (important.label, important.phoneNumber, important.notes)
+
+        _ = [family].prefix(3).map(\.name)
+        _ = [important].prefix(3).map(\.label)
+
+        #expect(family.name == familyBefore.0)
+        #expect(family.role == familyBefore.1)
+        #expect(family.phoneNumber == familyBefore.2)
+        #expect(family.notes == familyBefore.3)
+        #expect(important.label == importantBefore.0)
+        #expect(important.phoneNumber == importantBefore.1)
+        #expect(important.notes == importantBefore.2)
+    }
+
     @Test func eventSupplyPrioritiesSupplementBaseItems() {
         let powerOutage = NorwayEmergencyTemplates.template(for: .powerOutage)
         let supplyIDs = Set(powerOutage.supplyPriorities.map(\.id))

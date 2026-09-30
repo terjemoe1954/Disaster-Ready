@@ -1,0 +1,45 @@
+import Foundation
+
+/// Semantic localization keys for the guided, offline My Plan flow.
+enum MyPlanLocalizationResources {
+    static let all: [LocalizedStringResource] = [
+        LocalizedStringResource("myplan.country_template_unavailable.title", defaultValue: "Country guidance unavailable", comment: "Shown when no offline country template provider exists"),
+        LocalizedStringResource("myplan.country_template_unavailable.detail", defaultValue: "Select a supported country in Household Profile to use country-adapted offline guidance.", comment: "Non-emergency configuration message"),
+        LocalizedStringResource("myplan.safety_context.title", defaultValue: "Understand the information", comment: "Heading explaining the three information categories"),
+        LocalizedStringResource("myplan.context.personal.title", defaultValue: "Personal planning location", comment: "User-entered location category"),
+        LocalizedStringResource("myplan.context.personal.detail", defaultValue: "A place you enter for household planning. It is not verified or officially approved.", comment: "Required safety distinction"),
+        LocalizedStringResource("myplan.context.preparedness.title", defaultValue: "Preparedness guidance", comment: "Bundled offline guidance category"),
+        LocalizedStringResource("myplan.context.preparedness.detail", defaultValue: "Offline advice bundled with Disaster Ready for planning before an emergency.", comment: "Required safety distinction"),
+        LocalizedStringResource("myplan.context.official.title", defaultValue: "Official current information", comment: "Authority information category"),
+        LocalizedStringResource("myplan.context.official.detail", defaultValue: "Obtain current instructions from emergency services and public authorities. This plan is not a live alert.", comment: "Safety-critical distinction from live information"),
+        LocalizedStringResource("myplan.actions.title", defaultValue: "What should I do?", comment: "Guided plan step title"),
+        LocalizedStringResource("myplan.actions.now.title", defaultValue: "Prepare now", comment: "Actions possible before an emergency"),
+        LocalizedStringResource("myplan.actions.now.detail", defaultValue: "Complete these household preparations before an emergency occurs.", comment: "Offline preparedness category description"),
+        LocalizedStringResource("myplan.actions.during.title", defaultValue: "During an actual emergency", comment: "Actual-event guidance category title"),
+        LocalizedStringResource("myplan.actions.during.detail", defaultValue: "Use this plan only when it fits the situation. Move away from immediate danger, contact emergency services when needed, and follow current authority instructions.", comment: "Safety-critical actual-event guidance"),
+        LocalizedStringResource("myplan.actions.official.title", defaultValue: "Requires current official information", comment: "Authority-dependent action category"),
+        LocalizedStringResource("myplan.actions.official.detail", defaultValue: "These decisions depend on current information and instructions from authorities.", comment: "Safety-critical authority-dependent category"),
+        LocalizedStringResource("myplan.shelter.title", defaultValue: "Where should I shelter or go?", comment: "Guided plan step title"),
+        LocalizedStringResource("myplan.locations.title", defaultValue: "My meeting and location planning", comment: "Guided plan step title"),
+        LocalizedStringResource("myplan.locations.personal_notice", defaultValue: "These are personal planning notes. They are not official evacuation centres, civil-defence shelters, or verified safe places.", comment: "Required safety notice above user location fields"),
+        LocalizedStringResource("myplan.location.meeting_point", defaultValue: "Household meeting point", comment: "Maps to legacy reunionPoint"),
+        LocalizedStringResource("myplan.location.family_friend", defaultValue: "Family or friend location", comment: "Personal evacuation planning field"),
+        LocalizedStringResource("myplan.location.secondary_home", defaultValue: "Cabin or secondary home", comment: "Personal evacuation planning field"),
+        LocalizedStringResource("myplan.location.alternative", defaultValue: "Alternative accommodation", comment: "Personal evacuation planning field"),
+        LocalizedStringResource("myplan.location.evacuation_legacy", defaultValue: "Existing evacuation destination", comment: "Preserved legacy evacuationDestination field"),
+        LocalizedStringResource("myplan.location.shelter_legacy", defaultValue: "Existing shelter or safe-place note", comment: "Preserved legacy shelterZone field; not official"),
+        LocalizedStringResource("myplan.location.personal_note", defaultValue: "Personal safe-place note", comment: "User-defined note; never an official designation"),
+        LocalizedStringResource("myplan.supplies.title", defaultValue: "Supplies preview", comment: "Guided plan step title"),
+        LocalizedStringResource("myplan.supplies.preview_notice", defaultValue: "Read-only priorities from the offline emergency template. Your existing supply records are not changed.", comment: "Milestone 4 lightweight preview notice"),
+        LocalizedStringResource("myplan.supplies.home", defaultValue: "Home priorities", comment: "Home supply preview heading"),
+        LocalizedStringResource("myplan.supplies.evacuation", defaultValue: "Evacuation and grab-list priorities", comment: "Evacuation supply preview heading"),
+        LocalizedStringResource("myplan.contacts.title", defaultValue: "Contacts", comment: "Guided plan step title"),
+        LocalizedStringResource("myplan.contacts.reuse_notice", defaultValue: "This plan uses your existing contacts. Opening them here does not create copies.", comment: "Contact compatibility notice"),
+        LocalizedStringResource("myplan.contacts.unnamed", defaultValue: "Unnamed contact", comment: "Fallback label for an existing blank contact"),
+        LocalizedStringResource("myplan.contacts.manage", defaultValue: "View or edit existing contacts", comment: "Button opening the existing Contacts tab"),
+        LocalizedStringResource("myplan.save.title", defaultValue: "Save or update plan", comment: "Final guided plan step title"),
+        LocalizedStringResource("myplan.save.button", defaultValue: "Save plan on this device", comment: "Explicit local-save button"),
+        LocalizedStringResource("myplan.save.success", defaultValue: "Plan saved on this device.", comment: "Successful local persistence status"),
+        LocalizedStringResource("myplan.save.failure", defaultValue: "The plan could not be saved. Your current entries remain visible; try again.", comment: "Non-destructive persistence error status")
+    ]
+}

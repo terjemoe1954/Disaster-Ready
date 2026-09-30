@@ -84,33 +84,18 @@ struct DisasterDashboardView: View {
 
                 Tab(planTabTitle, systemImage: "checklist", value: DashboardTab.plan) {
                     dashboardScrollView {
-                        EmergencyTypePickerSection(
-                            selection: $selectedEmergencyType,
-                            language: selectedLanguage
-                        )
-                        EmergencyActionsSection(
-                            emergencyType: selectedEmergencyType,
-                            household: householdProfile,
-                            language: selectedLanguage
-                        )
-                        EmergencyShelterGuidanceSection(
-                            emergencyType: selectedEmergencyType,
-                            language: selectedLanguage
-                        )
                         if let plan = currentEmergencyPlan {
-                            HouseholdPlanSection(
+                            EventAwareMyPlanView(
+                                selectedEmergencyType: $selectedEmergencyType,
                                 plan: plan,
-                                summary: planSummary(for: plan),
+                                household: householdProfile,
+                                familyContacts: familyContacts,
+                                importantNumbers: importantNumbers,
                                 language: selectedLanguage,
-                                scenarioName: selectedEmergencyType.localizedName(in: selectedLanguage),
-                                showsGasShutoff: householdProfile.allowsGasSpecificGuidance
+                                openContacts: { selectedTab = .contacts },
+                                savePlan: saveCurrentPlan
                             )
                         }
-                        PlanNextStepsSection(
-                            language: selectedLanguage,
-                            openSupplies: { selectedTab = .supplies },
-                            openContacts: { selectedTab = .contacts }
-                        )
                         RolesSection(
                             roles: householdRoles,
                             language: selectedLanguage,
@@ -688,6 +673,15 @@ struct DisasterDashboardView: View {
             evacuation,
             shelter
         )
+    }
+
+    private func saveCurrentPlan() -> Bool {
+        do {
+            try modelContext.save()
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func messageBody(for template: FamilyMessageTemplate) -> String {
