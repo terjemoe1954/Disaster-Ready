@@ -30,6 +30,8 @@ struct DisasterDashboardView: View {
     @Query(sort: \SupplyItem.name) private var supplies: [SupplyItem]
 
     @State private var selectedScenario: PreparednessScenario = .storm
+    @State private var selectedEmergencyType: EmergencyType = .extremeWeather
+    @State private var householdProfile = HouseholdProfile.defaultProfile(locale: .current, householdSize: 1)
     @State private var selectedTab: DashboardTab = .overview
     @State private var selectedLanguage: AppLanguage = .current
     @State private var showingSettings = false
@@ -56,6 +58,7 @@ struct DisasterDashboardView: View {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
                         HeroCardSection(language: selectedLanguage)
+                        OfficialWeatherAlertsSection(language: selectedLanguage)
                         PreparednessOverviewSection(
                             completedPlanItems: completedPlanItems,
                             totalPlanItems: 3,
@@ -81,14 +84,32 @@ struct DisasterDashboardView: View {
 
                 Tab(planTabTitle, systemImage: "checklist", value: DashboardTab.plan) {
                     dashboardScrollView {
-                        if let plan = currentHouseholdPlan {
+                        EmergencyTypePickerSection(
+                            selection: $selectedEmergencyType,
+                            language: selectedLanguage
+                        )
+                        EmergencyActionsSection(
+                            emergencyType: selectedEmergencyType,
+                            language: selectedLanguage
+                        )
+                        EmergencyShelterGuidanceSection(
+                            emergencyType: selectedEmergencyType,
+                            language: selectedLanguage
+                        )
+                        if let plan = currentEmergencyPlan {
                             HouseholdPlanSection(
                                 plan: plan,
                                 summary: planSummary(for: plan),
                                 language: selectedLanguage,
-                                scenarioName: selectedScenario.localizedName(in: selectedLanguage)
+                                scenarioName: selectedEmergencyType.localizedName(in: selectedLanguage),
+                                showsGasShutoff: householdProfile.allowsGasSpecificGuidance
                             )
                         }
+                        PlanNextStepsSection(
+                            language: selectedLanguage,
+                            openSupplies: { selectedTab = .supplies },
+                            openContacts: { selectedTab = .contacts }
+                        )
                         RolesSection(
                             roles: householdRoles,
                             language: selectedLanguage,
@@ -106,6 +127,14 @@ struct DisasterDashboardView: View {
 
                 Tab(suppliesTabTitle, systemImage: "shippingbox.fill", value: DashboardTab.supplies) {
                     dashboardScrollView {
+                        SmartSupplyRecommendationsSection(
+                            homeCount: homeSupplyRecommendations.count,
+                            evacuationCount: evacuationSupplyRecommendations.count,
+                            language: selectedLanguage,
+                            addHome: addSmartHomeSupplies,
+                            addEvacuation: addSmartEvacuationSupplies
+                        )
+                        PaymentPreparednessSection(language: selectedLanguage)
                         HomePreparednessGuideSection(
                             householdMemberCount: $householdMemberCount,
                             language: selectedLanguage
@@ -120,6 +149,11 @@ struct DisasterDashboardView: View {
                             deleteItem: deleteSupplyItem
                         )
                         OfflineResourcesSection(resources: offlineResources, language: selectedLanguage)
+                        OfficialSourcesSection(
+                            sources: GuidanceSourceRegistry.norway,
+                            language: selectedLanguage
+                        )
+                        PublicSheltersSection(language: selectedLanguage)
                     }
                 }
 
@@ -202,6 +236,7 @@ struct DisasterDashboardView: View {
                 showOnlyMissingSupplies: $showOnlyMissingSupplies,
                 offlineFirstMode: $offlineFirstMode,
                 supplyReviewRemindersEnabled: $supplyReviewRemindersEnabled,
+                householdProfile: $householdProfile,
                 sendTestReminder: sendTestSupplyReminder,
                 showOnboarding: { showingOnboarding = true },
                 exportBackup: prepareBackupExport,
@@ -230,7 +265,9 @@ struct DisasterDashboardView: View {
         }
         .task {
             seedDataIfNeeded()
-            ensureScenarioPlans()
+            ensureEmergencyPlans()
+            householdProfile = HouseholdProfileStore.load()
+            householdMemberCount = householdProfile.householdSize
             selectedLanguage = AppLanguage(rawValue: preferredLanguageCode) ?? .current
             relocalizeDefaultSupplies(to: selectedLanguage)
             if !hasSeenOnboarding {
@@ -295,11 +332,20 @@ struct DisasterDashboardView: View {
             preferredLanguageCode = newValue.rawValue
             relocalizeDefaultSupplies(to: newValue)
         }
-        .onChange(of: selectedScenario) { _, _ in
-            ensureScenarioPlans()
+        .onChange(of: selectedEmergencyType) { _, _ in
+            ensureEmergencyPlans()
         }
         .onChange(of: householdMemberCount) { oldValue, newValue in
             updateGeneratedWaterQuantity(from: oldValue, to: newValue)
+            if householdProfile.householdSize != newValue {
+                householdProfile.householdSize = newValue
+            }
+        }
+        .onChange(of: householdProfile) { _, newValue in
+            HouseholdProfileStore.save(newValue)
+            if householdMemberCount != newValue.householdSize {
+                householdMemberCount = newValue.householdSize
+            }
         }
         .onChange(of: supplyReviewRemindersEnabled) { _, isEnabled in
             Task {
@@ -380,7 +426,12 @@ struct DisasterDashboardView: View {
     }
 
     private var addCarSupplyTitle: String {
-        L10n.pick(language: selectedLanguage, english: "New car item", norwegian: "Nytt bilutstyr", thai: "อุปกรณ์รถใหม่")
+        L10n.pick(
+            language: selectedLanguage,
+            english: "New grab / evacuation item",
+            norwegian: "Nytt evakueringsutstyr",
+            thai: "อุปกรณ์อพยพใหม่"
+        )
     }
 
     private var supplyReviewReminders: [SupplyReviewReminder] {
@@ -475,7 +526,7 @@ struct DisasterDashboardView: View {
     }
 
     private var completedPlanItems: Int {
-        guard let plan = currentHouseholdPlan else { return 0 }
+        guard let plan = currentEmergencyPlan else { return 0 }
         return [plan.reunionPoint, plan.evacuationDestination, plan.shelterZone]
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             .count
@@ -550,6 +601,20 @@ struct DisasterDashboardView: View {
         homeSupplies.count + carSupplies.count
     }
 
+    private var homeSupplyRecommendations: [TemplateSupplyItem] {
+        SupplyPrioritizer.prioritizedSupplies(
+            for: selectedEmergencyType,
+            household: householdProfile
+        )
+    }
+
+    private var evacuationSupplyRecommendations: [TemplateSupplyItem] {
+        SupplyPrioritizer.prioritizedEvacuationSupplies(
+            for: selectedEmergencyType,
+            household: householdProfile
+        )
+    }
+
     private var homeSupplies: [SupplyItem] {
         prioritizedSupplies(
             supplies.filter { $0.storageLocation == SupplyLocation.home.rawValue }
@@ -617,7 +682,7 @@ struct DisasterDashboardView: View {
         return L10n.format(
             "plan_summary_format",
             language: selectedLanguage,
-            selectedScenario.localizedName(in: selectedLanguage),
+            selectedEmergencyType.localizedName(in: selectedLanguage),
             reunion,
             evacuation,
             shelter
@@ -627,11 +692,11 @@ struct DisasterDashboardView: View {
     private func messageBody(for template: FamilyMessageTemplate) -> String {
         var lines = [
             template.body,
-            "\(L10n.text("scenario", language: selectedLanguage)): \(selectedScenario.localizedName(in: selectedLanguage))",
-            "\(L10n.text("action", language: selectedLanguage)): \(selectedScenario.recommendedAction(in: selectedLanguage))"
+            "\(L10n.text("scenario", language: selectedLanguage)): \(selectedEmergencyType.localizedName(in: selectedLanguage))",
+            "\(L10n.text("action", language: selectedLanguage)): \(selectedEmergencyType.preparationGuidance(in: selectedLanguage))"
         ]
 
-        if includePlanSummaryInMessages, let plan = currentHouseholdPlan {
+        if includePlanSummaryInMessages, let plan = currentEmergencyPlan {
             lines.append(planSummary(for: plan))
         }
 
@@ -681,6 +746,53 @@ struct DisasterDashboardView: View {
             supplyErrorMessage = error.localizedDescription
             showingSupplyError = true
             return false
+        }
+    }
+
+    private func addSmartHomeSupplies() {
+        addSupplyRecommendations(
+            homeSupplyRecommendations,
+            location: .home
+        )
+    }
+
+    private func addSmartEvacuationSupplies() {
+        addSupplyRecommendations(
+            evacuationSupplyRecommendations,
+            location: .car
+        )
+    }
+
+    private func addSupplyRecommendations(
+        _ recommendations: [TemplateSupplyItem],
+        location: SupplyLocation
+    ) {
+        var existingNames = Set(
+            supplies
+                .filter { $0.storageLocation == location.rawValue }
+                .map { $0.name.localizedLowercase }
+        )
+        let detail = L10n.pick(
+            language: selectedLanguage,
+            english: "Recommended for your household and selected emergency.",
+            norwegian: "Anbefalt for husstanden og valgt hendelse.",
+            thai: "แนะนำสำหรับครัวเรือนและเหตุฉุกเฉินที่เลือก"
+        )
+
+        for recommendation in recommendations {
+            let name = recommendation.localizedName(in: selectedLanguage)
+            guard !existingNames.contains(name.localizedLowercase) else { continue }
+            existingNames.insert(name.localizedLowercase)
+
+            modelContext.insert(
+                SupplyItem(
+                    name: name,
+                    detail: detail,
+                    isPacked: false,
+                    storageLocation: location.rawValue,
+                    quantity: recommendation.id == "water" ? recommendedWaterQuantity : ""
+                )
+            )
         }
     }
 
@@ -760,7 +872,13 @@ struct DisasterDashboardView: View {
                         gasShutoffNote: $0.gasShutoffNote,
                         medicalLead: $0.medicalLead,
                         petLead: $0.petLead,
-                        familyPassword: $0.familyPassword
+                        familyPassword: $0.familyPassword,
+                        alternativeAccommodation: $0.alternativeAccommodation,
+                        familyFriendLocation: $0.familyFriendLocation,
+                        secondaryHome: $0.secondaryHome,
+                        safePlaceNote: $0.safePlaceNote,
+                        waterStopcockNote: $0.waterStopcockNote,
+                        mainElectricalPanelNote: $0.mainElectricalPanelNote
                     )
                 },
                 householdRoles: householdRoles.map {
@@ -924,7 +1042,7 @@ struct DisasterDashboardView: View {
                 await SupplyReminderScheduler.removePendingReminders()
                 await Task.yield()
                 seedDataIfNeeded()
-                ensureScenarioPlans()
+                ensureEmergencyPlans()
                 transferMessage = L10n.pick(
                     language: selectedLanguage,
                     english: "Default local data was restored.",
@@ -970,7 +1088,13 @@ struct DisasterDashboardView: View {
                         gasShutoffNote: $0.gasShutoffNote,
                         medicalLead: $0.medicalLead,
                         petLead: $0.petLead,
-                        familyPassword: $0.familyPassword
+                        familyPassword: $0.familyPassword,
+                        alternativeAccommodation: $0.alternativeAccommodation,
+                        familyFriendLocation: $0.familyFriendLocation,
+                        secondaryHome: $0.secondaryHome,
+                        safePlaceNote: $0.safePlaceNote,
+                        waterStopcockNote: $0.waterStopcockNote,
+                        mainElectricalPanelNote: $0.mainElectricalPanelNote
                     )
                 }
                 .forEach(modelContext.insert)
@@ -1104,15 +1228,17 @@ struct DisasterDashboardView: View {
         ]
     }
 
-    private var currentHouseholdPlan: HouseholdPlan? {
-        householdPlans.first { $0.scenarioIdentifier == selectedScenario.rawValue }
-            ?? householdPlans.first { $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true }
+    private var currentEmergencyPlan: HouseholdPlan? {
+        householdPlans.first { $0.scenarioIdentifier == selectedEmergencyType.rawValue }
+            ?? householdPlans.first {
+                EmergencyType.migrated(fromLegacyIdentifier: $0.scenarioIdentifier) == selectedEmergencyType
+            }
     }
 
     private var defaultHouseholdPlans: [HouseholdPlan] {
-        PreparednessScenario.allCases.map { scenario in
+        EmergencyType.allCases.map { emergencyType in
             HouseholdPlan(
-                scenarioIdentifier: scenario.rawValue,
+                scenarioIdentifier: emergencyType.rawValue,
                 reunionPoint: "",
                 evacuationDestination: "",
                 shelterZone: "",
@@ -1124,28 +1250,38 @@ struct DisasterDashboardView: View {
         }
     }
 
-    private func ensureScenarioPlans() {
-        let legacyPlans = householdPlans.filter { $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true }
-        let templatePlan = householdPlans.first
+    private func ensureEmergencyPlans() {
+        let unassignedPlans = householdPlans.filter {
+            $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true
+        }
+        let templatePlan = unassignedPlans.first ?? householdPlans.first
 
-        if let firstLegacyPlan = legacyPlans.first {
-            firstLegacyPlan.scenarioIdentifier = PreparednessScenario.storm.rawValue
+        if let firstUnassignedPlan = unassignedPlans.first {
+            firstUnassignedPlan.scenarioIdentifier = EmergencyType.extremeWeather.rawValue
         }
 
-        let assignedScenarios = Set(householdPlans.compactMap(\.scenarioIdentifier))
+        let missingEmergencyTypes = EmergencyPlanMigration.missingEmergencyTypes(
+            for: householdPlans.map(\.scenarioIdentifier)
+        )
 
-        for scenario in PreparednessScenario.allCases where !assignedScenarios.contains(scenario.rawValue) {
+        for emergencyType in missingEmergencyTypes {
             let sourcePlan = templatePlan
             modelContext.insert(
                 HouseholdPlan(
-                    scenarioIdentifier: scenario.rawValue,
+                    scenarioIdentifier: emergencyType.rawValue,
                     reunionPoint: sourcePlan?.reunionPoint ?? "",
                     evacuationDestination: sourcePlan?.evacuationDestination ?? "",
                     shelterZone: sourcePlan?.shelterZone ?? "",
                     gasShutoffNote: sourcePlan?.gasShutoffNote ?? "",
                     medicalLead: sourcePlan?.medicalLead ?? "",
                     petLead: sourcePlan?.petLead ?? "",
-                    familyPassword: sourcePlan?.familyPassword ?? ""
+                    familyPassword: sourcePlan?.familyPassword ?? "",
+                    alternativeAccommodation: sourcePlan?.alternativeAccommodation,
+                    familyFriendLocation: sourcePlan?.familyFriendLocation,
+                    secondaryHome: sourcePlan?.secondaryHome,
+                    safePlaceNote: sourcePlan?.safePlaceNote,
+                    waterStopcockNote: sourcePlan?.waterStopcockNote,
+                    mainElectricalPanelNote: sourcePlan?.mainElectricalPanelNote
                 )
             )
         }

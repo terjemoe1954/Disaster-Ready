@@ -512,6 +512,7 @@ struct HouseholdPlanSection: View {
     let summary: String
     let language: AppLanguage
     let scenarioName: String
+    let showsGasShutoff: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -534,8 +535,17 @@ struct HouseholdPlanSection: View {
             planField(L10n.text("reunion_point", language: language), text: $plan.reunionPoint)
             planField(L10n.text("evacuation_destination", language: language), text: $plan.evacuationDestination)
             planField(L10n.text("shelter_zone", language: language), text: $plan.shelterZone)
-            planField(L10n.text("gas_shutoff_note", language: language), text: $plan.gasShutoffNote, axis: .vertical)
+            planField(alternativeAccommodationTitle, text: optionalBinding(for: \HouseholdPlan.alternativeAccommodation))
+            planField(familyFriendLocationTitle, text: optionalBinding(for: \HouseholdPlan.familyFriendLocation))
+            planField(secondaryHomeTitle, text: optionalBinding(for: \HouseholdPlan.secondaryHome))
+            planField(safePlaceNoteTitle, text: optionalBinding(for: \HouseholdPlan.safePlaceNote), axis: .vertical)
                 .lineLimit(2...4)
+            planField(waterStopcockTitle, text: optionalBinding(for: \HouseholdPlan.waterStopcockNote))
+            planField(mainElectricalPanelTitle, text: optionalBinding(for: \HouseholdPlan.mainElectricalPanelNote))
+            if showsGasShutoff {
+                planField(L10n.text("gas_shutoff_note", language: language), text: $plan.gasShutoffNote, axis: .vertical)
+                    .lineLimit(2...4)
+            }
             planField(L10n.text("medical_lead", language: language), text: $plan.medicalLead)
             planField(L10n.text("pet_lead", language: language), text: $plan.petLead)
             planField(L10n.text("family_password", language: language), text: $plan.familyPassword)
@@ -552,6 +562,41 @@ struct HouseholdPlanSection: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
+    }
+
+    private func optionalBinding(
+        for keyPath: ReferenceWritableKeyPath<HouseholdPlan, String?>
+    ) -> Binding<String> {
+        Binding(
+            get: { plan[keyPath: keyPath] ?? "" },
+            set: { newValue in
+                plan[keyPath: keyPath] = newValue.isEmpty ? nil : newValue
+            }
+        )
+    }
+
+    private var alternativeAccommodationTitle: String {
+        L10n.pick(language: language, english: "Alternative accommodation", norwegian: "Alternativ overnatting", thai: "ที่พักทางเลือก")
+    }
+
+    private var familyFriendLocationTitle: String {
+        L10n.pick(language: language, english: "Family or friend location", norwegian: "Sted hos familie eller venner", thai: "สถานที่ของครอบครัวหรือเพื่อน")
+    }
+
+    private var secondaryHomeTitle: String {
+        L10n.pick(language: language, english: "Cabin or secondary home", norwegian: "Hytte eller sekundærbolig", thai: "กระท่อมหรือบ้านสำรอง")
+    }
+
+    private var safePlaceNoteTitle: String {
+        L10n.pick(language: language, english: "Personal safe-place note", norwegian: "Personlig notat om oppholdssted", thai: "บันทึกส่วนตัวเกี่ยวกับสถานที่ปลอดภัย")
+    }
+
+    private var waterStopcockTitle: String {
+        L10n.pick(language: language, english: "Main water stopcock", norwegian: "Hovedstoppekran for vann", thai: "วาล์วปิดน้ำหลัก")
+    }
+
+    private var mainElectricalPanelTitle: String {
+        L10n.pick(language: language, english: "Main electrical panel", norwegian: "Hovedsikringsskap", thai: "ตู้ไฟฟ้าหลัก")
     }
 
     private func planField(_ title: String, text: Binding<String>, axis: Axis = .horizontal) -> some View {
@@ -837,7 +882,7 @@ struct SuppliesSection: View {
 
                 if !filteredCarSupplies.isEmpty {
                     SupplyGroupSection(
-                        title: L10n.text("car", language: language),
+                        title: evacuationListTitle,
                         storageLocation: .car,
                         items: filteredCarSupplies,
                         accent: .mint,
@@ -857,6 +902,15 @@ struct SuppliesSection: View {
 
     private var filteredCarSupplies: [SupplyItem] {
         filtered(carSupplies)
+    }
+
+    private var evacuationListTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Grab / evacuation",
+            norwegian: "Ta-med / evakuering",
+            thai: "กระเป๋าฉุกเฉิน / อพยพ"
+        )
     }
 
     private func filtered(_ items: [SupplyItem]) -> [SupplyItem] {

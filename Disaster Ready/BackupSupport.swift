@@ -96,6 +96,12 @@ struct HouseholdPlanSnapshot: Codable, Equatable {
     var medicalLead: String
     var petLead: String
     var familyPassword: String
+    var alternativeAccommodation: String? = nil
+    var familyFriendLocation: String? = nil
+    var secondaryHome: String? = nil
+    var safePlaceNote: String? = nil
+    var waterStopcockNote: String? = nil
+    var mainElectricalPanelNote: String? = nil
 
 }
 

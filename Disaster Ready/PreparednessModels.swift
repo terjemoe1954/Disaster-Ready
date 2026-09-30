@@ -299,6 +299,12 @@ final class HouseholdPlan {
     var medicalLead: String
     var petLead: String
     var familyPassword: String
+    var alternativeAccommodation: String?
+    var familyFriendLocation: String?
+    var secondaryHome: String?
+    var safePlaceNote: String?
+    var waterStopcockNote: String?
+    var mainElectricalPanelNote: String?
 
     init(
         id: UUID = UUID(),
@@ -309,7 +315,13 @@ final class HouseholdPlan {
         gasShutoffNote: String,
         medicalLead: String,
         petLead: String,
-        familyPassword: String
+        familyPassword: String,
+        alternativeAccommodation: String? = nil,
+        familyFriendLocation: String? = nil,
+        secondaryHome: String? = nil,
+        safePlaceNote: String? = nil,
+        waterStopcockNote: String? = nil,
+        mainElectricalPanelNote: String? = nil
     ) {
         self.id = id
         self.scenarioIdentifier = scenarioIdentifier
@@ -320,5 +332,11 @@ final class HouseholdPlan {
         self.medicalLead = medicalLead
         self.petLead = petLead
         self.familyPassword = familyPassword
+        self.alternativeAccommodation = alternativeAccommodation
+        self.familyFriendLocation = familyFriendLocation
+        self.secondaryHome = secondaryHome
+        self.safePlaceNote = safePlaceNote
+        self.waterStopcockNote = waterStopcockNote
+        self.mainElectricalPanelNote = mainElectricalPanelNote
     }
 }

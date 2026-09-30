@@ -65,6 +65,40 @@ final class Disaster_ReadyUITests: XCTestCase {
     }
 
     @MainActor
+    func testEventAwarePlanIsAvailable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", "nb"
+        ]
+        app.launch()
+
+        let planTab = app.tabBars.buttons["Plan"]
+        XCTAssertTrue(planTab.waitForExistence(timeout: 5))
+        planTab.tap()
+
+        let emergencyPicker = app.descendants(matching: .any)["emergencyTypePicker"]
+        XCTAssertTrue(emergencyPicker.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testPaymentPreparednessChecklistIsAvailable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", "nb"
+        ]
+        app.launch()
+
+        let suppliesTab = app.tabBars.buttons["Utstyr"]
+        XCTAssertTrue(suppliesTab.waitForExistence(timeout: 5))
+        suppliesTab.tap()
+
+        let paymentSection = app.descendants(matching: .any)["paymentPreparednessSection"]
+        XCTAssertTrue(paymentSection.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {

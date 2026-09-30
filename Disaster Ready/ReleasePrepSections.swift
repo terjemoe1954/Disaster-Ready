@@ -120,6 +120,7 @@ struct SettingsSheet: View {
     @Binding var showOnlyMissingSupplies: Bool
     @Binding var offlineFirstMode: Bool
     @Binding var supplyReviewRemindersEnabled: Bool
+    @Binding var householdProfile: HouseholdProfile
     let sendTestReminder: () -> Void
     let showOnboarding: () -> Void
     let exportBackup: () -> Void
@@ -144,6 +145,21 @@ struct SettingsSheet: View {
                             Text(appearance.title(in: language)).tag(appearance.rawValue)
                         }
                     }
+                }
+
+                Section(householdProfileTitle) {
+                    NavigationLink {
+                        HouseholdProfileEditor(
+                            profile: $householdProfile,
+                            language: language
+                        )
+                    } label: {
+                        LabeledContent(
+                            householdProfileEditTitle,
+                            value: householdProfileSummary
+                        )
+                    }
+                    .accessibilityIdentifier("householdProfileLink")
                 }
 
                 Section(preferencesTitle) {
@@ -257,6 +273,33 @@ struct SettingsSheet: View {
 
     private var appearancePickerTitle: String {
         L10n.pick(language: language, english: "Theme", norwegian: "Tema", thai: "ธีม")
+    }
+
+    private var householdProfileTitle: String {
+        L10n.pick(
+            language: language,
+            english: "My household",
+            norwegian: "Min husstand",
+            thai: "ครัวเรือนของฉัน"
+        )
+    }
+
+    private var householdProfileEditTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Edit household profile",
+            norwegian: "Rediger husholdningsprofil",
+            thai: "แก้ไขโปรไฟล์ครัวเรือน"
+        )
+    }
+
+    private var householdProfileSummary: String {
+        L10n.pick(
+            language: language,
+            english: "\(householdProfile.countryCode), \(householdProfile.householdSize) people",
+            norwegian: "\(householdProfile.countryCode), \(householdProfile.householdSize) personer",
+            thai: "\(householdProfile.countryCode), \(householdProfile.householdSize) คน"
+        )
     }
 
     private var preferencesTitle: String {

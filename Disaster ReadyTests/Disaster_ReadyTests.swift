@@ -127,7 +127,13 @@ struct Disaster_ReadyTests {
                     gasShutoffNote: "Red valve",
                     medicalLead: "Alex",
                     petLead: "Jordan",
-                    familyPassword: "North star"
+                    familyPassword: "North star",
+                    alternativeAccommodation: "Community hotel",
+                    familyFriendLocation: "Alex's home",
+                    secondaryHome: "Mountain cabin",
+                    safePlaceNote: "User-entered planning note",
+                    waterStopcockNote: "Utility room",
+                    mainElectricalPanelNote: "Front hall"
                 )
             ],
             householdRoles: [
@@ -243,6 +249,318 @@ struct Disaster_ReadyTests {
         }
     }
 
+    @Test func version101BackupWithoutLaterOptionalFieldsPreservesUserData() throws {
+        let legacyJSON = """
+        {
+          "exportDate": "2026-09-01T12:00:00Z",
+          "familyContacts": [
+            {
+              "name": "Alex",
+              "role": "Medical",
+              "phoneNumber": "+47 900 00 111",
+              "notes": "Uses the side entrance"
+            }
+          ],
+          "importantNumbers": [],
+          "householdPlans": [
+            {
+              "reunionPoint": "Old oak tree",
+              "evacuationDestination": "Family cabin",
+              "shelterZone": "Interior hallway",
+              "gasShutoffNote": "Valve by the meter",
+              "medicalLead": "Alex",
+              "petLead": "Sam",
+              "familyPassword": "North star"
+            }
+          ],
+          "householdRoles": [],
+          "supplies": [
+            {
+              "name": "Water",
+              "detail": "Stored in pantry",
+              "isPacked": true,
+              "storageLocation": "Home"
+            }
+          ]
+        }
+        """
+        let legacyData = try #require(legacyJSON.data(using: .utf8))
+
+        let payload = try DisasterBackupPayload.decode(from: legacyData)
+        try payload.validateForImport()
+
+        #expect(payload.schemaVersion == nil)
+        #expect(payload.householdMemberCount == nil)
+        #expect(payload.familyContacts.first?.notes == "Uses the side entrance")
+        #expect(payload.householdPlans.first?.scenarioIdentifier == nil)
+        #expect(payload.householdPlans.first?.reunionPoint == "Old oak tree")
+        #expect(payload.householdPlans.first?.evacuationDestination == "Family cabin")
+        #expect(payload.householdPlans.first?.shelterZone == "Interior hallway")
+        #expect(payload.householdPlans.first?.gasShutoffNote == "Valve by the meter")
+        #expect(payload.supplies.first?.quantity == nil)
+        #expect(payload.supplies.first?.reviewDate == nil)
+    }
+
+    @Test func householdProfileMigrationPreservesLegacyHouseholdSize() throws {
+        let suiteName = "HouseholdProfileMigrationTests"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(4, forKey: HouseholdProfileStore.legacyHouseholdSizeKey)
+
+        let profile = HouseholdProfileStore.load(
+            defaults: defaults,
+            locale: Locale(identifier: "nb_NO")
+        )
+
+        #expect(profile.countryCode == "NO")
+        #expect(profile.householdSize == 4)
+        #expect(profile.hasGasInstallation == false)
+        #expect(defaults.integer(forKey: HouseholdProfileStore.legacyHouseholdSizeKey) == 4)
+        #expect(defaults.data(forKey: HouseholdProfileStore.storageKey) != nil)
+    }
+
+    @Test func householdProfileStoreDoesNotOverwriteExistingProfile() throws {
+        let suiteName = "HouseholdProfileExistingDataTests"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let savedProfile = HouseholdProfile(
+            countryCode: "TH",
+            municipality: "Chiang Mai",
+            householdSize: 3,
+            hasPets: true,
+            hasGasInstallation: true
+        )
+        HouseholdProfileStore.save(savedProfile, defaults: defaults)
+        defaults.set(7, forKey: HouseholdProfileStore.legacyHouseholdSizeKey)
+
+        let loadedProfile = HouseholdProfileStore.load(
+            defaults: defaults,
+            locale: Locale(identifier: "nb_NO")
+        )
+
+        #expect(loadedProfile == savedProfile)
+        #expect(loadedProfile.householdSize == 3)
+        #expect(loadedProfile.hasGasInstallation)
+    }
+
+    @Test func householdProfileDecodingDefaultsNewFlagsSafely() throws {
+        let legacyProfileJSON = """
+        {
+          "countryCode": "no",
+          "householdSize": 2
+        }
+        """
+        let data = try #require(legacyProfileJSON.data(using: .utf8))
+
+        let profile = try JSONDecoder().decode(HouseholdProfile.self, from: data)
+
+        #expect(profile.countryCode == "NO")
+        #expect(profile.householdSize == 2)
+        #expect(profile.hasChildren == false)
+        #expect(profile.hasPets == false)
+        #expect(profile.hasGasInstallation == false)
+        #expect(profile.hasSpecialAssistanceNeeds == false)
+    }
+
+    @Test func householdWithoutGasDoesNotAllowGasSpecificGuidance() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 1)
+
+        #expect(profile.allowsGasSpecificGuidance == false)
+    }
+
+    @Test func householdWithGasAllowsGasSpecificGuidance() {
+        let profile = HouseholdProfile(
+            countryCode: "NO",
+            householdSize: 1,
+            hasGasInstallation: true
+        )
+
+        #expect(profile.allowsGasSpecificGuidance)
+    }
+
+    @Test func everyEmergencyTypeHasTraceableOfflineTemplate() {
+        #expect(NorwayEmergencyTemplates.all.count == EmergencyType.allCases.count)
+
+        for emergencyType in EmergencyType.allCases {
+            let template = NorwayEmergencyTemplates.template(for: emergencyType)
+            #expect(template.type == emergencyType)
+            #expect(template.id == "no.\(emergencyType.rawValue)")
+            #expect(!template.actions.isEmpty)
+            #expect(!template.shelterGuidance.isEmpty)
+            #expect(!template.sourceIDs.isEmpty)
+            #expect(template.shelterGuidance.allSatisfy {
+                $0.safetyNoticeKey == "shelter.preparedness_not_official.notice"
+            })
+        }
+    }
+
+    @Test func legacyScenarioIdentifiersMapWithoutDroppingKnownPlans() {
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "brownout") == .powerOutage)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "storm") == .extremeWeather)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "invasion") == .warOrSecurityIncident)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "flood") == .flood)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "landslide") == .landslide)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "earthquake") == .evacuation)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: "volcano") == .evacuation)
+        #expect(EmergencyType.migrated(fromLegacyIdentifier: nil) == nil)
+    }
+
+    @Test func eventSupplyPrioritiesSupplementBaseItems() {
+        let powerOutage = NorwayEmergencyTemplates.template(for: .powerOutage)
+        let supplyIDs = Set(powerOutage.supplyPriorities.map(\.id))
+
+        #expect(supplyIDs.isSuperset(of: ["water", "shelfStableFood", "medicines"]))
+        #expect(supplyIDs.contains("batteryLighting"))
+        #expect(supplyIDs.contains("powerBank"))
+        #expect(supplyIDs.contains("radio"))
+    }
+
+    @Test func smartHomeSuppliesKeepBaseItemsAndAddEventPriorities() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 2)
+        let items = prioritizedSupplies(for: .powerOutage, household: profile)
+        let ids = Set(items.map(\.id))
+
+        #expect(ids.isSuperset(of: [
+            "water", "shelfStableFood", "cookingMethod", "warmth", "lighting",
+            "radio", "batteries", "powerBank", "medicines", "firstAid",
+            "hygiene", "paymentPreparedness"
+        ]))
+        #expect(items.count == Set(items.map(\.id)).count)
+    }
+
+    @Test func smartSuppliesRespectHouseholdNeeds() {
+        let basicProfile = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        let basicIDs = Set(prioritizedSupplies(for: .flood, household: basicProfile).map(\.id))
+        #expect(!basicIDs.contains("gasInstallationSupplies"))
+        #expect(!basicIDs.contains("petHomeSupplies"))
+
+        let adaptedProfile = HouseholdProfile(
+            countryCode: "NO",
+            householdSize: 4,
+            hasChildren: true,
+            hasPets: true,
+            hasWoodStove: true,
+            hasGasInstallation: true,
+            hasEV: true,
+            hasSpecialAssistanceNeeds: true
+        )
+        let homeIDs = Set(prioritizedSupplies(for: .flood, household: adaptedProfile).map(\.id))
+        let evacuationIDs = Set(
+            SupplyPrioritizer.prioritizedEvacuationSupplies(
+                for: .flood,
+                household: adaptedProfile
+            ).map(\.id)
+        )
+
+        #expect(homeIDs.isSuperset(of: [
+            "childHomeSupplies", "petHomeSupplies", "woodStoveFuel",
+            "gasInstallationSupplies"
+        ]))
+        #expect(evacuationIDs.isSuperset(of: [
+            "childEvacuationSupplies", "petEvacuationSupplies",
+            "assistanceInformation", "evChargingPlan"
+        ]))
+    }
+
+    @Test func evacuationSuppliesContainCriticalEssentialsWithoutDuplicates() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        let items = SupplyPrioritizer.prioritizedEvacuationSupplies(
+            for: .evacuation,
+            household: profile
+        )
+        let ids = Set(items.map(\.id))
+
+        #expect(ids.isSuperset(of: [
+            "identification", "medicines", "phoneAndCharger", "warmClothing",
+            "foodAndDrink", "paymentOptions", "documentCopies"
+        ]))
+        #expect(items.count == ids.count)
+    }
+
+    @Test func paymentPreparednessChecklistHasStableNorwegianRequirements() {
+        #expect(PaymentPreparednessItem.allCases.map(\.id) == [
+            "cashAvailable",
+            "smallerDenominations",
+            "multipleCards",
+            "physicalCard",
+            "multiplePaymentOptions"
+        ])
+
+        let norwegianTitles = PaymentPreparednessItem.allCases.map {
+            $0.title(in: .norwegian)
+        }
+        #expect(norwegianTitles.allSatisfy { !$0.isEmpty })
+        #expect(norwegianTitles.contains { $0.localizedCaseInsensitiveContains("kontant") })
+        #expect(norwegianTitles.contains { $0.localizedCaseInsensitiveContains("fysisk kort") })
+    }
+
+    @Test func officialSourceRegistryUsesStableAuthoritativeMappings() throws {
+        let sources = GuidanceSourceRegistry.norway
+        let sourceIDs = Set(sources.map(\.id))
+
+        #expect(sourceIDs == [
+            "dsb-preparedness",
+            "met-weather-warnings",
+            "nve-natural-hazards"
+        ])
+        #expect(sources.allSatisfy { $0.countryCode == "NO" })
+        #expect(sources.allSatisfy { $0.url.scheme == "https" })
+        #expect(sources.allSatisfy { $0.lastReviewed > .distantPast })
+
+        let encoded = try JSONEncoder().encode(sources)
+        let decoded = try JSONDecoder().decode([GuidanceSource].self, from: encoded)
+        #expect(decoded == sources)
+    }
+
+    @Test func shelterGMLDecoderPreservesOfficialFields() throws {
+        let xml = """
+        <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:app="http://example.com/app">
+          <wfs:member><app:Tilfluktsrom><app:identifikasjon><app:Identifikasjon><app:lokalId>shelter-1</app:lokalId></app:Identifikasjon></app:identifikasjon><app:datauttaksdato>2026-09-29T23:40:57.826Z</app:datauttaksdato><app:posisjon><gml:Point><gml:pos>59.946683 10.619218</gml:pos></gml:Point></app:posisjon><app:romnr>16127</app:romnr><app:plasser>465</app:plasser><app:adresse>Nils Leuchsvei 40</app:adresse></app:Tilfluktsrom></wfs:member>
+        </wfs:FeatureCollection>
+        """
+
+        let shelter = try #require(ShelterGMLDecoder.decode(Data(xml.utf8)).first)
+        #expect(shelter.id == "shelter-1")
+        #expect(shelter.address == "Nils Leuchsvei 40")
+        #expect(shelter.capacity == 465)
+        #expect(shelter.latitude == 59.946683)
+        #expect(shelter.longitude == 10.619218)
+        #expect(shelter.sourceID == "dsb-geonorge-public-shelters-wfs")
+        #expect(shelter.dataUpdatedAt != nil)
+    }
+
+    @Test func emergencyTemplateRoundTripPreservesSourceMapping() throws {
+        let template = NorwayEmergencyTemplates.template(for: .flood)
+
+        let data = try JSONEncoder().encode(template)
+        let decoded = try JSONDecoder().decode(EmergencyPlanTemplate.self, from: data)
+
+        #expect(decoded == template)
+        #expect(decoded.sourceIDs.contains("dsb-flood-preparedness"))
+        #expect(decoded.sourceIDs.contains("nve-hazard-information"))
+    }
+
+    @Test func emergencyPlanMigrationCreatesOnlyMissingTypes() {
+        let existingIdentifiers: [String?] = [
+            "storm",
+            "flood",
+            EmergencyType.houseFire.rawValue,
+            nil
+        ]
+
+        let missingTypes = EmergencyPlanMigration.missingEmergencyTypes(
+            for: existingIdentifiers
+        )
+
+        #expect(!missingTypes.contains(.extremeWeather))
+        #expect(!missingTypes.contains(.flood))
+        #expect(!missingTypes.contains(.houseFire))
+        #expect(missingTypes.contains(.powerOutage))
+        #expect(missingTypes.contains(.evacuation))
+    }
+
     @Test func phoneLinkSanitizerSupportsFormattedAndEmergencyNumbers() {
         #expect(PhoneLinkBuilder.sanitizedNumber("+47 900 00 111") == "+4790000111")
         #expect(PhoneLinkBuilder.sanitizedNumber("(+47) 900-00-111") == nil)
@@ -255,6 +573,57 @@ struct Disaster_ReadyTests {
         #expect(PhoneLinkBuilder.sanitizedNumber("12") == nil)
         #expect(PhoneLinkBuilder.sanitizedNumber("++47 900") == nil)
         #expect(PhoneLinkBuilder.sanitizedNumber("call 110") == nil)
+    }
+
+    @Test func metAlertsDecoderPreservesOfficialContentAndSeverity() throws {
+        let data = Data(metAlertsJSON(features: [
+            metAlertFeature(id: "warning-1", type: "Alert", color: "Orange", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z")
+        ]).utf8)
+
+        let alert = try #require(METAlertsDecoder.decode(data).first)
+        #expect(alert.id == "warning-1")
+        #expect(alert.severity == .orange)
+        #expect(alert.messageType == .alert)
+        #expect(alert.instruction == "Stay away from exposed areas.")
+        #expect(alert.sourceID == "met-norway-metalerts-2")
+    }
+
+    @Test func metAlertsExcludeExpiredAndCancelledMessages() throws {
+        let data = Data(metAlertsJSON(features: [
+            metAlertFeature(id: "expired", type: "Alert", color: "Yellow", start: "2026-09-29T10:00:00Z", end: "2026-09-29T14:00:00Z"),
+            metAlertFeature(id: "cancelled", type: "Alert", color: "Red", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z"),
+            metAlertFeature(id: "cancelled", type: "Cancel", color: "Red", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z"),
+            metAlertFeature(id: "updated", type: "Update", color: "Orange", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z")
+        ]).utf8)
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-09-30T12:00:00Z"))
+
+        let active = METAlertsDecoder.activeAlerts(from: try METAlertsDecoder.decode(data), at: now)
+
+        #expect(active.map(\.id) == ["updated"])
+        #expect(active.first?.messageType == .update)
+    }
+
+    @Test func metAlertsRequestUsesHTTPSContactAndRoundedCoordinates() throws {
+        let request = try METWeatherAlertService().makeRequest(
+            latitude: 59.123456,
+            longitude: 10.987654,
+            languageCode: "no"
+        )
+
+        #expect(request.url?.scheme == "https")
+        #expect(request.value(forHTTPHeaderField: "User-Agent")?.contains("github.com/terjemoe1954/Disaster-Ready") == true)
+        #expect(request.url?.absoluteString.contains("lat=59.1235") == true)
+        #expect(request.url?.absoluteString.contains("lon=10.9877") == true)
+    }
+
+    private func metAlertsJSON(features: [String]) -> String {
+        "{\"features\":[\(features.joined(separator: ","))]}"
+    }
+
+    private func metAlertFeature(id: String, type: String, color: String, start: String, end: String) -> String {
+        """
+        {"properties":{"id":"\(id)","title":"Strong wind","event":"Wind","area":"Oslo","description":"Strong wind is expected.","instruction":"Stay away from exposed areas.","consequences":"Objects may be blown away.","riskMatrixColor":"\(color)","severity":"Severe","status":"Actual","type":"\(type)","web":"https://www.met.no/"},"when":{"interval":["\(start)","\(end)"]}}
+        """
     }
 
 }
