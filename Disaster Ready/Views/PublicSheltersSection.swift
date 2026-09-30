@@ -3,7 +3,7 @@ import SwiftUI
 
 struct PublicSheltersSection: View {
     @State private var area = ""
-    @State private var shelters: [Shelter] = []
+    @State private var snapshot: ShelterSnapshot?
     @State private var isLoading = false
     @State private var errorMessage: String?
 
@@ -45,8 +45,13 @@ struct PublicSheltersSection: View {
                     .foregroundStyle(.secondary)
             }
 
-            ForEach(shelters) { shelter in
-                PublicShelterRow(shelter: shelter, language: language)
+            if let snapshot {
+                Text(updatedText(snapshot))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                ForEach(snapshot.shelters) { shelter in
+                    PublicShelterRow(shelter: shelter, language: language)
+                }
             }
 
             Link(destination: officialMapURL) {
@@ -73,17 +78,31 @@ struct PublicSheltersSection: View {
                 guard let coordinate = response.mapItems.first?.location.coordinate else {
                     throw ShelterServiceError.invalidCoordinate
                 }
-                shelters = try await service.nearbyShelters(
+                let result = try await service.shelterSnapshot(
                     latitude: coordinate.latitude,
                     longitude: coordinate.longitude
                 )
-                if shelters.isEmpty { errorMessage = noResultsMessage }
+                snapshot = result
+                if result.shelters.isEmpty { errorMessage = noResultsMessage }
             } catch {
-                shelters = []
+                snapshot = nil
                 errorMessage = searchFailedMessage
             }
             isLoading = false
         }
+    }
+
+    private func updatedText(_ snapshot: ShelterSnapshot) -> String {
+        let date = snapshot.lastUpdated.formatted(
+            .dateTime.day().month().year().hour().minute().locale(AppLanguage.locale(for: language))
+        )
+        let suffix = snapshot.isCached ? cachedSuffix : ""
+        return L10n.pick(
+            language: language,
+            english: "Downloaded: \(date)\(suffix)",
+            norwegian: "Lastet ned: \(date)\(suffix)",
+            thai: "ดาวน์โหลด: \(date)\(suffix)"
+        )
     }
 
     private let officialMapURL = URL(string: "https://kart.dsb.no/") ?? URL(fileURLWithPath: "/")
@@ -94,6 +113,7 @@ struct PublicSheltersSection: View {
     private var officialMapTitle: String { L10n.pick(language: language, english: "Open DSB's official map", norwegian: "Åpne DSBs offisielle kart", thai: "เปิดแผนที่ทางการของ DSB") }
     private var noResultsMessage: String { L10n.pick(language: language, english: "No registered public shelters were found within 25 km. The register may not cover every location.", norwegian: "Ingen registrerte offentlige tilfluktsrom ble funnet innen 25 km. Registeret dekker ikke nødvendigvis alle steder.", thai: "ไม่พบที่หลบภัยสาธารณะที่ลงทะเบียนในระยะ 25 กม. ทะเบียนอาจไม่ครอบคลุมทุกพื้นที่") }
     private var searchFailedMessage: String { L10n.pick(language: language, english: "The official shelter service is unavailable. Use DSB's official map or try again later.", norwegian: "Den offisielle tilfluktsromtjenesten er utilgjengelig. Bruk DSBs offisielle kart eller prøv senere.", thai: "บริการข้อมูลที่หลบภัยอย่างเป็นทางการไม่พร้อมใช้งาน โปรดใช้แผนที่ DSB หรือลองใหม่ภายหลัง") }
+    private var cachedSuffix: String { L10n.pick(language: language, english: " (saved reference copy)", norwegian: " (lagret referansekopi)", thai: " (สำเนาอ้างอิงที่บันทึกไว้)") }
 }
 
 private struct PublicShelterRow: View {

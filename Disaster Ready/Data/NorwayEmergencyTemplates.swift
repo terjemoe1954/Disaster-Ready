@@ -2,7 +2,9 @@ import Foundation
 
 enum NorwayEmergencyTemplates {
     static var all: [EmergencyPlanTemplate] {
-        EmergencyType.allCases.map(template)
+        EmergencyType.allCases.map { emergencyType in
+            template(for: emergencyType)
+        }
     }
 
     static func template(for type: EmergencyType) -> EmergencyPlanTemplate {
@@ -20,6 +22,32 @@ enum NorwayEmergencyTemplates {
         )
     }
 
+    static func template(
+        for type: EmergencyType,
+        household: HouseholdProfile
+    ) -> EmergencyPlanTemplate {
+        let baseTemplate = template(for: type)
+        guard
+            household.countryCode == "NO",
+            household.hasGasInstallation,
+            gasRelevantTypes.contains(type)
+        else {
+            return baseTemplate
+        }
+
+        return EmergencyPlanTemplate(
+            id: baseTemplate.id,
+            type: baseTemplate.type,
+            titleKey: baseTemplate.titleKey,
+            summaryKey: baseTemplate.summaryKey,
+            actions: baseTemplate.actions + [gasPreparednessAction(for: type)],
+            shelterGuidance: baseTemplate.shelterGuidance,
+            supplyPriorities: baseTemplate.supplyPriorities,
+            evacuationItems: baseTemplate.evacuationItems,
+            sourceIDs: baseTemplate.sourceIDs
+        )
+    }
+
     private static func actions(for type: EmergencyType) -> [PreparednessAction] {
         [
             PreparednessAction(
@@ -33,6 +61,20 @@ enum NorwayEmergencyTemplates {
                 detailKey: "action.\(type.rawValue).prepare.detail"
             )
         ]
+    }
+
+    private static let gasRelevantTypes: Set<EmergencyType> = [
+        .houseFire,
+        .evacuation,
+        .hazardousRelease
+    ]
+
+    private static func gasPreparednessAction(for type: EmergencyType) -> PreparednessAction {
+        PreparednessAction(
+            id: "\(type.rawValue).gasInstallationPreparedness",
+            titleKey: "action.gas_installation.prepare.title",
+            detailKey: "action.gas_installation.prepare.detail"
+        )
     }
 
     private static func shelterGuidance(for type: EmergencyType) -> [ShelterGuidance] {

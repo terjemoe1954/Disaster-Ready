@@ -14,32 +14,31 @@ enum EmergencyType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Stable, explicit compatibility map for identifiers persisted by Disaster Ready 1.0.1.
+    static let legacyIdentifierMapping: [String: EmergencyType] = [
+        "brownout": .powerOutage,
+        "flood": .flood,
+        "storm": .extremeWeather,
+        "landslide": .landslide,
+        "invasion": .warOrSecurityIncident,
+        // These legacy scenarios have no direct 1.1 equivalent. They remain stored
+        // unchanged and are shown through the broader evacuation plan category.
+        "earthquake": .evacuation,
+        "volcano": .evacuation
+    ]
+
     static func migrated(fromLegacyIdentifier identifier: String?) -> EmergencyType? {
         guard let identifier, !identifier.isEmpty else { return nil }
-
-        switch identifier {
-        case "brownout":
-            return .powerOutage
-        case "flood":
-            return .flood
-        case "storm":
-            return .extremeWeather
-        case "landslide":
-            return .landslide
-        case "invasion":
-            return .warOrSecurityIncident
-        case "earthquake", "volcano":
-            return .evacuation
-        default:
-            return EmergencyType(rawValue: identifier)
-        }
+        return legacyIdentifierMapping[identifier] ?? EmergencyType(rawValue: identifier)
     }
 }
 
 enum EmergencyPlanMigration {
     static func missingEmergencyTypes(for identifiers: [String?]) -> [EmergencyType] {
         let assignedTypes = Set(
-            identifiers.compactMap(EmergencyType.migrated(fromLegacyIdentifier:))
+            identifiers.compactMap { identifier in
+                EmergencyType.migrated(fromLegacyIdentifier: identifier)
+            }
         )
         return EmergencyType.allCases.filter { !assignedTypes.contains($0) }
     }
@@ -56,6 +55,10 @@ struct ShelterGuidance: Codable, Equatable, Identifiable {
     let titleKey: String
     let detailKey: String
     let safetyNoticeKey: String
+
+    /// Template guidance always describes a planning location type. It never
+    /// represents an authority-designated shelter, centre, or safe address.
+    var isOfficialLocation: Bool { false }
 }
 
 struct TemplateSupplyItem: Codable, Equatable, Identifiable {

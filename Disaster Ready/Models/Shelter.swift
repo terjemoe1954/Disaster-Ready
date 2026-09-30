@@ -14,3 +14,9 @@ struct Shelter: Codable, Identifiable, Equatable, Sendable {
 protocol ShelterService {
     func nearbyShelters(latitude: Double, longitude: Double) async throws -> [Shelter]
 }
+
+struct ShelterSnapshot: Sendable {
+    let shelters: [Shelter]
+    let lastUpdated: Date
+    let isCached: Bool
+}

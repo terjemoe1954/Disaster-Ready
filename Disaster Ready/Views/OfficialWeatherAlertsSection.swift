@@ -15,6 +15,7 @@ struct OfficialWeatherAlertsSection: View {
             Label(title, systemImage: "exclamationmark.triangle.fill")
                 .font(.title3.weight(.bold))
                 .accessibilityHeading(.h2)
+                .accessibilityIdentifier("officialWeatherAlertsSection")
             Text(explanation)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -49,7 +50,6 @@ struct OfficialWeatherAlertsSection: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
-        .accessibilityIdentifier("officialWeatherAlertsSection")
     }
 
     private func search() {

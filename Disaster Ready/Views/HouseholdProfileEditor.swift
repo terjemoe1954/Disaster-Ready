@@ -23,6 +23,8 @@ struct HouseholdProfileEditor: View {
                 hasWoodStove: $profile.hasWoodStove,
                 hasGasInstallation: $profile.hasGasInstallation,
                 hasAlternativeHeating: $profile.hasAlternativeHeating,
+                knowsWaterStopcock: $profile.knowsWaterStopcock,
+                knowsMainElectricalPanel: $profile.knowsMainElectricalPanel,
                 language: language
             )
             HouseholdProfileTransportSection(
@@ -152,6 +154,8 @@ private struct HouseholdProfileHomeSection: View {
     @Binding var hasWoodStove: Bool
     @Binding var hasGasInstallation: Bool
     @Binding var hasAlternativeHeating: Bool
+    @Binding var knowsWaterStopcock: Bool
+    @Binding var knowsMainElectricalPanel: Bool
     let language: AppLanguage
 
     var body: some View {
@@ -161,6 +165,8 @@ private struct HouseholdProfileHomeSection: View {
             Toggle(gasInstallationTitle, isOn: $hasGasInstallation)
                 .accessibilityIdentifier("hasGasInstallation")
             Toggle(alternativeHeatingTitle, isOn: $hasAlternativeHeating)
+            Toggle(waterStopcockTitle, isOn: $knowsWaterStopcock)
+            Toggle(electricalPanelTitle, isOn: $knowsMainElectricalPanel)
         } header: {
             Text(homeTitle)
         } footer: {
@@ -186,6 +192,24 @@ private struct HouseholdProfileHomeSection: View {
 
     private var alternativeHeatingTitle: String {
         L10n.pick(language: language, english: "Other alternative heating", norwegian: "Annen alternativ oppvarming", thai: "เครื่องทำความร้อนทางเลือกอื่น")
+    }
+
+    private var waterStopcockTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Know the main water stopcock location",
+            norwegian: "Kjenner plasseringen av hovedstoppekranen",
+            thai: "ทราบตำแหน่งวาล์วปิดน้ำหลัก"
+        )
+    }
+
+    private var electricalPanelTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Know the main electrical panel location",
+            norwegian: "Kjenner plasseringen av hovedsikringsskapet",
+            thai: "ทราบตำแหน่งตู้ไฟฟ้าหลัก"
+        )
     }
 
     private var gasFooter: String {

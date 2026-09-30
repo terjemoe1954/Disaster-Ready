@@ -1,0 +1,68 @@
+import Foundation
+
+/// Static resources make semantic template keys visible to Xcode's String
+/// Catalog extractor while templates continue to persist only stable keys.
+enum EmergencyLocalizationResources {
+    static let all: [LocalizedStringResource] = [
+        LocalizedStringResource("emergency.powerOutage.title", defaultValue: "Power outage", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.flood.title", defaultValue: "Flood", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.extremeWeather.title", defaultValue: "Extreme weather", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.landslide.title", defaultValue: "Landslide", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.wildfire.title", defaultValue: "Wildfire", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.houseFire.title", defaultValue: "House fire", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.waterOutage.title", defaultValue: "Water outage", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.evacuation.title", defaultValue: "Evacuation", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.hazardousRelease.title", defaultValue: "Hazardous release", comment: "Emergency type title"),
+        LocalizedStringResource("emergency.warOrSecurityIncident.title", defaultValue: "War or security incident", comment: "Emergency type title"),
+
+        LocalizedStringResource("emergency.powerOutage.summary", defaultValue: "Prepare the household for loss of electricity, communication, cooking, and heating.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.flood.summary", defaultValue: "Prepare for flooding, unsafe routes, and possible evacuation from risk areas.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.extremeWeather.summary", defaultValue: "Prepare for severe weather and disruptions to transport, power, and communication.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.landslide.summary", defaultValue: "Prepare for landslide risk, blocked routes, and the need to leave early.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.wildfire.summary", defaultValue: "Prepare for smoke, rapidly changing fire conditions, and possible evacuation.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.houseFire.summary", defaultValue: "Prepare escape routes and a household meeting point outside the home.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.waterOutage.summary", defaultValue: "Prepare for loss of drinking water, sanitation, and normal cooking facilities.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.evacuation.summary", defaultValue: "Prepare where to go, how to travel, and which essential items to bring.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.hazardousRelease.summary", defaultValue: "Prepare to limit exposure and follow current instructions from authorities.", comment: "Offline preparedness summary"),
+        LocalizedStringResource("emergency.warOrSecurityIncident.summary", defaultValue: "Prepare to receive official warnings and follow instructions about sheltering or evacuation.", comment: "Offline preparedness summary"),
+
+        LocalizedStringResource("action.follow_official_information.title", defaultValue: "Follow official information", comment: "Preparedness action title"),
+        LocalizedStringResource("action.follow_official_information.detail", defaultValue: "Monitor official information and follow current instructions from local authorities.", comment: "Safety-critical preparedness guidance"),
+        LocalizedStringResource("action.powerOutage.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.powerOutage.prepare.detail", defaultValue: "Plan for light, communication, food preparation, and warmth without electricity.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.flood.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.flood.prepare.detail", defaultValue: "Know the local flood risk and plan how to leave before routes become unsafe.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.extremeWeather.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.extremeWeather.prepare.detail", defaultValue: "Secure loose items and prepare for disrupted transport, power, and communication.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.landslide.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.landslide.prepare.detail", defaultValue: "Know nearby risk areas and plan an early route to stable ground.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.wildfire.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.wildfire.prepare.detail", defaultValue: "Plan more than one route away from vegetation and smoke exposure.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.houseFire.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.houseFire.prepare.detail", defaultValue: "Practise escape routes and agree on an outdoor meeting point at a safe distance.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.waterOutage.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.waterOutage.prepare.detail", defaultValue: "Store drinking water and plan for cooking, hygiene, and sanitation.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.evacuation.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.evacuation.prepare.detail", defaultValue: "Plan where to go, how to travel, and what essential items to bring.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.hazardousRelease.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.hazardousRelease.prepare.detail", defaultValue: "Know how to close doors and ventilation while awaiting official instructions.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.warOrSecurityIncident.prepare.title", defaultValue: "Prepare your household", comment: "Preparedness action title"),
+        LocalizedStringResource("action.warOrSecurityIncident.prepare.detail", defaultValue: "Prepare to receive official warnings and identify protective places in the building.", comment: "Offline preparedness guidance"),
+        LocalizedStringResource("action.gas_installation.prepare.title", defaultValue: "Prepare for the gas installation", comment: "Shown only when a Norwegian household declares a gas installation"),
+        LocalizedStringResource("action.gas_installation.prepare.detail", defaultValue: "Record where the gas shutoff is and follow instructions from emergency services or a qualified professional.", comment: "Gas preparedness guidance; never shown by default"),
+
+        LocalizedStringResource("shelter.outside_risk_area.title", defaultValue: "Outside the risk area", comment: "Suggested planning location type, not an official safe place"),
+        LocalizedStringResource("shelter.outside_risk_area.detail", defaultValue: "Plan a location outside the affected or risk area and follow official evacuation instructions.", comment: "Safety-critical planning guidance"),
+        LocalizedStringResource("shelter.robust_indoor_location.title", defaultValue: "Robust indoor location", comment: "Suggested planning location type, not an official shelter"),
+        LocalizedStringResource("shelter.robust_indoor_location.detail", defaultValue: "Identify a robust indoor location appropriate to the current official warning.", comment: "Safety-critical planning guidance"),
+        LocalizedStringResource("shelter.outdoor_meeting_point.title", defaultValue: "Outdoor meeting point", comment: "Suggested household meeting-point type"),
+        LocalizedStringResource("shelter.outdoor_meeting_point.detail", defaultValue: "Choose a predetermined outdoor household meeting point at a safe distance from the home.", comment: "House-fire planning guidance"),
+        LocalizedStringResource("shelter.planned_alternative_accommodation.title", defaultValue: "Planned alternative accommodation", comment: "Suggested planning location type"),
+        LocalizedStringResource("shelter.planned_alternative_accommodation.detail", defaultValue: "Plan for family, friends, or a secondary home. Keep this separate from an official evacuation centre established by authorities.", comment: "Evacuation planning guidance"),
+        LocalizedStringResource("shelter.follow_shelter_instructions.title", defaultValue: "Follow authority instructions", comment: "War or security incident location guidance"),
+        LocalizedStringResource("shelter.follow_shelter_instructions.detail", defaultValue: "Current authority instructions determine whether to shelter in place, evacuate, or use a civil-defence shelter.", comment: "Safety-critical war or security guidance"),
+        LocalizedStringResource("shelter.home_or_alternative_accommodation.title", defaultValue: "Home or alternative accommodation", comment: "Suggested planning location type"),
+        LocalizedStringResource("shelter.home_or_alternative_accommodation.detail", defaultValue: "Plan whether to remain at home or stay with someone who has the utilities you need.", comment: "Preparedness location guidance"),
+        LocalizedStringResource("shelter.preparedness_not_official.notice", defaultValue: "Suggested type of location for preparedness planning. Follow current instructions from local authorities during an actual emergency.", comment: "Required safety disclaimer for every template-generated location")
+    ]
+}

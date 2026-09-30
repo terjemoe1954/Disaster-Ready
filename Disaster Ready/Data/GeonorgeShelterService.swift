@@ -7,38 +7,107 @@ enum ShelterServiceError: Error {
     case decodingFailed
 }
 
+actor ShelterCache {
+    struct Entry: Codable, Sendable {
+        let shelters: [Shelter]
+        let updatedAt: Date
+        let latitude: Double
+        let longitude: Double
+    }
+
+    private let fileURL: URL
+
+    init(fileURL: URL? = nil) {
+        if let fileURL {
+            self.fileURL = fileURL
+        } else {
+            let directory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+                ?? FileManager.default.temporaryDirectory
+            self.fileURL = directory.appendingPathComponent("public-shelters-cache.json")
+        }
+    }
+
+    func load(latitude: Double, longitude: Double) -> Entry? {
+        guard let data = try? Data(contentsOf: fileURL),
+              let entry = try? JSONDecoder().decode(Entry.self, from: data),
+              abs(entry.latitude - latitude) < 0.01,
+              abs(entry.longitude - longitude) < 0.01 else { return nil }
+        return entry
+    }
+
+    func save(_ entry: Entry) throws {
+        let data = try JSONEncoder().encode(entry)
+        try data.write(to: fileURL, options: .atomic)
+    }
+}
+
 struct GeonorgeShelterService: ShelterService {
     private let session: URLSession
+    private let cache: ShelterCache
+    private let now: @Sendable () -> Date
     private let radiusKilometers = 25.0
 
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        cache: ShelterCache = ShelterCache(),
+        now: @escaping @Sendable () -> Date = { .now }
+    ) {
         self.session = session
+        self.cache = cache
+        self.now = now
     }
 
     func nearbyShelters(latitude: Double, longitude: Double) async throws -> [Shelter] {
+        try await shelterSnapshot(latitude: latitude, longitude: longitude).shelters
+    }
+
+    func shelterSnapshot(latitude: Double, longitude: Double) async throws -> ShelterSnapshot {
         guard (-90...90).contains(latitude), (-180...180).contains(longitude) else {
             throw ShelterServiceError.invalidCoordinate
         }
+        let roundedLatitude = roundedCoordinate(latitude)
+        let roundedLongitude = roundedCoordinate(longitude)
 
-        let request = try makeRequest(latitude: latitude, longitude: longitude)
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw ShelterServiceError.invalidResponse
-        }
-
-        return try ShelterGMLDecoder.decode(data)
-            .map { shelter in
-                (shelter, distanceKilometers(
-                    fromLatitude: latitude,
-                    longitude: longitude,
-                    toLatitude: shelter.latitude,
-                    longitude: shelter.longitude
-                ))
+        do {
+            let request = try makeRequest(latitude: roundedLatitude, longitude: roundedLongitude)
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw ShelterServiceError.invalidResponse
             }
-            .filter { $0.1 <= radiusKilometers }
-            .sorted { $0.1 < $1.1 }
-            .map(\.0)
+            let shelters = nearbyShelters(
+                from: try ShelterGMLDecoder.decode(data),
+                latitude: roundedLatitude,
+                longitude: roundedLongitude
+            )
+            let updatedAt = now()
+            try? await cache.save(.init(
+                shelters: shelters,
+                updatedAt: updatedAt,
+                latitude: roundedLatitude,
+                longitude: roundedLongitude
+            ))
+            return ShelterSnapshot(shelters: shelters, lastUpdated: updatedAt, isCached: false)
+        } catch {
+            guard let entry = await cache.load(latitude: roundedLatitude, longitude: roundedLongitude) else {
+                throw error
+            }
+            return ShelterSnapshot(shelters: entry.shelters, lastUpdated: entry.updatedAt, isCached: true)
+        }
+    }
+
+    private func nearbyShelters(from shelters: [Shelter], latitude: Double, longitude: Double) -> [Shelter] {
+        shelters.map { shelter in
+            (shelter, distanceKilometers(
+                fromLatitude: latitude,
+                longitude: longitude,
+                toLatitude: shelter.latitude,
+                longitude: shelter.longitude
+            ))
+        }
+        .filter { $0.1 <= radiusKilometers }
+        .sorted { $0.1 < $1.1 }
+        .map(\.0)
     }
 
     private func makeRequest(latitude: Double, longitude: Double) throws -> URLRequest {
@@ -63,6 +132,10 @@ struct GeonorgeShelterService: ShelterService {
         var request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 20)
         request.setValue("DisasterReady/1.1", forHTTPHeaderField: "User-Agent")
         return request
+    }
+
+    private func roundedCoordinate(_ value: Double) -> Double {
+        (value * 10_000).rounded() / 10_000
     }
 
     private func distanceKilometers(

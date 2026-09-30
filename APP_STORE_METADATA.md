@@ -7,7 +7,7 @@ Prepared for Milestone 2. Remaining manual submission tasks are tracked in the c
 | Field | Value |
 |---|---|
 | Name | Disaster Ready |
-| Supported devices | iPhone only for version 1.0.1 |
+| Supported devices | iPhone only for version 1.1 |
 | Primary language | Norwegian Bokmål |
 | Additional localizations | English (U.S.), Thai |
 | Primary category | Lifestyle |
@@ -18,7 +18,7 @@ Prepared for Milestone 2. Remaining manual submission tasks are tracked in the c
 | App privacy | No, this app does not collect data |
 | Tracking | No |
 | Copyright | © 2026 Terje Moe |
-| Version 1.0.1 availability | Norway only |
+| Version 1.1 availability | Norway only |
 | Price | Free |
 | In-App Purchases | None |
 | Release method | Automatically release after App Review approval |
@@ -37,12 +37,12 @@ Prepared for Milestone 2. Remaining manual submission tasks are tracked in the c
 
 The SKU is internal and is not shown on the App Store. Verify that the Bundle ID appears in the App Store Connect selector before creating the record.
 
-## Version 1.0.1 submission
+## Version 1.1 submission
 
 | Field | Value |
 |---|---|
-| Version | 1.0.1 |
-| Build | 2 |
+| Version | 1.1 |
+| Build | 3 |
 | Sign-in required | No |
 | Demo account | Not applicable |
 | Review notes | Use the prepared App Review notes below |
@@ -54,7 +54,7 @@ The SKU is internal and is not shown on the App Store. Verify that the Bundle ID
 Final archive validation:
 
 - Bundle ID: `com.terjemoe.Disaster-Ready`
-- Version/build: `1.0.1 (2)`
+- Version/build: `1.1 (3)`
 - Device family: iPhone (`UIDeviceFamily = [1]`)
 - Export compliance: `ITSAppUsesNonExemptEncryption = false`
 - Code signature: valid and satisfies its designated requirement
@@ -70,7 +70,7 @@ Final archive validation:
 
 The app stores plans, contacts, roles, supplies, and preferences locally. A backup leaves the app only when the user explicitly exports it. Optional local notifications are used for supply reminders. External source links open in the browser.
 
-Version 1.0.1 should be distributed only in Norway because the default emergency numbers and official source links are Norwegian. Do not expand availability until emergency contacts and guidance are adapted to the selected country or region.
+Version 1.1 should be distributed only in Norway because the default emergency numbers and official source links are Norwegian. Do not expand availability until emergency contacts and guidance are adapted to the selected country or region.
 
 ## App Review notes
 
@@ -87,7 +87,9 @@ Suggested review flow:
 5. Open Contacts to review local emergency numbers and household contacts.
 6. Open Settings from the gear button to change language, test an optional local reminder, or export/import a backup.
 
-Notification permission is requested only when the reviewer enables or tests supply-review reminders. Fixed official source links open in the system browser and require connectivity; the core app remains usable offline.
+Version 1.1 adds household-aware emergency plans, prioritized supply recommendations, payment preparedness, official source attribution, public civil-defence shelter search, and active MET Norway weather warnings. Official online data is clearly attributed and displays its freshness timestamp. Manual area search is available without granting location permission.
+
+Notification permission is requested only when the reviewer enables or tests supply-review reminders. Fixed official source links open in the system browser and require connectivity; the core app remains usable offline. When the reviewer manually searches for a Norwegian place, Apple Maps geocodes the entered place and the resulting coordinates are sent to MET Norway or Geonorge to retrieve weather warnings or nearby public shelters. The app does not request the device's current location.
 
 Review contact: Terje Moe, terjemoe54@hotmail.com, +47 99594576.
 
@@ -113,7 +115,7 @@ Recommended App Store Connect response:
 | Does the app contain, show, or access third-party content? | Yes |
 | Rights confirmation | Confirm only after verifying that the app may link to and identify the public DSB preparedness source |
 
-The app does not embed DSB webpages, logos, images, video, or copied publications. It contains original preparedness summaries and a fixed external link to `https://www.dsb.no/egenberedskap`, identified as official advice from DSB. Keep the wording and attribution accurate, and reassess this declaration if third-party material is embedded later.
+The app does not embed DSB webpages, logos, images, video, or copied publications. It contains original preparedness summaries and a fixed external link to `https://www.dsb.no/sikkerhverdag/egenberedskap/`, identified as official advice from DSB. It also displays attributed public data retrieved from MET Norway and DSB/Geonorge. Confirm the applicable public-data terms before submission and reassess this declaration if additional third-party material is embedded later.
 
 ## English (U.S.)
 

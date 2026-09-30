@@ -2,7 +2,20 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
+      "localizations" : {
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : ""
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : ""
+          }
+        }
+      }
     },
     "%@ • %@" : {
       "comment" : "A label that combines a role title and the name of the person assigned to that role. The first argument is the role title. The second argument is the name of the person assigned to that role.",
@@ -13,6 +26,18 @@
             "state" : "new",
             "value" : "%1$@ • %2$@"
           }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$@ • %2$@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$@ • %2$@"
+          }
         }
       }
     },
@@ -21,6 +46,18 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
             "value" : "%1$@: %2$@"
           }
         }
@@ -35,6 +72,18 @@
             "state" : "new",
             "value" : "%1$lld/%2$lld"
           }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$lld/%2$lld"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$lld/%2$lld"
+          }
         }
       }
     },
@@ -45,6 +94,18 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$lld/%2$lld %3$@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "%1$lld/%2$lld %3$@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
             "value" : "%1$lld/%2$lld %3$@"
           }
         }
@@ -69,6 +130,582 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "การดำเนินการ"
+          }
+        }
+      }
+    },
+    "action.evacuation.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan where to go, how to travel, and what essential items to bring."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg hvor dere skal dra, hvordan dere skal komme dere dit, og hvilke nødvendige ting dere skal ta med."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนว่าจะไปที่ไหน เดินทางอย่างไร และต้องนำสิ่งของจำเป็นอะไรไปบ้าง"
+          }
+        }
+      }
+    },
+    "action.evacuation.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.extremeWeather.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Secure loose items and prepare for disrupted transport, power, and communication."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sikre løse gjenstander, og forbered dere på forstyrrelser i transport, strømforsyning og kommunikasjon."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ยึดสิ่งของที่อาจปลิวหรือเคลื่อนที่ให้แน่นหนา และเตรียมพร้อมรับมือการหยุดชะงักของการเดินทาง ไฟฟ้า และการสื่อสาร"
+          }
+        }
+      }
+    },
+    "action.extremeWeather.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.flood.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Know the local flood risk and plan how to leave before routes become unsafe."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjør dere kjent med den lokale flomrisikoen, og planlegg hvordan dere skal dra før rutene blir utrygge."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ศึกษาความเสี่ยงจากน้ำท่วมในพื้นที่ และวางแผนออกจากพื้นที่ก่อนที่เส้นทางจะไม่ปลอดภัย"
+          }
+        }
+      }
+    },
+    "action.flood.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.follow_official_information.detail" : {
+      "comment" : "Safety-critical preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Monitor official information and follow current instructions from local authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Følg med på offisiell informasjon, og følg gjeldende instrukser fra lokale myndigheter."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ติดตามข้อมูลทางการและปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานท้องถิ่น"
+          }
+        }
+      }
+    },
+    "action.follow_official_information.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Follow official information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Følg offisiell informasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ติดตามข้อมูลทางการ"
+          }
+        }
+      }
+    },
+    "action.gas_installation.prepare.detail" : {
+      "comment" : "Gas preparedness guidance; never shown by default",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Record where the gas shutoff is and follow instructions from emergency services or a qualified professional."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Noter hvor gasstilførselen stenges, og følg instruksene fra nødetatene eller en kvalifisert fagperson."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกตำแหน่งวาล์วปิดแก๊ส และปฏิบัติตามคำแนะนำจากหน่วยบริการฉุกเฉินหรือผู้เชี่ยวชาญที่มีคุณสมบัติเหมาะสม"
+          }
+        }
+      }
+    },
+    "action.gas_installation.prepare.title" : {
+      "comment" : "Shown only when a Norwegian household declares a gas installation",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for the gas installation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forberedelser for gassanlegget"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมสำหรับระบบแก๊ส"
+          }
+        }
+      }
+    },
+    "action.hazardousRelease.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Know how to close doors and ventilation while awaiting official instructions."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vit hvordan dere lukker dører og stenger ventilasjonen mens dere venter på offisielle instrukser."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เรียนรู้วิธีปิดประตูและปิดระบบระบายอากาศระหว่างรอคำแนะนำอย่างเป็นทางการ"
+          }
+        }
+      }
+    },
+    "action.hazardousRelease.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.houseFire.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Practise escape routes and agree on an outdoor meeting point at a safe distance."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Øv på rømningsveier, og avtal et utendørs møtested på trygg avstand."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ฝึกใช้เส้นทางหนีไฟและตกลงกันเรื่องจุดนัดพบกลางแจ้งที่อยู่ห่างออกไปในระยะปลอดภัย"
+          }
+        }
+      }
+    },
+    "action.houseFire.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.landslide.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Know nearby risk areas and plan an early route to stable ground."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjør dere kjent med risikoområder i nærheten, og planlegg en tidlig rute til stabilt terreng."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ศึกษาพื้นที่เสี่ยงใกล้เคียง และวางแผนเส้นทางล่วงหน้าไปยังพื้นที่มั่นคง"
+          }
+        }
+      }
+    },
+    "action.landslide.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.powerOutage.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan for light, communication, food preparation, and warmth without electricity."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg for lys, kommunikasjon, matlaging og varme uten strøm."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนเรื่องแสงสว่าง การสื่อสาร การเตรียมอาหาร และความอบอุ่นเมื่อไม่มีไฟฟ้า"
+          }
+        }
+      }
+    },
+    "action.powerOutage.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.warOrSecurityIncident.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare to receive official warnings and identify protective places in the building."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på å motta offisielle varsler, og finn steder i bygningen som kan gi beskyttelse."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับคำเตือนอย่างเป็นทางการ และระบุสถานที่กำบังภายในอาคาร"
+          }
+        }
+      }
+    },
+    "action.warOrSecurityIncident.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.waterOutage.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Store drinking water and plan for cooking, hygiene, and sanitation."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Lagre drikkevann, og planlegg for matlaging, hygiene og sanitære behov."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สำรองน้ำดื่มและวางแผนสำหรับการทำอาหาร สุขอนามัย และการจัดการสิ่งปฏิกูล"
+          }
+        }
+      }
+    },
+    "action.waterOutage.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
+          }
+        }
+      }
+    },
+    "action.wildfire.prepare.detail" : {
+      "comment" : "Offline preparedness guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan more than one route away from vegetation and smoke exposure."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg flere ruter bort fra vegetasjon og røykutsatte områder."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนเส้นทางมากกว่าหนึ่งเส้นทางเพื่อออกห่างจากพืชพรรณและหลีกเลี่ยงการสัมผัสควัน"
+          }
+        }
+      }
+    },
+    "action.wildfire.prepare.title" : {
+      "comment" : "Preparedness action title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare your household"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมความพร้อมให้ครัวเรือน"
           }
         }
       }
@@ -552,6 +1189,486 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "เสบียงฉุกเฉิน"
+          }
+        }
+      }
+    },
+    "emergency.evacuation.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare where to go, how to travel, and which essential items to bring."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg hvor dere skal dra, hvordan dere skal komme dere dit, og hvilke nødvendige ting dere skal ta med."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมแผนว่าจะไปที่ไหน เดินทางอย่างไร และต้องนำสิ่งของจำเป็นอะไรไปบ้าง"
+          }
+        }
+      }
+    },
+    "emergency.evacuation.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Evacuation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การอพยพ"
+          }
+        }
+      }
+    },
+    "emergency.extremeWeather.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for severe weather and disruptions to transport, power, and communication."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på ekstremvær og forstyrrelser i transport, strømforsyning og kommunikasjon."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับมือสภาพอากาศรุนแรงและการหยุดชะงักของการเดินทาง ไฟฟ้า และการสื่อสาร"
+          }
+        }
+      }
+    },
+    "emergency.extremeWeather.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Extreme weather"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ekstremvær"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สภาพอากาศรุนแรง"
+          }
+        }
+      }
+    },
+    "emergency.flood.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for flooding, unsafe routes, and possible evacuation from risk areas."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på flom, utrygge ruter og mulig evakuering fra risikoområder."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับมือน้ำท่วม เส้นทางที่ไม่ปลอดภัย และการอพยพที่อาจจำเป็นจากพื้นที่เสี่ยง"
+          }
+        }
+      }
+    },
+    "emergency.flood.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Flood"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Flom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "น้ำท่วม"
+          }
+        }
+      }
+    },
+    "emergency.hazardousRelease.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare to limit exposure and follow current instructions from authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på å begrense eksponeringen og følge gjeldende instrukser fra myndighetene."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมเพื่อลดการสัมผัสอันตรายและปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานที่เกี่ยวข้อง"
+          }
+        }
+      }
+    },
+    "emergency.hazardousRelease.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hazardous release"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Utslipp av farlige stoffer"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การรั่วไหลของสารอันตราย"
+          }
+        }
+      }
+    },
+    "emergency.houseFire.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare escape routes and a household meeting point outside the home."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg rømningsveier og et møtested for husstanden utenfor boligen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมเส้นทางหนีไฟและจุดนัดพบของสมาชิกในครัวเรือนนอกบ้าน"
+          }
+        }
+      }
+    },
+    "emergency.houseFire.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "House fire"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Boligbrann"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไฟไหม้บ้าน"
+          }
+        }
+      }
+    },
+    "emergency.landslide.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for landslide risk, blocked routes, and the need to leave early."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på skredfare, stengte ruter og behovet for å dra tidlig."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับมือความเสี่ยงจากดินถล่ม เส้นทางที่ถูกปิดกั้น และความจำเป็นในการออกจากพื้นที่ตั้งแต่เนิ่นๆ"
+          }
+        }
+      }
+    },
+    "emergency.landslide.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Landslide"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Skred"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดินถล่ม"
+          }
+        }
+      }
+    },
+    "emergency.powerOutage.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare the household for loss of electricity, communication, cooking, and heating."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered husstanden på bortfall av strøm, kommunikasjon, matlaging og oppvarming."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมครัวเรือนให้พร้อมรับมือเมื่อไม่มีไฟฟ้า การสื่อสาร การทำอาหาร และเครื่องทำความร้อน"
+          }
+        }
+      }
+    },
+    "emergency.powerOutage.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Power outage"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Strømbrudd"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไฟฟ้าดับ"
+          }
+        }
+      }
+    },
+    "emergency.warOrSecurityIncident.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare to receive official warnings and follow instructions about sheltering or evacuation."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på å motta offisielle varsler og følge instrukser om å søke dekning eller evakuere."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับคำเตือนอย่างเป็นทางการ และปฏิบัติตามคำแนะนำเรื่องการหลบภัยหรือการอพยพ"
+          }
+        }
+      }
+    },
+    "emergency.warOrSecurityIncident.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "War or security incident"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krig eller sikkerhetshendelse"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สงครามหรือเหตุการณ์ด้านความมั่นคง"
+          }
+        }
+      }
+    },
+    "emergency.waterOutage.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for loss of drinking water, sanitation, and normal cooking facilities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på bortfall av drikkevann, sanitære tjenester og vanlige matlagingsmuligheter."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับมือเมื่อไม่มีน้ำดื่ม ระบบสุขาภิบาล และอุปกรณ์ทำอาหารตามปกติ"
+          }
+        }
+      }
+    },
+    "emergency.waterOutage.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Water outage"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vannavbrudd"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "น้ำประปาไม่ไหล"
+          }
+        }
+      }
+    },
+    "emergency.wildfire.summary" : {
+      "comment" : "Offline preparedness summary",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare for smoke, rapidly changing fire conditions, and possible evacuation."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered dere på røyk, raskt skiftende brannforhold og mulig evakuering."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมรับมือควัน สถานการณ์ไฟที่เปลี่ยนแปลงอย่างรวดเร็ว และการอพยพที่อาจจำเป็น"
+          }
+        }
+      }
+    },
+    "emergency.wildfire.title" : {
+      "comment" : "Emergency type title",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Wildfire"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Skogbrann"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไฟป่า"
           }
         }
       }
@@ -3339,6 +4456,318 @@
         }
       }
     },
+    "shelter.follow_shelter_instructions.detail" : {
+      "comment" : "Safety-critical war or security guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Current authority instructions determine whether to shelter in place, evacuate, or use a civil-defence shelter."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjeldende instrukser fra myndighetene avgjør om dere skal søke dekning der dere er, evakuere eller bruke et tilfluktsrom."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ให้ปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานที่เกี่ยวข้องว่าจะหลบภัยอยู่ในที่เดิม อพยพ หรือใช้ที่หลบภัยป้องกันภัยฝ่ายพลเรือน"
+          }
+        }
+      }
+    },
+    "shelter.follow_shelter_instructions.title" : {
+      "comment" : "War or security incident location guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Follow authority instructions"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Følg instruksene fra myndighetene"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ปฏิบัติตามคำแนะนำจากหน่วยงานที่เกี่ยวข้อง"
+          }
+        }
+      }
+    },
+    "shelter.home_or_alternative_accommodation.detail" : {
+      "comment" : "Preparedness location guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan whether to remain at home or stay with someone who has the utilities you need."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg om dere skal bli hjemme eller bo hos noen som har strøm, vann og andre tjenester dere trenger."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนว่าจะอยู่บ้านต่อหรือไปพักกับผู้ที่มีสาธารณูปโภคที่จำเป็นสำหรับคุณ"
+          }
+        }
+      }
+    },
+    "shelter.home_or_alternative_accommodation.title" : {
+      "comment" : "Suggested planning location type",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Home or alternative accommodation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hjemme eller alternativ overnatting"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บ้านหรือที่พักทางเลือก"
+          }
+        }
+      }
+    },
+    "shelter.outdoor_meeting_point.detail" : {
+      "comment" : "House-fire planning guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Choose a predetermined outdoor household meeting point at a safe distance from the home."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Velg på forhånd et utendørs møtested for husstanden på trygg avstand fra boligen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เลือกจุดนัดพบกลางแจ้งสำหรับสมาชิกในครัวเรือนไว้ล่วงหน้า โดยให้อยู่ห่างจากบ้านในระยะปลอดภัย"
+          }
+        }
+      }
+    },
+    "shelter.outdoor_meeting_point.title" : {
+      "comment" : "Suggested household meeting-point type",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Outdoor meeting point"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Utendørs møtested"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "จุดนัดพบกลางแจ้ง"
+          }
+        }
+      }
+    },
+    "shelter.outside_risk_area.detail" : {
+      "comment" : "Safety-critical planning guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan a location outside the affected or risk area and follow official evacuation instructions."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg et sted utenfor det berørte området eller risikoområdet, og følg offisielle evakueringsinstrukser."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนสถานที่นอกพื้นที่ได้รับผลกระทบหรือพื้นที่เสี่ยง และปฏิบัติตามคำแนะนำการอพยพอย่างเป็นทางการ"
+          }
+        }
+      }
+    },
+    "shelter.outside_risk_area.title" : {
+      "comment" : "Suggested planning location type, not an official safe place",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Outside the risk area"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Utenfor risikoområdet"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "นอกพื้นที่เสี่ยง"
+          }
+        }
+      }
+    },
+    "shelter.planned_alternative_accommodation.detail" : {
+      "comment" : "Evacuation planning guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plan for family, friends, or a secondary home. Keep this separate from an official evacuation centre established by authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlegg overnatting hos familie eller venner eller i en fritidsbolig. Dette er ikke det samme som et offisielt evakueringssenter opprettet av myndighetene."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วางแผนพักกับครอบครัวหรือเพื่อน หรือที่บ้านอีกหลังหนึ่ง สถานที่นี้ไม่ใช่ศูนย์อพยพอย่างเป็นทางการที่หน่วยงานรัฐจัดตั้งขึ้น"
+          }
+        }
+      }
+    },
+    "shelter.planned_alternative_accommodation.title" : {
+      "comment" : "Suggested planning location type",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Planned alternative accommodation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Planlagt alternativ overnatting"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่พักทางเลือกที่วางแผนไว้"
+          }
+        }
+      }
+    },
+    "shelter.preparedness_not_official.notice" : {
+      "comment" : "Required safety disclaimer for every template-generated location",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Suggested type of location for preparedness planning. Follow current instructions from local authorities during an actual emergency."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dette er et forslag til type sted i beredskapsplanleggingen, ikke et offisielt angitt sted. Følg gjeldende instrukser fra lokale myndigheter i en faktisk nødsituasjon."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "นี่เป็นเพียงประเภทสถานที่ที่แนะนำสำหรับการวางแผนเตรียมพร้อม ไม่ใช่สถานที่ที่ทางการกำหนด เมื่อเกิดเหตุฉุกเฉินจริง ให้ปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานท้องถิ่น"
+          }
+        }
+      }
+    },
+    "shelter.robust_indoor_location.detail" : {
+      "comment" : "Safety-critical planning guidance",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Identify a robust indoor location appropriate to the current official warning."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Finn et solid sted innendørs som er egnet ut fra det gjeldende offisielle varselet."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ระบุสถานที่กำบังที่แข็งแรงภายในอาคารให้เหมาะกับคำเตือนอย่างเป็นทางการล่าสุด"
+          }
+        }
+      }
+    },
+    "shelter.robust_indoor_location.title" : {
+      "comment" : "Suggested planning location type, not an official shelter",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Robust indoor location"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Solid sted innendørs"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "จุดที่แข็งแรงภายในอาคาร"
+          }
+        }
+      }
+    },
     "stocked" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4053,5 +5482,5 @@
       }
     }
   },
-  "version" : "1.1"
+  "version" : "1.3"
 }

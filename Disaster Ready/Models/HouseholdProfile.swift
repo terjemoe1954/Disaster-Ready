@@ -13,6 +13,8 @@ struct HouseholdProfile: Codable, Equatable {
     var hasCar: Bool
     var hasEV: Bool
     var hasSpecialAssistanceNeeds: Bool
+    var knowsWaterStopcock: Bool
+    var knowsMainElectricalPanel: Bool
 
     init(
         countryCode: String,
@@ -26,7 +28,9 @@ struct HouseholdProfile: Codable, Equatable {
         hasAlternativeHeating: Bool = false,
         hasCar: Bool = false,
         hasEV: Bool = false,
-        hasSpecialAssistanceNeeds: Bool = false
+        hasSpecialAssistanceNeeds: Bool = false,
+        knowsWaterStopcock: Bool = false,
+        knowsMainElectricalPanel: Bool = false
     ) {
         self.countryCode = countryCode.uppercased()
         self.municipality = municipality
@@ -40,6 +44,8 @@ struct HouseholdProfile: Codable, Equatable {
         self.hasCar = hasCar
         self.hasEV = hasEV
         self.hasSpecialAssistanceNeeds = hasSpecialAssistanceNeeds
+        self.knowsWaterStopcock = knowsWaterStopcock
+        self.knowsMainElectricalPanel = knowsMainElectricalPanel
     }
 
     init(from decoder: Decoder) throws {
@@ -56,6 +62,8 @@ struct HouseholdProfile: Codable, Equatable {
         hasCar = try container.decodeIfPresent(Bool.self, forKey: .hasCar) ?? false
         hasEV = try container.decodeIfPresent(Bool.self, forKey: .hasEV) ?? false
         hasSpecialAssistanceNeeds = try container.decodeIfPresent(Bool.self, forKey: .hasSpecialAssistanceNeeds) ?? false
+        knowsWaterStopcock = try container.decodeIfPresent(Bool.self, forKey: .knowsWaterStopcock) ?? false
+        knowsMainElectricalPanel = try container.decodeIfPresent(Bool.self, forKey: .knowsMainElectricalPanel) ?? false
     }
 
     var allowsGasSpecificGuidance: Bool {

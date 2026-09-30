@@ -90,6 +90,7 @@ struct DisasterDashboardView: View {
                         )
                         EmergencyActionsSection(
                             emergencyType: selectedEmergencyType,
+                            household: householdProfile,
                             language: selectedLanguage
                         )
                         EmergencyShelterGuidanceSection(
@@ -847,6 +848,7 @@ struct DisasterDashboardView: View {
         backupDocument = DisasterBackupDocument(
             payload: DisasterBackupPayload(
                 householdMemberCount: householdMemberCount,
+                householdProfile: householdProfile,
                 exportDate: Date(),
                 familyContacts: familyContacts.map {
                     FamilyContactSnapshot(
@@ -1122,8 +1124,14 @@ struct DisasterDashboardView: View {
                 .forEach(modelContext.insert)
         }
 
-        if let restoredHouseholdMemberCount = payload.householdMemberCount {
+        if let restoredProfile = payload.householdProfile {
+            householdProfile = restoredProfile
+            HouseholdProfileStore.save(restoredProfile)
+            householdMemberCount = restoredProfile.householdSize
+        } else if let restoredHouseholdMemberCount = payload.householdMemberCount {
             householdMemberCount = restoredHouseholdMemberCount
+            householdProfile.householdSize = restoredHouseholdMemberCount
+            HouseholdProfileStore.save(householdProfile)
         }
     }
 
@@ -1251,37 +1259,21 @@ struct DisasterDashboardView: View {
     }
 
     private func ensureEmergencyPlans() {
-        let unassignedPlans = householdPlans.filter {
-            $0.scenarioIdentifier == nil || $0.scenarioIdentifier?.isEmpty == true
-        }
-        let templatePlan = unassignedPlans.first ?? householdPlans.first
-
-        if let firstUnassignedPlan = unassignedPlans.first {
-            firstUnassignedPlan.scenarioIdentifier = EmergencyType.extremeWeather.rawValue
-        }
-
         let missingEmergencyTypes = EmergencyPlanMigration.missingEmergencyTypes(
             for: householdPlans.map(\.scenarioIdentifier)
         )
 
         for emergencyType in missingEmergencyTypes {
-            let sourcePlan = templatePlan
             modelContext.insert(
                 HouseholdPlan(
                     scenarioIdentifier: emergencyType.rawValue,
-                    reunionPoint: sourcePlan?.reunionPoint ?? "",
-                    evacuationDestination: sourcePlan?.evacuationDestination ?? "",
-                    shelterZone: sourcePlan?.shelterZone ?? "",
-                    gasShutoffNote: sourcePlan?.gasShutoffNote ?? "",
-                    medicalLead: sourcePlan?.medicalLead ?? "",
-                    petLead: sourcePlan?.petLead ?? "",
-                    familyPassword: sourcePlan?.familyPassword ?? "",
-                    alternativeAccommodation: sourcePlan?.alternativeAccommodation,
-                    familyFriendLocation: sourcePlan?.familyFriendLocation,
-                    secondaryHome: sourcePlan?.secondaryHome,
-                    safePlaceNote: sourcePlan?.safePlaceNote,
-                    waterStopcockNote: sourcePlan?.waterStopcockNote,
-                    mainElectricalPanelNote: sourcePlan?.mainElectricalPanelNote
+                    reunionPoint: "",
+                    evacuationDestination: "",
+                    shelterZone: "",
+                    gasShutoffNote: "",
+                    medicalLead: "",
+                    petLead: "",
+                    familyPassword: ""
                 )
             )
         }

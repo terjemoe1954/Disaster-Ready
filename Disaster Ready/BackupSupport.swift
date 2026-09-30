@@ -12,6 +12,7 @@ struct DisasterBackupPayload: Codable, Equatable {
 
     var schemaVersion: Int? = currentSchemaVersion
     var householdMemberCount: Int? = nil
+    var householdProfile: HouseholdProfile? = nil
     var exportDate: Date
     var familyContacts: [FamilyContactSnapshot]
     var importantNumbers: [ImportantNumberSnapshot]

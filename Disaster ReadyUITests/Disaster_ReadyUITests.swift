@@ -99,6 +99,43 @@ final class Disaster_ReadyUITests: XCTestCase {
     }
 
     @MainActor
+    func testOfficialWeatherWarningsAreAvailableFromOverview() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", "nb"
+        ]
+        app.launch()
+
+        let searchField = app.descendants(matching: .any)["weatherAlertAreaSearchField"]
+        for _ in 0..<4 where !searchField.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(searchField.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testHouseholdProfileCanBeOpenedFromSettings() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", "nb"
+        ]
+        app.launch()
+
+        let settingsButton = app.buttons["settingsButton"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+
+        let profileLink = app.buttons["householdProfileLink"]
+        XCTAssertTrue(profileLink.waitForExistence(timeout: 5))
+        profileLink.tap()
+
+        let countryField = app.descendants(matching: .any)["householdCountryCode"]
+        XCTAssertTrue(countryField.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {

@@ -111,6 +111,14 @@ struct Disaster_ReadyTests {
         let reviewDate = try #require(ISO8601DateFormatter().date(from: "2027-03-01T09:00:00Z"))
         let payload = DisasterBackupPayload(
             householdMemberCount: 4,
+            householdProfile: HouseholdProfile(
+                countryCode: "NO",
+                municipality: "Oslo",
+                householdSize: 4,
+                hasChildren: true,
+                knowsWaterStopcock: true,
+                knowsMainElectricalPanel: true
+            ),
             exportDate: exportDate,
             familyContacts: [
                 FamilyContactSnapshot(name: "Alex", role: "Medical", phoneNumber: "+47 900 00 111", notes: "Neighbor")
@@ -291,6 +299,7 @@ struct Disaster_ReadyTests {
 
         #expect(payload.schemaVersion == nil)
         #expect(payload.householdMemberCount == nil)
+        #expect(payload.householdProfile == nil)
         #expect(payload.familyContacts.first?.notes == "Uses the side entrance")
         #expect(payload.householdPlans.first?.scenarioIdentifier == nil)
         #expect(payload.householdPlans.first?.reunionPoint == "Old oak tree")
@@ -316,6 +325,8 @@ struct Disaster_ReadyTests {
         #expect(profile.countryCode == "NO")
         #expect(profile.householdSize == 4)
         #expect(profile.hasGasInstallation == false)
+        #expect(profile.knowsWaterStopcock == false)
+        #expect(profile.knowsMainElectricalPanel == false)
         #expect(defaults.integer(forKey: HouseholdProfileStore.legacyHouseholdSizeKey) == 4)
         #expect(defaults.data(forKey: HouseholdProfileStore.storageKey) != nil)
     }
@@ -330,7 +341,9 @@ struct Disaster_ReadyTests {
             municipality: "Chiang Mai",
             householdSize: 3,
             hasPets: true,
-            hasGasInstallation: true
+            hasGasInstallation: true,
+            knowsWaterStopcock: true,
+            knowsMainElectricalPanel: true
         )
         HouseholdProfileStore.save(savedProfile, defaults: defaults)
         defaults.set(7, forKey: HouseholdProfileStore.legacyHouseholdSizeKey)
@@ -343,6 +356,8 @@ struct Disaster_ReadyTests {
         #expect(loadedProfile == savedProfile)
         #expect(loadedProfile.householdSize == 3)
         #expect(loadedProfile.hasGasInstallation)
+        #expect(loadedProfile.knowsWaterStopcock)
+        #expect(loadedProfile.knowsMainElectricalPanel)
     }
 
     @Test func householdProfileDecodingDefaultsNewFlagsSafely() throws {
@@ -362,6 +377,8 @@ struct Disaster_ReadyTests {
         #expect(profile.hasPets == false)
         #expect(profile.hasGasInstallation == false)
         #expect(profile.hasSpecialAssistanceNeeds == false)
+        #expect(profile.knowsWaterStopcock == false)
+        #expect(profile.knowsMainElectricalPanel == false)
     }
 
     @Test func householdWithoutGasDoesNotAllowGasSpecificGuidance() {
@@ -405,6 +422,120 @@ struct Disaster_ReadyTests {
         #expect(EmergencyType.migrated(fromLegacyIdentifier: "earthquake") == .evacuation)
         #expect(EmergencyType.migrated(fromLegacyIdentifier: "volcano") == .evacuation)
         #expect(EmergencyType.migrated(fromLegacyIdentifier: nil) == nil)
+    }
+
+    @Test func everyLegacyPreparednessScenarioHasExplicitCompatibilityMapping() {
+        let mappedIdentifiers = Set(EmergencyType.legacyIdentifierMapping.keys)
+        let legacyIdentifiers = Set(PreparednessScenario.allCases.map(\.rawValue))
+
+        #expect(mappedIdentifiers == legacyIdentifiers)
+        #expect(EmergencyType.legacyIdentifierMapping["earthquake"] == .evacuation)
+        #expect(EmergencyType.legacyIdentifierMapping["volcano"] == .evacuation)
+    }
+
+    @Test func legacyScenarioPlanContentSurvivesMappingUnchanged() {
+        let plan = HouseholdPlan(
+            scenarioIdentifier: "storm",
+            reunionPoint: "Old oak tree",
+            evacuationDestination: "Family cabin",
+            shelterZone: "Interior hallway",
+            gasShutoffNote: "Valve by the meter",
+            medicalLead: "Alex – medication details",
+            petLead: "Sam – bring carrier",
+            familyPassword: "North star"
+        )
+
+        let mappedType = EmergencyType.migrated(fromLegacyIdentifier: plan.scenarioIdentifier)
+
+        #expect(mappedType == .extremeWeather)
+        #expect(plan.scenarioIdentifier == "storm")
+        #expect(plan.reunionPoint == "Old oak tree")
+        #expect(plan.evacuationDestination == "Family cabin")
+        #expect(plan.shelterZone == "Interior hallway")
+        #expect(plan.gasShutoffNote == "Valve by the meter")
+        #expect(plan.medicalLead == "Alex – medication details")
+        #expect(plan.petLead == "Sam – bring carrier")
+        #expect(plan.familyPassword == "North star")
+    }
+
+    @Test func readingTemplateDoesNotOverwriteUserEditedPlanContent() {
+        let plan = HouseholdPlan(
+            scenarioIdentifier: "flood",
+            reunionPoint: "User meeting point",
+            evacuationDestination: "User destination",
+            shelterZone: "User shelter note",
+            gasShutoffNote: "User gas note",
+            medicalLead: "User medical note",
+            petLead: "User pet note",
+            familyPassword: "User family message"
+        )
+
+        _ = NorwayEmergencyTemplates.template(for: .flood)
+
+        #expect(plan.reunionPoint == "User meeting point")
+        #expect(plan.evacuationDestination == "User destination")
+        #expect(plan.shelterZone == "User shelter note")
+        #expect(plan.gasShutoffNote == "User gas note")
+        #expect(plan.medicalLead == "User medical note")
+        #expect(plan.petLead == "User pet note")
+        #expect(plan.familyPassword == "User family message")
+    }
+
+    @Test func emergencyTypeIdentifiersAreStableAndUnique() {
+        let identifiers = EmergencyType.allCases.map(\.rawValue)
+
+        #expect(identifiers == [
+            "powerOutage", "flood", "extremeWeather", "landslide", "wildfire",
+            "houseFire", "waterOutage", "evacuation", "hazardousRelease",
+            "warOrSecurityIncident"
+        ])
+        #expect(Set(identifiers).count == identifiers.count)
+    }
+
+    @Test func norwayTemplateCatalogIsCountrySpecificAndOffline() throws {
+        let provider = try #require(EmergencyTemplateCatalog.provider(for: "NO"))
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 2)
+
+        for emergencyType in EmergencyType.allCases {
+            let template = provider.template(for: emergencyType, household: profile)
+            #expect(template.id == "no.\(emergencyType.rawValue)")
+            #expect(template.type == emergencyType)
+            #expect(!template.sourceIDs.isEmpty)
+        }
+
+        #expect(EmergencyTemplateCatalog.provider(for: "TH") == nil)
+    }
+
+    @Test func norwegianTemplatesFilterGasGuidanceByExplicitProfileFlag() {
+        let withoutGas = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        let withGas = HouseholdProfile(
+            countryCode: "NO",
+            householdSize: 1,
+            hasGasInstallation: true
+        )
+
+        for emergencyType in EmergencyType.allCases {
+            let actionIDs = NorwayEmergencyTemplates
+                .template(for: emergencyType, household: withoutGas)
+                .actions
+                .map(\.id)
+            #expect(actionIDs.allSatisfy { !$0.contains("gasInstallation") })
+        }
+
+        let gasActionIDs = NorwayEmergencyTemplates
+            .template(for: .houseFire, household: withGas)
+            .actions
+            .map(\.id)
+        #expect(gasActionIDs.contains("houseFire.gasInstallationPreparedness"))
+    }
+
+    @Test func templateLocationsAreNeverMarkedAsOfficialSafeAddresses() {
+        for template in NorwayEmergencyTemplates.all {
+            #expect(template.shelterGuidance.allSatisfy { !$0.isOfficialLocation })
+            #expect(template.shelterGuidance.allSatisfy {
+                $0.safetyNoticeKey == "shelter.preparedness_not_official.notice"
+            })
+        }
     }
 
     @Test func eventSupplyPrioritiesSupplementBaseItems() {
@@ -614,6 +745,47 @@ struct Disaster_ReadyTests {
         #expect(request.value(forHTTPHeaderField: "User-Agent")?.contains("github.com/terjemoe1954/Disaster-Ready") == true)
         #expect(request.url?.absoluteString.contains("lat=59.1235") == true)
         #expect(request.url?.absoluteString.contains("lon=10.9877") == true)
+    }
+
+    @Test func weatherAlertCachePreservesFreshnessTimestamp() async throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("weather-alert-cache-\(UUID().uuidString).json")
+        let cache = WeatherAlertCache(fileURL: fileURL)
+        let updatedAt = try #require(ISO8601DateFormatter().date(from: "2026-09-30T12:00:00Z"))
+        let alert = try #require(METAlertsDecoder.decode(Data(metAlertsJSON(features: [
+            metAlertFeature(id: "cached", type: "Alert", color: "Yellow", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z")
+        ]).utf8)).first)
+
+        try await cache.save(.init(alerts: [alert], updatedAt: updatedAt, latitude: 59.9139, longitude: 10.7522))
+        let entry = await cache.load(latitude: 59.9139, longitude: 10.7522)
+
+        #expect(entry?.updatedAt == updatedAt)
+        #expect(entry?.alerts == [alert])
+        #expect(await cache.load(latitude: 60.3929, longitude: 5.3242) == nil)
+    }
+
+    @Test func shelterCachePreservesReferenceDataTimestamp() async throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("shelter-cache-\(UUID().uuidString).json")
+        let cache = ShelterCache(fileURL: fileURL)
+        let updatedAt = try #require(ISO8601DateFormatter().date(from: "2026-09-30T12:00:00Z"))
+        let shelter = Shelter(
+            id: "room-1",
+            roomNumber: "1",
+            address: "Example road 1",
+            capacity: 100,
+            latitude: 59.9139,
+            longitude: 10.7522,
+            sourceID: "dsb-geonorge-public-shelters-wfs",
+            dataUpdatedAt: nil
+        )
+
+        try await cache.save(.init(shelters: [shelter], updatedAt: updatedAt, latitude: 59.9139, longitude: 10.7522))
+        let entry = await cache.load(latitude: 59.9139, longitude: 10.7522)
+
+        #expect(entry?.updatedAt == updatedAt)
+        #expect(entry?.shelters == [shelter])
+        #expect(await cache.load(latitude: 60.3929, longitude: 5.3242) == nil)
     }
 
     private func metAlertsJSON(features: [String]) -> String {
