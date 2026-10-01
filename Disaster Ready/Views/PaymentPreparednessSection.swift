@@ -27,6 +27,10 @@ struct PaymentPreparednessSection: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
                 .accessibilityElement(children: .combine)
+
+            if let source = GuidanceSourceRegistry.source(for: PaymentPreparednessCatalog.norwaySourceID) {
+                SourceAttributionCard(source: source, language: language)
+            }
         }
         .padding(20)
         .background(DashboardCardBackground())

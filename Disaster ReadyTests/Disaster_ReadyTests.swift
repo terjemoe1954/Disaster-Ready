@@ -851,11 +851,11 @@ struct Disaster_ReadyTests {
         let sources = GuidanceSourceRegistry.norway
         let sourceIDs = Set(sources.map(\.id))
 
-        #expect(sourceIDs == [
-            "dsb-preparedness",
-            "met-weather-warnings",
-            "nve-natural-hazards"
-        ])
+        #expect(sourceIDs.count == sources.count)
+        #expect(sourceIDs.contains("dsb-self-preparedness"))
+        #expect(sourceIDs.contains("met-weather-warnings"))
+        #expect(sourceIDs.contains("nve-hazard-information"))
+        #expect(sourceIDs.contains(PaymentPreparednessCatalog.norwaySourceID))
         #expect(sources.allSatisfy { $0.countryCode == "NO" })
         #expect(sources.allSatisfy { $0.url.scheme == "https" })
         #expect(sources.allSatisfy { $0.lastReviewed > .distantPast })
@@ -863,6 +863,56 @@ struct Disaster_ReadyTests {
         let encoded = try JSONEncoder().encode(sources)
         let decoded = try JSONDecoder().decode([GuidanceSource].self, from: encoded)
         #expect(decoded == sources)
+    }
+
+    @Test func everyNorwayTemplateSourceIDResolvesOrIsExplicitlyPending() {
+        for template in NorwayEmergencyTemplates.all {
+            for sourceID in template.sourceIDs {
+                #expect(
+                    GuidanceSourceRegistry.source(for: sourceID) != nil ||
+                    GuidanceSourceRegistry.pendingSourceIDs.contains(sourceID)
+                )
+            }
+        }
+    }
+
+    @Test func paymentPreparednessSourceResolvesToVerifiedNorwegianGuidance() throws {
+        let source = try #require(
+            GuidanceSourceRegistry.source(for: PaymentPreparednessCatalog.norwaySourceID)
+        )
+
+        #expect(source.countryCode == "NO")
+        #expect(source.url.host == "www.dsb.no")
+        #expect(source.title == "Eigenberedskap for betalinger")
+    }
+
+    @Test func unknownSourceIDsFailSafelyWithoutBrokenPresentation() {
+        #expect(GuidanceSourceRegistry.source(for: "unknown.source") == nil)
+        #expect(GuidanceSourceRegistry.resolvedSources(for: ["unknown.source"]).isEmpty)
+    }
+
+    @Test func sourceCompatibilityAliasesResolveWithoutChangingTemplateIDs() throws {
+        let flood = NorwayEmergencyTemplates.template(for: .flood)
+        let evacuation = NorwayEmergencyTemplates.template(for: .evacuation)
+
+        #expect(flood.sourceIDs.contains("nve-hazard-information"))
+        #expect(evacuation.sourceIDs.contains("dsb-evacuation"))
+        #expect(GuidanceSourceRegistry.source(for: "dsb-evacuation")?.id == "dsb-crisis-locations")
+        #expect(GuidanceSourceRegistry.source(for: "dsb-preparedness")?.id == "dsb-self-preparedness")
+    }
+
+    @Test func sourceMetadataIsBundledAndRequiresNoNetworkState() {
+        let resolved = GuidanceSourceRegistry.resolvedSources(
+            for: NorwayEmergencyTemplates.template(for: .warOrSecurityIncident).sourceIDs
+        )
+
+        #expect(!resolved.isEmpty)
+        #expect(resolved.allSatisfy { !$0.authority.isEmpty && !$0.title.isEmpty })
+    }
+
+    @Test func sourceReviewCopyDoesNotDescribeALiveUpdate() {
+        #expect(!GuidanceSourceRegistry.reviewDateRepresentsLiveUpdate)
+        #expect(SourceLocalizationResources.values.count == 7)
     }
 
     @Test func shelterGMLDecoderPreservesOfficialFields() throws {

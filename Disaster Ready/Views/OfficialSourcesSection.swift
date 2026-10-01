@@ -10,12 +10,12 @@ struct OfficialSourcesSection: View {
                 .font(.title3.weight(.bold))
                 .accessibilityHeading(.h2)
 
-            Text(sectionDescription)
+            Text(L10n.text("source.section.description", language: language))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             ForEach(sources) { source in
-                OfficialSourceRow(source: source, language: language)
+                SourceAttributionCard(source: source, language: language)
             }
         }
         .padding(20)
@@ -23,26 +23,10 @@ struct OfficialSourcesSection: View {
         .accessibilityIdentifier("officialSourcesSection")
     }
 
-    private var sectionTitle: String {
-        L10n.pick(
-            language: language,
-            english: "Official information",
-            norwegian: "Offisiell informasjon",
-            thai: "ข้อมูลทางการ"
-        )
-    }
-
-    private var sectionDescription: String {
-        L10n.pick(
-            language: language,
-            english: "Official instructions always override the app's preparedness templates.",
-            norwegian: "Offisielle instrukser gjelder alltid foran appens beredskapsmaler.",
-            thai: "คำแนะนำอย่างเป็นทางการมีความสำคัญเหนือแบบเตรียมพร้อมของแอปเสมอ"
-        )
-    }
+    private var sectionTitle: String { L10n.text("source.section.title", language: language) }
 }
 
-private struct OfficialSourceRow: View {
+struct SourceAttributionCard: View {
     let source: GuidanceSource
     let language: AppLanguage
 
@@ -51,11 +35,11 @@ private struct OfficialSourceRow: View {
             Text(source.title)
                 .font(.headline)
 
-            LabeledContent(sourceLabel, value: source.authority)
+            LabeledContent(L10n.text("source.label", language: language), value: source.authority)
                 .font(.caption)
 
             HStack(spacing: 4) {
-                Text(reviewedLabel)
+                Text(L10n.text("source.reviewed.label", language: language))
                 Text(source.lastReviewed, format: .dateTime.day().month().year())
             }
             .font(.caption)
@@ -63,30 +47,36 @@ private struct OfficialSourceRow: View {
             .environment(\.locale, AppLanguage.locale(for: language))
 
             Link(destination: source.url) {
-                Label(viewAdviceTitle, systemImage: "arrow.up.right.square")
+                Label(L10n.text("source.view_advice", language: language), systemImage: "arrow.up.right.square")
                     .font(.subheadline.weight(.semibold))
             }
+            .frame(minHeight: 44)
+            .accessibilityLabel(L10n.format("source.link.accessibility", language: language, source.authority))
             .accessibilityIdentifier("officialSource.\(source.id)")
+
+            Text(L10n.text("source.review_semantics", language: language))
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(InsetCardBackground())
     }
 
-    private var sourceLabel: String {
-        L10n.pick(language: language, english: "Source", norwegian: "Kilde", thai: "แหล่งข้อมูล")
+}
+
+struct TemplateSourceAttributionSection: View {
+    let sourceIDs: [String]
+    let language: AppLanguage
+
+    private var sources: [GuidanceSource] {
+        GuidanceSourceRegistry.resolvedSources(for: sourceIDs)
     }
 
-    private var reviewedLabel: String {
-        L10n.pick(language: language, english: "Reviewed:", norwegian: "Gjennomgått:", thai: "ตรวจสอบเมื่อ:")
-    }
-
-    private var viewAdviceTitle: String {
-        L10n.pick(
-            language: language,
-            english: "View official advice",
-            norwegian: "Se offisielle råd",
-            thai: "ดูคำแนะนำอย่างเป็นทางการ"
-        )
+    var body: some View {
+        if !sources.isEmpty {
+            OfficialSourcesSection(sources: sources, language: language)
+                .accessibilityIdentifier("templateSourceAttribution")
+        }
     }
 }

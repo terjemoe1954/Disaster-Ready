@@ -6340,6 +6340,167 @@
         }
       }
     },
+    "source.label" : {
+      "comment" : "Label before an official authority name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Source"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kilde"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แหล่งข้อมูล"
+          }
+        }
+      }
+    },
+    "source.link.accessibility" : {
+      "comment" : "VoiceOver label; placeholder is the authority name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Open official advice from %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Åpne offisielle råd fra %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เปิดคำแนะนำอย่างเป็นทางการจาก %@"
+          }
+        }
+      }
+    },
+    "source.review_semantics" : {
+      "comment" : "Safety explanation distinguishing a source review date from live information",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready reviewed this guidance against the listed official source on the date above. This is not a live-update time. During an emergency, follow current instructions from public authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready gjennomgikk veiledningen mot den oppførte offisielle kilden på datoen ovenfor. Dette er ikke tidspunktet for en sanntidsoppdatering. Følg gjeldende instrukser fra offentlige myndigheter i en nødsituasjon."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready ตรวจสอบแนวทางนี้โดยเทียบกับแหล่งข้อมูลทางการที่ระบุไว้ ณ วันที่ด้านบน วันที่ดังกล่าวไม่ใช่เวลาที่ข้อมูลได้รับการอัปเดตแบบเรียลไทม์ เมื่อเกิดเหตุฉุกเฉิน ให้ปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานภาครัฐ"
+          }
+        }
+      }
+    },
+    "source.reviewed.label" : {
+      "comment" : "Date when Disaster Ready last reviewed its bundled guidance, not a live update",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Source reviewed:"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kilden ble gjennomgått:"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วันที่ตรวจสอบแหล่งข้อมูล:"
+          }
+        }
+      }
+    },
+    "source.section.description" : {
+      "comment" : "Explains offline source metadata",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bundled preparedness guidance is checked against these official sources. Source details remain available offline."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Beredskapsveiledningen som følger med appen, er kontrollert mot disse offisielle kildene. Kildeinformasjonen er tilgjengelig uten internett."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำแนะนำเพื่อการเตรียมพร้อมที่มาพร้อมกับแอปได้รับการตรวจสอบเทียบกับแหล่งข้อมูลทางการเหล่านี้ รายละเอียดแหล่งข้อมูลยังคงดูได้แบบออฟไลน์"
+          }
+        }
+      }
+    },
+    "source.section.title" : {
+      "comment" : "Heading above official source attribution cards",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Official sources"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offisielle kilder"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แหล่งข้อมูลทางการ"
+          }
+        }
+      }
+    },
+    "source.view_advice" : {
+      "comment" : "Link that opens an official website",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "View official advice"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vis offisielle råd"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดูคำแนะนำอย่างเป็นทางการ"
+          }
+        }
+      }
+    },
     "stocked" : {
       "extractionState" : "stale",
       "localizations" : {

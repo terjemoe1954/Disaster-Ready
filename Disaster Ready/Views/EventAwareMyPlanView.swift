@@ -50,6 +50,10 @@ struct EventAwareMyPlanView: View {
                     language: language,
                     openContacts: openContacts
                 )
+                TemplateSourceAttributionSection(
+                    sourceIDs: template.sourceIDs,
+                    language: language
+                )
                 MyPlanSaveStep(
                     saveSucceeded: saveSucceeded,
                     language: language,
