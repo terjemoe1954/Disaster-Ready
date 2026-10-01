@@ -733,12 +733,118 @@ struct Disaster_ReadyTests {
             "multiplePaymentOptions"
         ])
 
-        let norwegianTitles = PaymentPreparednessItem.allCases.map {
-            $0.title(in: .norwegian)
+        #expect(PaymentPreparednessCatalog.checklist(for: "NO") == PaymentPreparednessItem.allCases)
+        #expect(PaymentPreparednessCatalog.checklist(for: "TH").isEmpty)
+        #expect(PaymentPreparednessCatalog.norwaySourceID == "no.payment-preparedness-guidance")
+        #expect(PaymentPreparednessItem.allCases.map(\.titleKey) == [
+            "payment.item.cashAvailable",
+            "payment.item.smallerDenominations",
+            "payment.item.multipleCards",
+            "payment.item.physicalCard",
+            "payment.item.multiplePaymentOptions"
+        ])
+    }
+
+    @Test func paymentPreparednessCompletionIsIndependentAndCodable() throws {
+        var checklist = PaymentPreparednessChecklist(countryCode: "NO")
+        checklist.setComplete(true, for: .cashAvailable)
+        checklist.setComplete(true, for: .physicalCard)
+
+        #expect(checklist.isComplete(.cashAvailable))
+        #expect(checklist.isComplete(.physicalCard))
+        #expect(!checklist.isComplete(.smallerDenominations))
+        #expect(checklist.completedCount == 2)
+
+        checklist.setComplete(false, for: .cashAvailable)
+        #expect(!checklist.isComplete(.cashAvailable))
+        #expect(checklist.completedCount == 1)
+
+        let decoded = try JSONDecoder().decode(
+            PaymentPreparednessChecklist.self,
+            from: JSONEncoder().encode(checklist)
+        )
+        #expect(decoded == checklist)
+    }
+
+    @Test func paymentPreparednessStorePersistsAndMigratesLegacyFlags() throws {
+        let suiteName = "PaymentPreparednessStoreTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(true, forKey: "paymentPreparedness.cashAvailable")
+        defaults.set(true, forKey: "paymentPreparedness.multipleCards")
+
+        var checklist = PaymentPreparednessStore.load(countryCode: "NO", defaults: defaults)
+        #expect(checklist.isComplete(.cashAvailable))
+        #expect(checklist.isComplete(.multipleCards))
+        #expect(!checklist.isComplete(.physicalCard))
+
+        checklist.setComplete(true, for: .physicalCard)
+        PaymentPreparednessStore.save(checklist, defaults: defaults)
+        let restored = PaymentPreparednessStore.load(countryCode: "NO", defaults: defaults)
+        #expect(restored == checklist)
+    }
+
+    @Test func paymentPreparednessStoresNoSensitiveFinancialFields() throws {
+        var checklist = PaymentPreparednessChecklist(countryCode: "NO")
+        checklist.setComplete(true, for: .cashAvailable)
+        let encoded = try JSONEncoder().encode(checklist)
+        let json = try #require(String(data: encoded, encoding: .utf8)).lowercased()
+
+        #expect(json.contains("countrycode"))
+        #expect(json.contains("completeditemids"))
+        for forbidden in ["amount", "balance", "account", "cardnumber", "pin", "bankid", "password", "credential"] {
+            #expect(!json.contains(forbidden))
         }
-        #expect(norwegianTitles.allSatisfy { !$0.isEmpty })
-        #expect(norwegianTitles.contains { $0.localizedCaseInsensitiveContains("kontant") })
-        #expect(norwegianTitles.contains { $0.localizedCaseInsensitiveContains("fysisk kort") })
+    }
+
+    @Test func paymentCompletionAndExistingSupplyItemRemainIndependent() throws {
+        let reviewDate = try #require(ISO8601DateFormatter().date(from: "2027-05-01T10:00:00Z"))
+        let supply = SupplyItem(
+            name: "Cash",
+            detail: "User-entered preparedness item",
+            isPacked: true,
+            storageLocation: SupplyLocation.home.rawValue,
+            quantity: "User value",
+            reviewDate: reviewDate
+        )
+        var checklist = PaymentPreparednessChecklist(countryCode: "NO")
+
+        #expect(!checklist.isComplete(.cashAvailable))
+        checklist.setComplete(true, for: .cashAvailable)
+
+        #expect(supply.name == "Cash")
+        #expect(supply.detail == "User-entered preparedness item")
+        #expect(supply.quantity == "User value")
+        #expect(supply.isPacked)
+        #expect(supply.reviewDate == reviewDate)
+    }
+
+    @Test func paymentPreparednessIsSurfacedOnlyForRelevantPlanScenarios() {
+        let relevant: Set<EmergencyType> = [.powerOutage, .evacuation, .extremeWeather, .warOrSecurityIncident]
+        for emergency in EmergencyType.allCases {
+            #expect(PaymentPreparednessCatalog.isRelevant(to: emergency) == relevant.contains(emergency))
+        }
+        #expect(!PaymentPreparednessCatalog.isRelevant(to: .houseFire))
+    }
+
+    @Test func paymentPreparednessDoesNotAlterLegacyBackupCompatibility() throws {
+        let legacyJSON = """
+        {
+          "exportDate": "2026-09-01T12:00:00Z",
+          "familyContacts": [{"name":"Alex","role":"","phoneNumber":"110","notes":""}],
+          "importantNumbers": [],
+          "householdPlans": [],
+          "householdRoles": [],
+          "supplies": []
+        }
+        """
+        let payload = try DisasterBackupPayload.decode(from: Data(legacyJSON.utf8))
+        try payload.validateForImport()
+        let exported = try #require(String(data: payload.encodedData(), encoding: .utf8)).lowercased()
+
+        #expect(payload.schemaVersion == nil)
+        #expect(!exported.contains("paymentpreparedness"))
+        #expect(!exported.contains("bankid"))
     }
 
     @Test func officialSourceRegistryUsesStableAuthoritativeMappings() throws {

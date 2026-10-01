@@ -1,6 +1,6 @@
 import Foundation
 
-enum PaymentPreparednessItem: String, CaseIterable, Identifiable {
+enum PaymentPreparednessItem: String, CaseIterable, Codable, Identifiable {
     case cashAvailable
     case smallerDenominations
     case multipleCards
@@ -8,44 +8,42 @@ enum PaymentPreparednessItem: String, CaseIterable, Identifiable {
     case multiplePaymentOptions
 
     var id: String { rawValue }
+    var titleKey: String { "payment.item.\(rawValue)" }
+}
 
-    func title(in language: AppLanguage) -> String {
-        switch self {
-        case .cashAvailable:
-            return L10n.pick(
-                language: language,
-                english: "Keep some cash available",
-                norwegian: "Ha noen kontanter tilgjengelig",
-                thai: "เตรียมเงินสดไว้บางส่วน"
-            )
-        case .smallerDenominations:
-            return L10n.pick(
-                language: language,
-                english: "Include useful smaller denominations",
-                norwegian: "Ha nyttige mindre valører",
-                thai: "เตรียมธนบัตรมูลค่าน้อยที่ใช้สะดวก"
-            )
-        case .multipleCards:
-            return L10n.pick(
-                language: language,
-                english: "Have more than one payment card where practical",
-                norwegian: "Ha mer enn ett betalingskort der det er praktisk",
-                thai: "มีบัตรชำระเงินมากกว่าหนึ่งใบหากทำได้"
-            )
-        case .physicalCard:
-            return L10n.pick(
-                language: language,
-                english: "Keep a physical card suitable for Norwegian payment systems",
-                norwegian: "Ha et fysisk kort som fungerer i norsk betalingsinfrastruktur",
-                thai: "เก็บบัตรจริงที่ใช้กับระบบชำระเงินของนอร์เวย์ได้"
-            )
-        case .multiplePaymentOptions:
-            return L10n.pick(
-                language: language,
-                english: "Consider more than one payment option or bank",
-                norwegian: "Vurder mer enn én betalingsmåte eller bank",
-                thai: "พิจารณาวิธีชำระเงินหรือธนาคารมากกว่าหนึ่งทาง"
-            )
+struct PaymentPreparednessChecklist: Codable, Equatable {
+    var countryCode: String
+    private(set) var completedItemIDs: Set<String>
+
+    init(countryCode: String = "NO", completedItemIDs: Set<String> = []) {
+        self.countryCode = countryCode.uppercased()
+        self.completedItemIDs = completedItemIDs.intersection(Set(PaymentPreparednessItem.allCases.map(\.id)))
+    }
+
+    var completedCount: Int { completedItemIDs.count }
+
+    func isComplete(_ item: PaymentPreparednessItem) -> Bool {
+        completedItemIDs.contains(item.id)
+    }
+
+    mutating func setComplete(_ isComplete: Bool, for item: PaymentPreparednessItem) {
+        if isComplete {
+            completedItemIDs.insert(item.id)
+        } else {
+            completedItemIDs.remove(item.id)
         }
+    }
+}
+
+enum PaymentPreparednessCatalog {
+    // Stable reference only. Authority metadata belongs to the later source-registry milestone.
+    static let norwaySourceID = "no.payment-preparedness-guidance"
+
+    static func checklist(for countryCode: String) -> [PaymentPreparednessItem] {
+        countryCode.uppercased() == "NO" ? PaymentPreparednessItem.allCases : []
+    }
+
+    static func isRelevant(to emergency: EmergencyType) -> Bool {
+        [.powerOutage, .evacuation, .extremeWeather, .warOrSecurityIncident].contains(emergency)
     }
 }

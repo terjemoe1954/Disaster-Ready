@@ -32,6 +32,7 @@ struct DisasterDashboardView: View {
     @State private var selectedScenario: PreparednessScenario = .storm
     @State private var selectedEmergencyType: EmergencyType = .extremeWeather
     @State private var householdProfile = HouseholdProfile.defaultProfile(locale: .current, householdSize: 1)
+    @State private var paymentPreparedness = PaymentPreparednessChecklist()
     @State private var selectedTab: DashboardTab = .overview
     @State private var selectedLanguage: AppLanguage = .current
     @State private var showingSettings = false
@@ -90,6 +91,7 @@ struct DisasterDashboardView: View {
                                 plan: plan,
                                 household: householdProfile,
                                 savedSupplies: supplies,
+                                paymentPreparedness: paymentPreparedness,
                                 familyContacts: familyContacts,
                                 importantNumbers: importantNumbers,
                                 language: selectedLanguage,
@@ -121,7 +123,12 @@ struct DisasterDashboardView: View {
                             addHome: addSmartHomeSupplies,
                             addEvacuation: addSmartEvacuationSupplies
                         )
-                        PaymentPreparednessSection(language: selectedLanguage)
+                        if householdProfile.countryCode == "NO" {
+                            PaymentPreparednessSection(
+                                checklist: $paymentPreparedness,
+                                language: selectedLanguage
+                            )
+                        }
                         HomePreparednessGuideSection(
                             householdMemberCount: $householdMemberCount,
                             language: selectedLanguage
@@ -254,6 +261,9 @@ struct DisasterDashboardView: View {
             seedDataIfNeeded()
             ensureEmergencyPlans()
             householdProfile = HouseholdProfileStore.load()
+            paymentPreparedness = PaymentPreparednessStore.load(
+                countryCode: householdProfile.countryCode
+            )
             householdMemberCount = householdProfile.householdSize
             selectedLanguage = AppLanguage(rawValue: preferredLanguageCode) ?? .current
             relocalizeDefaultSupplies(to: selectedLanguage)
@@ -333,6 +343,9 @@ struct DisasterDashboardView: View {
             if householdMemberCount != newValue.householdSize {
                 householdMemberCount = newValue.householdSize
             }
+        }
+        .onChange(of: paymentPreparedness) { _, newValue in
+            PaymentPreparednessStore.save(newValue)
         }
         .onChange(of: supplyReviewRemindersEnabled) { _, isEnabled in
             Task {

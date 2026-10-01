@@ -5,6 +5,7 @@ struct EventAwareMyPlanView: View {
     @Bindable var plan: HouseholdPlan
     let household: HouseholdProfile
     let savedSupplies: [SupplyItem]
+    let paymentPreparedness: PaymentPreparednessChecklist
     let familyContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
     let language: AppLanguage
@@ -36,6 +37,13 @@ struct EventAwareMyPlanView: View {
                     savedSupplies: savedSupplies,
                     language: language
                 )
+                if household.countryCode == "NO",
+                   PaymentPreparednessCatalog.isRelevant(to: selectedEmergencyType) {
+                    PaymentPreparednessStatusCard(
+                        checklist: paymentPreparedness,
+                        language: language
+                    )
+                }
                 MyPlanContactsStep(
                     familyContacts: familyContacts,
                     importantNumbers: importantNumbers,
