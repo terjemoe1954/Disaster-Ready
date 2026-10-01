@@ -92,33 +92,49 @@ Six focused source-architecture tests were added, covering:
 - compatibility aliases without changing template source IDs
 - bundled/offline metadata and non-live review wording
 
-The project contains 68 enabled unit tests and 8 enabled UI/launch tests (76 total discovered by Xcode). A complete result count could not be produced in this run because `Run All Tests` entered a stuck UI-test run and left Xcode reporting `Tests are already running`. A direct unit-test retry then failed when CoreSimulatorService disconnected (`CoreSimulatorService connection became invalid`, no iPhone 17 Pro destination available). No test assertion failure was reported before the infrastructure failure.
+Final verification on 2026-10-01 ran all 68 enabled unit tests on the manually started iPhone 17 Pro simulator:
+
+- Tests run: 68
+- Passed: 68
+- Failed: 0
+- Skipped: 0
+- Expected failures: 0
+- Not run: 0
+
+The source-registry tests confirm that every source ID currently emitted by `NorwayEmergencyTemplates` resolves or is explicitly pending. All current IDs resolve; `pendingSourceIDs` remains empty. Compatibility, migration, backup, HouseholdProfile, Payment Preparedness, Smart Supply, and legacy-data tests also passed in the same run.
 
 ## Build result
 
-- Full Xcode build before localization: succeeded, 0 reported errors.
-- Full Xcode build after implementation/localization: succeeded, 0 reported errors.
+- Final complete Xcode build: succeeded.
+- App compiler errors: 0.
+- App compiler warnings: 0.
+- Xcode warning-level build-log entries: 0.
 - File-level diagnostics for all modified/new Swift source files: no issues.
 
 ## Manual UI results
 
-Manual simulator verification started successfully before CoreSimulatorService disconnected:
+Final simulator verification completed on the latest build without resetting, stopping, or rebooting the simulator:
 
-- Norwegian My Plan → Extreme weather displayed two resolved DSB source cards.
-- Authority, the titles `Egenberedskap` and `Oppholdssteder i kriser`, and review date `1. okt. 2026` were visible.
-- VoiceOver link labels included the authority name.
-- The explanatory text explicitly said the date was not a real-time update and directed users to current public-authority instructions.
-- No overlap or truncation was visible at 402 × 874 points at the default Dynamic Type size.
-- Payment Preparedness itself remained visible and functional.
+| Check | Result | Evidence |
+|---|---|---|
+| A. Open resolved DSB link | Pass | `Egenberedskap` opened on the official DSB page in Safari; returning preserved app state. |
+| B. Payment Preparedness attribution | Pass | Displayed `Eigenberedskap for betalinger`, `Norges Bank / Direktoratet for samfunnssikkerhet og beredskap (DSB)`, review date 1 October 2026, and a working official link. |
+| C. Unknown source ID | Pass, code/test-backed | There is no user route for injecting an unknown ID. The passing `unknownSourceIDsFailSafelyWithoutBrokenPresentation` test confirms an unknown ID resolves to `nil`/an empty presentation, and runtime inspection showed no broken source button. |
+| D. Offline bundled metadata | Pass, code/test-backed | Metadata appeared immediately with no loading state or metadata network request and remained visible after returning from Safari. Network was not disabled globally because no safe simulator control was available during the session. Registry metadata is bundled and the offline-resolution test passed. |
+| E. Review-date meaning | Pass | English UI explicitly states that Disaster Ready reviewed the guidance on the displayed date, that it is not a live-update time, and that current authority instructions take priority. Bokmål and Thai communicate the same distinction. |
+| F. English source UI | Pass | All source labels and safety text were translated; no raw `source.*` keys, clipping, or overlap. |
+| G. Norwegian Bokmål source UI | Pass | `Kilde`, `Kilden ble gjennomgått:`, `Vis offisielle råd`, and the non-live explanation displayed correctly. |
+| H. Thai source UI | Pass | `แหล่งข้อมูล`, `วันที่ตรวจสอบแหล่งข้อมูล:`, `ดูคำแนะนำอย่างเป็นทางการ`, and the non-realtime explanation displayed without source-card layout defects. |
+| I. Not a live warning | Pass | Source cards use neutral book/source styling and explanatory attribution wording; they do not resemble live emergency alerts. |
 
-Opening the links, airplane-mode behavior, explicit unresolved-source UI, the Payment source card, and English/Thai layouts were not completed because of the simulator-service failure. The device verification session was ended cleanly.
+The device-interaction session ended cleanly.
 
 ## Warnings and errors
 
-- Build warnings from project code: none reported by Xcode build.
-- Test infrastructure: stuck Xcode test state (`Tests are already running`).
-- Simulator infrastructure: CoreSimulatorService connection invalid; `simdiskimaged` unavailable; direct test command exited 70 because the iPhone 17 Pro simulator destination disappeared.
-- The command-line Xcode process also emitted Xcode-internal property-list type-detection warnings. These were toolchain warnings, not app compiler diagnostics.
+- Final app build: 0 compiler errors and 0 compiler warnings.
+- Final unit-test run: 0 failures, 0 skipped tests, and no reported test errors.
+- Source UI: no visual or functional defects found in English, Bokmål, or Thai.
+- The adjacent English My Plan localization issue was corrected before Milestone 8. Explicit English values were added for the existing Emergency, My Plan, shelter, Smart Supply, and supply keys; no logic or non-English translations changed. Final simulator verification found no raw semantic keys in the six required scenarios.
 
 ## Unresolved source IDs
 
@@ -134,8 +150,6 @@ None among the source IDs currently emitted by `NorwayEmergencyTemplates`. `pend
 
 ## Remaining risks / TODOs
 
-- Re-run all 68 unit tests after Xcode/Device Hub restores CoreSimulatorService.
-- Complete manual checks A–J after the simulator is healthy, especially opening an official link and inspecting English, Bokmål, and Thai layouts.
 - Review dates are bundled release metadata and must be deliberately updated only after a future source review.
 - Milestone 8 may consume this registry, but must not reinterpret review dates as live-data timestamps.
 

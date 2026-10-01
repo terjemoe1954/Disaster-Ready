@@ -137,11 +137,10 @@
     },
     "action.evacuation.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan where to go, how to travel, and what essential items to bring."
           }
         },
@@ -161,11 +160,10 @@
     },
     "action.evacuation.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -185,11 +183,10 @@
     },
     "action.extremeWeather.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Secure loose items and prepare for disrupted transport, power, and communication."
           }
         },
@@ -209,11 +206,10 @@
     },
     "action.extremeWeather.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -233,11 +229,10 @@
     },
     "action.flood.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Know the local flood risk and plan how to leave before routes become unsafe."
           }
         },
@@ -257,11 +252,10 @@
     },
     "action.flood.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -281,11 +275,10 @@
     },
     "action.follow_official_information.detail" : {
       "comment" : "Safety-critical preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Monitor official information and follow current instructions from local authorities."
           }
         },
@@ -305,11 +298,10 @@
     },
     "action.follow_official_information.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Follow official information"
           }
         },
@@ -329,11 +321,10 @@
     },
     "action.gas_installation.prepare.detail" : {
       "comment" : "Gas preparedness guidance; never shown by default",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Record where the gas shutoff is and follow instructions from emergency services or a qualified professional."
           }
         },
@@ -353,11 +344,10 @@
     },
     "action.gas_installation.prepare.title" : {
       "comment" : "Shown only when a Norwegian household declares a gas installation",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for the gas installation"
           }
         },
@@ -377,11 +367,10 @@
     },
     "action.hazardousRelease.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Know how to close doors and ventilation while awaiting official instructions."
           }
         },
@@ -401,11 +390,10 @@
     },
     "action.hazardousRelease.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -425,11 +413,10 @@
     },
     "action.houseFire.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Practise escape routes and agree on an outdoor meeting point at a safe distance."
           }
         },
@@ -449,11 +436,10 @@
     },
     "action.houseFire.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -473,11 +459,10 @@
     },
     "action.landslide.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Know nearby risk areas and plan an early route to stable ground."
           }
         },
@@ -497,11 +482,10 @@
     },
     "action.landslide.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -521,11 +505,10 @@
     },
     "action.powerOutage.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan for light, communication, food preparation, and warmth without electricity."
           }
         },
@@ -545,11 +528,10 @@
     },
     "action.powerOutage.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -569,11 +551,10 @@
     },
     "action.warOrSecurityIncident.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare to receive official warnings and identify protective places in the building."
           }
         },
@@ -593,11 +574,10 @@
     },
     "action.warOrSecurityIncident.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -617,11 +597,10 @@
     },
     "action.waterOutage.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Store drinking water and plan for cooking, hygiene, and sanitation."
           }
         },
@@ -641,11 +620,10 @@
     },
     "action.waterOutage.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -665,11 +643,10 @@
     },
     "action.wildfire.prepare.detail" : {
       "comment" : "Offline preparedness guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan more than one route away from vegetation and smoke exposure."
           }
         },
@@ -689,11 +666,10 @@
     },
     "action.wildfire.prepare.title" : {
       "comment" : "Preparedness action title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare your household"
           }
         },
@@ -1196,11 +1172,10 @@
     },
     "emergency.evacuation.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare where to go, how to travel, and which essential items to bring."
           }
         },
@@ -1220,11 +1195,10 @@
     },
     "emergency.evacuation.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Evacuation"
           }
         },
@@ -1244,11 +1218,10 @@
     },
     "emergency.extremeWeather.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for severe weather and disruptions to transport, power, and communication."
           }
         },
@@ -1268,11 +1241,10 @@
     },
     "emergency.extremeWeather.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Extreme weather"
           }
         },
@@ -1292,11 +1264,10 @@
     },
     "emergency.flood.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for flooding, unsafe routes, and possible evacuation from risk areas."
           }
         },
@@ -1316,11 +1287,10 @@
     },
     "emergency.flood.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Flood"
           }
         },
@@ -1340,11 +1310,10 @@
     },
     "emergency.hazardousRelease.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare to limit exposure and follow current instructions from authorities."
           }
         },
@@ -1364,11 +1333,10 @@
     },
     "emergency.hazardousRelease.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Hazardous release"
           }
         },
@@ -1388,11 +1356,10 @@
     },
     "emergency.houseFire.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare escape routes and a household meeting point outside the home."
           }
         },
@@ -1412,11 +1379,10 @@
     },
     "emergency.houseFire.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "House fire"
           }
         },
@@ -1436,11 +1402,10 @@
     },
     "emergency.landslide.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for landslide risk, blocked routes, and the need to leave early."
           }
         },
@@ -1460,11 +1425,10 @@
     },
     "emergency.landslide.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Landslide"
           }
         },
@@ -1484,11 +1448,10 @@
     },
     "emergency.powerOutage.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare the household for loss of electricity, communication, cooking, and heating."
           }
         },
@@ -1508,11 +1471,10 @@
     },
     "emergency.powerOutage.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Power outage"
           }
         },
@@ -1532,11 +1494,10 @@
     },
     "emergency.warOrSecurityIncident.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare to receive official warnings and follow instructions about sheltering or evacuation."
           }
         },
@@ -1556,11 +1517,10 @@
     },
     "emergency.warOrSecurityIncident.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "War or security incident"
           }
         },
@@ -1580,11 +1540,10 @@
     },
     "emergency.waterOutage.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for loss of drinking water, sanitation, and normal cooking facilities."
           }
         },
@@ -1604,11 +1563,10 @@
     },
     "emergency.waterOutage.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Water outage"
           }
         },
@@ -1628,11 +1586,10 @@
     },
     "emergency.wildfire.summary" : {
       "comment" : "Offline preparedness summary",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare for smoke, rapidly changing fire conditions, and possible evacuation."
           }
         },
@@ -1652,11 +1609,10 @@
     },
     "emergency.wildfire.title" : {
       "comment" : "Emergency type title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Wildfire"
           }
         },
@@ -2389,11 +2345,10 @@
     },
     "myplan.actions.during.detail" : {
       "comment" : "Safety-critical actual-event guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Use this plan only when it fits the situation. Move away from immediate danger, contact emergency services when needed, and follow current authority instructions."
           }
         },
@@ -2413,11 +2368,10 @@
     },
     "myplan.actions.during.title" : {
       "comment" : "Actual-event guidance category title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "During an actual emergency"
           }
         },
@@ -2437,11 +2391,10 @@
     },
     "myplan.actions.now.detail" : {
       "comment" : "Offline preparedness category description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Complete these household preparations before an emergency occurs."
           }
         },
@@ -2461,11 +2414,10 @@
     },
     "myplan.actions.now.title" : {
       "comment" : "Actions possible before an emergency",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare now"
           }
         },
@@ -2485,11 +2437,10 @@
     },
     "myplan.actions.official.detail" : {
       "comment" : "Safety-critical authority-dependent category",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "These decisions depend on current information and instructions from authorities."
           }
         },
@@ -2509,11 +2460,10 @@
     },
     "myplan.actions.official.title" : {
       "comment" : "Authority-dependent action category",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Requires current official information"
           }
         },
@@ -2533,11 +2483,10 @@
     },
     "myplan.actions.title" : {
       "comment" : "Guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "What should I do?"
           }
         },
@@ -2557,11 +2506,10 @@
     },
     "myplan.contacts.manage" : {
       "comment" : "Button opening the existing Contacts tab",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "View or edit existing contacts"
           }
         },
@@ -2581,11 +2529,10 @@
     },
     "myplan.contacts.reuse_notice" : {
       "comment" : "Contact compatibility notice",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "This plan uses your existing contacts. Opening them here does not create copies."
           }
         },
@@ -2605,11 +2552,10 @@
     },
     "myplan.contacts.title" : {
       "comment" : "Guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Contacts"
           }
         },
@@ -2629,11 +2575,10 @@
     },
     "myplan.contacts.unnamed" : {
       "comment" : "Fallback label for an existing blank contact",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Unnamed contact"
           }
         },
@@ -2653,11 +2598,10 @@
     },
     "myplan.context.official.detail" : {
       "comment" : "Safety-critical distinction from live information",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Obtain current instructions from emergency services and public authorities. This plan is not a live alert."
           }
         },
@@ -2677,11 +2621,10 @@
     },
     "myplan.context.official.title" : {
       "comment" : "Authority information category",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Official current information"
           }
         },
@@ -2701,11 +2644,10 @@
     },
     "myplan.context.personal.detail" : {
       "comment" : "Required safety distinction",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "A place you enter for household planning. It is not verified or officially approved."
           }
         },
@@ -2725,11 +2667,10 @@
     },
     "myplan.context.personal.title" : {
       "comment" : "User-entered location category",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Personal planning location"
           }
         },
@@ -2749,11 +2690,10 @@
     },
     "myplan.context.preparedness.detail" : {
       "comment" : "Required safety distinction",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Offline advice bundled with Disaster Ready for planning before an emergency."
           }
         },
@@ -2773,11 +2713,10 @@
     },
     "myplan.context.preparedness.title" : {
       "comment" : "Bundled offline guidance category",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Preparedness guidance"
           }
         },
@@ -2797,11 +2736,10 @@
     },
     "myplan.country_template_unavailable.detail" : {
       "comment" : "Non-emergency configuration message",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Select a supported country in Household Profile to use country-adapted offline guidance."
           }
         },
@@ -2821,11 +2759,10 @@
     },
     "myplan.country_template_unavailable.title" : {
       "comment" : "Shown when no offline country template provider exists",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Country guidance unavailable"
           }
         },
@@ -2845,11 +2782,10 @@
     },
     "myplan.location.alternative" : {
       "comment" : "Personal evacuation planning field",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Alternative accommodation"
           }
         },
@@ -2869,11 +2805,10 @@
     },
     "myplan.location.evacuation_legacy" : {
       "comment" : "Preserved legacy evacuationDestination field",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Existing evacuation destination"
           }
         },
@@ -2893,11 +2828,10 @@
     },
     "myplan.location.family_friend" : {
       "comment" : "Personal evacuation planning field",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Family or friend location"
           }
         },
@@ -2917,11 +2851,10 @@
     },
     "myplan.location.meeting_point" : {
       "comment" : "Maps to legacy reunionPoint",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Household meeting point"
           }
         },
@@ -2941,11 +2874,10 @@
     },
     "myplan.location.personal_note" : {
       "comment" : "User-defined note; never an official designation",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Personal safe-place note"
           }
         },
@@ -2965,11 +2897,10 @@
     },
     "myplan.location.secondary_home" : {
       "comment" : "Personal evacuation planning field",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Cabin or secondary home"
           }
         },
@@ -2989,11 +2920,10 @@
     },
     "myplan.location.shelter_legacy" : {
       "comment" : "Preserved legacy shelterZone field; not official",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Existing shelter or safe-place note"
           }
         },
@@ -3013,11 +2943,10 @@
     },
     "myplan.locations.personal_notice" : {
       "comment" : "Required safety notice above user location fields",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "These are personal planning notes. They are not official evacuation centres, civil-defence shelters, or verified safe places."
           }
         },
@@ -3037,11 +2966,10 @@
     },
     "myplan.locations.title" : {
       "comment" : "Guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "My meeting and location planning"
           }
         },
@@ -3061,11 +2989,10 @@
     },
     "myplan.safety_context.title" : {
       "comment" : "Heading explaining the three information categories",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Understand the information"
           }
         },
@@ -3085,11 +3012,10 @@
     },
     "myplan.save.button" : {
       "comment" : "Explicit local-save button",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Save plan on this device"
           }
         },
@@ -3109,11 +3035,10 @@
     },
     "myplan.save.failure" : {
       "comment" : "Non-destructive persistence error status",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "The plan could not be saved. Your current entries remain visible; try again."
           }
         },
@@ -3133,11 +3058,10 @@
     },
     "myplan.save.success" : {
       "comment" : "Successful local persistence status",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan saved on this device."
           }
         },
@@ -3157,11 +3081,10 @@
     },
     "myplan.save.title" : {
       "comment" : "Final guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Save or update plan"
           }
         },
@@ -3181,11 +3104,10 @@
     },
     "myplan.shelter.title" : {
       "comment" : "Guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Where should I shelter or go?"
           }
         },
@@ -3205,11 +3127,10 @@
     },
     "myplan.supplies.evacuation" : {
       "comment" : "Evacuation supply preview heading",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Evacuation and grab-list priorities"
           }
         },
@@ -3229,11 +3150,10 @@
     },
     "myplan.supplies.home" : {
       "comment" : "Home supply preview heading",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Home priorities"
           }
         },
@@ -3253,11 +3173,10 @@
     },
     "myplan.supplies.preview_notice" : {
       "comment" : "Milestone 4 lightweight preview notice",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Read-only priorities from the offline emergency template. Your existing supply records are not changed."
           }
         },
@@ -3277,11 +3196,10 @@
     },
     "myplan.supplies.title" : {
       "comment" : "Guided plan step title",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Supplies preview"
           }
         },
@@ -5670,11 +5588,10 @@
     },
     "shelter.follow_shelter_instructions.detail" : {
       "comment" : "Safety-critical war or security guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Current authority instructions determine whether to shelter in place, evacuate, or use a civil-defence shelter."
           }
         },
@@ -5694,11 +5611,10 @@
     },
     "shelter.follow_shelter_instructions.title" : {
       "comment" : "War or security incident location guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Follow authority instructions"
           }
         },
@@ -5718,11 +5634,10 @@
     },
     "shelter.home_or_alternative_accommodation.detail" : {
       "comment" : "Preparedness location guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan whether to remain at home or stay with someone who has the utilities you need."
           }
         },
@@ -5742,11 +5657,10 @@
     },
     "shelter.home_or_alternative_accommodation.title" : {
       "comment" : "Suggested planning location type",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Home or alternative accommodation"
           }
         },
@@ -5766,11 +5680,10 @@
     },
     "shelter.outdoor_meeting_point.detail" : {
       "comment" : "House-fire planning guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Choose a predetermined outdoor household meeting point at a safe distance from the home."
           }
         },
@@ -5790,11 +5703,10 @@
     },
     "shelter.outdoor_meeting_point.title" : {
       "comment" : "Suggested household meeting-point type",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Outdoor meeting point"
           }
         },
@@ -5814,11 +5726,10 @@
     },
     "shelter.outside_risk_area.detail" : {
       "comment" : "Safety-critical planning guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan a location outside the affected or risk area and follow official evacuation instructions."
           }
         },
@@ -5838,11 +5749,10 @@
     },
     "shelter.outside_risk_area.title" : {
       "comment" : "Suggested planning location type, not an official safe place",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Outside the risk area"
           }
         },
@@ -5862,11 +5772,10 @@
     },
     "shelter.planned_alternative_accommodation.detail" : {
       "comment" : "Evacuation planning guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Plan for family, friends, or a secondary home. Keep this separate from an official evacuation centre established by authorities."
           }
         },
@@ -5886,11 +5795,10 @@
     },
     "shelter.planned_alternative_accommodation.title" : {
       "comment" : "Suggested planning location type",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Planned alternative accommodation"
           }
         },
@@ -5910,11 +5818,10 @@
     },
     "shelter.preparedness_not_official.notice" : {
       "comment" : "Required safety disclaimer for every template-generated location",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Suggested type of location for preparedness planning. Follow current instructions from local authorities during an actual emergency."
           }
         },
@@ -5934,11 +5841,10 @@
     },
     "shelter.robust_indoor_location.detail" : {
       "comment" : "Safety-critical planning guidance",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Identify a robust indoor location appropriate to the current official warning."
           }
         },
@@ -5958,11 +5864,10 @@
     },
     "shelter.robust_indoor_location.title" : {
       "comment" : "Suggested planning location type, not an official shelter",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Robust indoor location"
           }
         },
@@ -5982,11 +5887,10 @@
     },
     "smart_supply.appears_recorded" : {
       "comment" : "Exact-name match only; does not claim ownership",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Recorded"
           }
         },
@@ -6006,11 +5910,10 @@
     },
     "smart_supply.grab.title" : {
       "comment" : "Supplies prepared for leaving quickly",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Grab / evacuation"
           }
         },
@@ -6030,11 +5933,10 @@
     },
     "smart_supply.home.title" : {
       "comment" : "Supplies for remaining at home",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Home preparedness"
           }
         },
@@ -6054,11 +5956,10 @@
     },
     "smart_supply.my_supplies.detail" : {
       "comment" : "Persistence distinction",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Items you have recorded. Recommendations never change quantities, packed status, or review dates."
           }
         },
@@ -6078,11 +5979,10 @@
     },
     "smart_supply.my_supplies.empty" : {
       "comment" : "Empty saved supply list",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "No saved supplies yet."
           }
         },
@@ -6102,11 +6002,10 @@
     },
     "smart_supply.my_supplies.title" : {
       "comment" : "Heading for persisted user supply records",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "My supplies"
           }
         },
@@ -6126,11 +6025,10 @@
     },
     "smart_supply.priority.critical" : {
       "comment" : "Highest planning priority",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Critical priority"
           }
         },
@@ -6150,11 +6048,10 @@
     },
     "smart_supply.priority.high" : {
       "comment" : "High planning priority",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "High priority"
           }
         },
@@ -6174,11 +6071,10 @@
     },
     "smart_supply.priority.normal" : {
       "comment" : "Normal planning priority",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Normal priority"
           }
         },
@@ -6198,11 +6094,10 @@
     },
     "smart_supply.quantity" : {
       "comment" : "Saved supply quantity label",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Quantity"
           }
         },
@@ -6222,11 +6117,10 @@
     },
     "smart_supply.recommended.detail" : {
       "comment" : "Smart list explanation",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Recommendations combine basic preparedness, the selected emergency, and your household profile. They are planning guidance, not a guarantee of safety."
           }
         },
@@ -6246,11 +6140,10 @@
     },
     "smart_supply.recommended.title" : {
       "comment" : "Heading for app recommendations",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Recommended"
           }
         },
@@ -6270,11 +6163,10 @@
     },
     "smart_supply.safety.authority_first" : {
       "comment" : "Authority-first security incident notice",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Current authority instructions determine whether to shelter or evacuate. This supply list does not make that decision."
           }
         },
@@ -6294,11 +6186,10 @@
     },
     "smart_supply.safety.general" : {
       "comment" : "General supply safety notice",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Prepare in advance and follow current instructions from emergency services and public authorities."
           }
         },
@@ -6318,11 +6209,10 @@
     },
     "smart_supply.safety.house_fire" : {
       "comment" : "Safety-critical active fire notice",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "During an active fire, leave immediately. Never delay evacuation to collect supplies or belongings."
           }
         },
@@ -7101,11 +6991,10 @@
     },
     "supply.alternativeHeatingPreparedness" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Alternative heating preparedness"
           }
         },
@@ -7125,11 +7014,10 @@
     },
     "supply.assistanceInformation" : {
       "comment" : "Special assistance grab list",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Assistance needs information"
           }
         },
@@ -7149,11 +7037,10 @@
     },
     "supply.assistiveDevices" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Assistive devices"
           }
         },
@@ -7173,11 +7060,10 @@
     },
     "supply.bankCards" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Bank cards"
           }
         },
@@ -7197,11 +7083,10 @@
     },
     "supply.batteries" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Batteries"
           }
         },
@@ -7221,11 +7106,10 @@
     },
     "supply.batteryLighting" : {
       "comment" : "Legacy template supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Battery lighting"
           }
         },
@@ -7245,11 +7129,10 @@
     },
     "supply.cash" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Cash"
           }
         },
@@ -7269,11 +7152,10 @@
     },
     "supply.chargerPowerBank" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Charger and power bank"
           }
         },
@@ -7293,11 +7175,10 @@
     },
     "supply.childEvacuationSupplies" : {
       "comment" : "Child grab list",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Essential child evacuation supplies"
           }
         },
@@ -7317,11 +7198,10 @@
     },
     "supply.childHomeSupplies" : {
       "comment" : "Child home preparedness",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Essential child supplies"
           }
         },
@@ -7341,11 +7221,10 @@
     },
     "supply.cookingMethod" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Cooking method without normal power"
           }
         },
@@ -7365,11 +7244,10 @@
     },
     "supply.documentCopies" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Critical document copies"
           }
         },
@@ -7389,11 +7267,10 @@
     },
     "supply.drinkingWater" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Drinking water for evacuation"
           }
         },
@@ -7413,11 +7290,10 @@
     },
     "supply.essentialSupportSupplies" : {
       "comment" : "Special assistance household supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Essential support supplies"
           }
         },
@@ -7437,11 +7313,10 @@
     },
     "supply.evChargingPlan" : {
       "comment" : "Does not imply EV is preferred transport",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "EV charging and route plan"
           }
         },
@@ -7461,11 +7336,10 @@
     },
     "supply.firstAid" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "First aid supplies"
           }
         },
@@ -7485,11 +7359,10 @@
     },
     "supply.foodAndDrink" : {
       "comment" : "Legacy template supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Food and drink"
           }
         },
@@ -7509,11 +7382,10 @@
     },
     "supply.gasInstallationSupplies" : {
       "comment" : "Only shown for explicit gas installations",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Gas installation preparedness"
           }
         },
@@ -7533,11 +7405,10 @@
     },
     "supply.grabFood" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Food for evacuation"
           }
         },
@@ -7557,11 +7428,10 @@
     },
     "supply.hygiene" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Hygiene supplies"
           }
         },
@@ -7581,11 +7451,10 @@
     },
     "supply.hygieneSupplies" : {
       "comment" : "Legacy template supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Hygiene supplies"
           }
         },
@@ -7605,11 +7474,10 @@
     },
     "supply.identification" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Identification"
           }
         },
@@ -7629,11 +7497,10 @@
     },
     "supply.lighting" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Battery lighting"
           }
         },
@@ -7653,11 +7520,10 @@
     },
     "supply.medicines" : {
       "comment" : "Preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Necessary medicines"
           }
         },
@@ -7677,11 +7543,10 @@
     },
     "supply.paymentOptions" : {
       "comment" : "Legacy template supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Payment options"
           }
         },
@@ -7701,11 +7566,10 @@
     },
     "supply.paymentPreparedness" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Payment preparedness"
           }
         },
@@ -7725,11 +7589,10 @@
     },
     "supply.petEvacuationSupplies" : {
       "comment" : "Pet grab list",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Essential pet evacuation supplies"
           }
         },
@@ -7749,11 +7612,10 @@
     },
     "supply.petHomeSupplies" : {
       "comment" : "Pet home preparedness",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Pet food, water, and supplies"
           }
         },
@@ -7773,11 +7635,10 @@
     },
     "supply.phone" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Mobile phone"
           }
         },
@@ -7797,11 +7658,10 @@
     },
     "supply.phoneAndCharger" : {
       "comment" : "Legacy template supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Phone, charger, and power bank"
           }
         },
@@ -7821,11 +7681,10 @@
     },
     "supply.powerBank" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Power banks"
           }
         },
@@ -7845,23 +7704,22 @@
     },
     "supply.radio" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Battery or crank radio"
           }
         },
         "nb" : {
           "stringUnit" : {
-            "state" : "machine_translated",
+            "state" : "needs_review",
             "value" : "Batteri- eller sveiveradio"
           }
         },
         "th" : {
           "stringUnit" : {
-            "state" : "machine_translated",
+            "state" : "needs_review",
             "value" : "วิทยุใช้แบตเตอรี่หรือมือหมุน"
           }
         }
@@ -7869,11 +7727,10 @@
     },
     "supply.shelfStableFood" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Shelf-stable food"
           }
         },
@@ -7893,11 +7750,10 @@
     },
     "supply.warmClothing" : {
       "comment" : "Grab list supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Warm clothing"
           }
         },
@@ -7917,11 +7773,10 @@
     },
     "supply.warmth" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Warm clothing and blankets"
           }
         },
@@ -7941,11 +7796,10 @@
     },
     "supply.water" : {
       "comment" : "Home preparedness supply",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Drinking water"
           }
         },
@@ -7965,11 +7819,10 @@
     },
     "supply.woodStoveFuel" : {
       "comment" : "Wood stove preparedness",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "machine_translated",
             "value" : "Dry firewood and matches"
           }
         },
