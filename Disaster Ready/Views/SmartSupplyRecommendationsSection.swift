@@ -102,59 +102,12 @@ private struct RecommendationActionRow: View {
 
 extension TemplateSupplyItem {
     func localizedName(in language: AppLanguage) -> String {
-        switch id {
-        case "water":
-            return L10n.pick(language: language, english: "Drinking water", norwegian: "Drikkevann", thai: "น้ำดื่ม")
-        case "shelfStableFood":
-            return L10n.pick(language: language, english: "Shelf-stable food", norwegian: "Holdbar mat", thai: "อาหารเก็บได้นาน")
-        case "cookingMethod":
-            return L10n.pick(language: language, english: "Alternative cooking method", norwegian: "Alternativ kokemulighet", thai: "วิธีทำอาหารทางเลือก")
-        case "warmth", "warmClothing":
-            return L10n.pick(language: language, english: "Warm clothing and blankets", norwegian: "Varme klær og tepper", thai: "เสื้อผ้าอุ่นและผ้าห่ม")
-        case "lighting", "batteryLighting":
-            return L10n.pick(language: language, english: "Battery lighting", norwegian: "Batteribelysning", thai: "ไฟส่องสว่างใช้แบตเตอรี่")
-        case "radio":
-            return L10n.pick(language: language, english: "Battery or crank radio", norwegian: "Batteri- eller sveiveradio", thai: "วิทยุแบตเตอรี่หรือมือหมุน")
-        case "batteries":
-            return L10n.pick(language: language, english: "Batteries", norwegian: "Batterier", thai: "แบตเตอรี่")
-        case "powerBank":
-            return L10n.pick(language: language, english: "Power banks", norwegian: "Batteribanker", thai: "พาวเวอร์แบงก์")
-        case "medicines":
-            return L10n.pick(language: language, english: "Necessary medicines", norwegian: "Nødvendige legemidler", thai: "ยาที่จำเป็น")
-        case "firstAid":
-            return L10n.pick(language: language, english: "First aid supplies", norwegian: "Førstehjelpsutstyr", thai: "อุปกรณ์ปฐมพยาบาล")
-        case "hygiene", "hygieneSupplies":
-            return L10n.pick(language: language, english: "Hygiene supplies", norwegian: "Hygieneartikler", thai: "อุปกรณ์สุขอนามัย")
-        case "paymentPreparedness", "paymentOptions":
-            return L10n.pick(language: language, english: "Payment preparedness", norwegian: "Betalingsberedskap", thai: "การเตรียมพร้อมด้านการชำระเงิน")
-        case "petHomeSupplies":
-            return L10n.pick(language: language, english: "Pet food, water, and supplies", norwegian: "Mat, vann og utstyr til kjæledyr", thai: "อาหาร น้ำ และอุปกรณ์สัตว์เลี้ยง")
-        case "childHomeSupplies":
-            return L10n.pick(language: language, english: "Essential child supplies", norwegian: "Nødvendig utstyr til barn", thai: "อุปกรณ์จำเป็นสำหรับเด็ก")
-        case "woodStoveFuel":
-            return L10n.pick(language: language, english: "Dry firewood and matches", norwegian: "Tørr ved og fyrstikker", thai: "ฟืนแห้งและไม้ขีด")
-        case "gasInstallationSupplies":
-            return L10n.pick(language: language, english: "Gas installation preparedness", norwegian: "Beredskap for gassinstallasjon", thai: "การเตรียมพร้อมสำหรับระบบก๊าซ")
-        case "identification":
-            return L10n.pick(language: language, english: "Identification", norwegian: "Identifikasjon", thai: "เอกสารประจำตัว")
-        case "assistiveDevices":
-            return L10n.pick(language: language, english: "Assistive devices", norwegian: "Hjelpemidler", thai: "อุปกรณ์ช่วยเหลือ")
-        case "phoneAndCharger":
-            return L10n.pick(language: language, english: "Phone, charger, and power bank", norwegian: "Telefon, lader og batteribank", thai: "โทรศัพท์ ที่ชาร์จ และพาวเวอร์แบงก์")
-        case "foodAndDrink":
-            return L10n.pick(language: language, english: "Food and drink", norwegian: "Mat og drikke", thai: "อาหารและเครื่องดื่ม")
-        case "documentCopies":
-            return L10n.pick(language: language, english: "Critical document copies", norwegian: "Kopier av viktige dokumenter", thai: "สำเนาเอกสารสำคัญ")
-        case "childEvacuationSupplies":
-            return L10n.pick(language: language, english: "Essential child evacuation supplies", norwegian: "Nødvendig evakueringsutstyr til barn", thai: "อุปกรณ์อพยพที่จำเป็นสำหรับเด็ก")
-        case "petEvacuationSupplies":
-            return L10n.pick(language: language, english: "Essential pet evacuation supplies", norwegian: "Nødvendig evakueringsutstyr til kjæledyr", thai: "อุปกรณ์อพยพที่จำเป็นสำหรับสัตว์เลี้ยง")
-        case "assistanceInformation":
-            return L10n.pick(language: language, english: "Assistance needs information", norwegian: "Informasjon om hjelpebehov", thai: "ข้อมูลความต้องการความช่วยเหลือ")
-        case "evChargingPlan":
-            return L10n.pick(language: language, english: "EV charging and route plan", norwegian: "Plan for elbillading og rute", thai: "แผนชาร์จรถไฟฟ้าและเส้นทาง")
-        default:
-            return nameKey
-        }
+        L10n.text(nameKey, language: language)
+    }
+}
+
+extension SupplyRecommendation {
+    func localizedName(in language: AppLanguage) -> String {
+        L10n.text(nameKey, language: language)
     }
 }

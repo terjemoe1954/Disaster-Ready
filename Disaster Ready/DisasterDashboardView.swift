@@ -89,6 +89,7 @@ struct DisasterDashboardView: View {
                                 selectedEmergencyType: $selectedEmergencyType,
                                 plan: plan,
                                 household: householdProfile,
+                                savedSupplies: supplies,
                                 familyContacts: familyContacts,
                                 importantNumbers: importantNumbers,
                                 language: selectedLanguage,

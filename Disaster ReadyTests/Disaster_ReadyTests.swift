@@ -718,8 +718,8 @@ struct Disaster_ReadyTests {
         let ids = Set(items.map(\.id))
 
         #expect(ids.isSuperset(of: [
-            "identification", "medicines", "phoneAndCharger", "warmClothing",
-            "foodAndDrink", "paymentOptions", "documentCopies"
+            "identification", "medicines", "phone", "chargerPowerBank", "warmClothing",
+            "grabFood", "drinkingWater", "bankCards", "cash", "documentCopies"
         ]))
         #expect(items.count == ids.count)
     }
@@ -900,6 +900,114 @@ struct Disaster_ReadyTests {
         #expect(entry?.updatedAt == updatedAt)
         #expect(entry?.shelters == [shelter])
         #expect(await cache.load(latitude: 60.3929, longitude: 5.3242) == nil)
+    }
+
+    @Test func smartSupplyRecommendationsAreDeterministicAndOffline() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 3, hasChildren: true)
+        let first = SupplyPrioritizer.recommendations(for: .powerOutage, household: profile)
+        let second = SupplyPrioritizer.recommendations(for: .powerOutage, household: profile)
+
+        #expect(first == second)
+        #expect(!first.home.isEmpty)
+        #expect(!first.grab.isEmpty)
+    }
+
+    @Test func everyEmergencyReturnsDistinctValidHomeAndGrabLists() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        for emergency in EmergencyType.allCases {
+            let result = SupplyPrioritizer.recommendations(for: emergency, household: profile)
+            #expect(result.emergencyType == emergency)
+            #expect(result.home.allSatisfy { $0.listKind == .homePreparedness })
+            #expect(result.grab.allSatisfy { $0.listKind == .grabEvacuation })
+            #expect(Set(result.home.map(\.id)).count == result.home.count)
+            #expect(Set(result.grab.map(\.id)).count == result.grab.count)
+        }
+    }
+
+    @Test func powerOutagePrioritizesPowerInformationAndHeatPreparation() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 2, hasElectricHeating: true)
+        let result = SupplyPrioritizer.recommendations(for: .powerOutage, household: profile)
+        let critical = Set(result.home.filter { $0.priority == .critical }.map(\.id))
+
+        #expect(critical.isSuperset(of: ["lighting", "batteries", "radio", "powerBank", "cookingMethod", "warmth"]))
+    }
+
+    @Test func floodAndEvacuationPrioritizeGrabReadiness() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 2)
+        let flood = SupplyPrioritizer.recommendations(for: .flood, household: profile)
+        let evacuation = SupplyPrioritizer.recommendations(for: .evacuation, household: profile)
+        let floodCritical = Set(flood.grab.filter { $0.priority == .critical }.map(\.id))
+        let evacuationCritical = Set(evacuation.grab.filter { $0.priority == .critical }.map(\.id))
+
+        #expect(floodCritical.isSuperset(of: ["documentCopies", "medicines", "phone", "drinkingWater"]))
+        #expect(evacuationCritical.isSuperset(of: ["identification", "medicines", "phone", "chargerPowerBank", "bankCards"]))
+    }
+
+    @Test func houseFireAndSecurityUseSafetySpecificNotices() {
+        let profile = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        #expect(SupplyPrioritizer.recommendations(for: .houseFire, household: profile).safetyNoticeKey == "smart_supply.safety.house_fire")
+        #expect(SupplyPrioritizer.recommendations(for: .warOrSecurityIncident, household: profile).safetyNoticeKey == "smart_supply.safety.authority_first")
+    }
+
+    @Test func householdNeedsAddOnlyApplicableRecommendations() {
+        let standard = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        let adapted = HouseholdProfile(
+            countryCode: "NO",
+            householdSize: 4,
+            hasChildren: true,
+            hasPets: true,
+            hasSpecialAssistanceNeeds: true
+        )
+        let standardPlan = SupplyPrioritizer.recommendations(for: .evacuation, household: standard)
+        let adaptedPlan = SupplyPrioritizer.recommendations(for: .evacuation, household: adapted)
+        let standardIDs = Set((standardPlan.home + standardPlan.grab).map(\.id))
+        let adaptedIDs = Set((adaptedPlan.home + adaptedPlan.grab).map(\.id))
+
+        #expect(!standardIDs.contains("petEvacuationSupplies"))
+        #expect(!standardIDs.contains("childEvacuationSupplies"))
+        #expect(!standardIDs.contains("essentialSupportSupplies"))
+        #expect(adaptedIDs.isSuperset(of: ["petEvacuationSupplies", "childEvacuationSupplies", "essentialSupportSupplies", "assistanceInformation"]))
+    }
+
+    @Test func gasRecommendationsRequireExplicitNorwegianGasFlag() {
+        let noGas = HouseholdProfile(countryCode: "NO", householdSize: 1)
+        let withGas = HouseholdProfile(countryCode: "NO", householdSize: 1, hasGasInstallation: true)
+        let noGasIDs = Set(SupplyPrioritizer.recommendations(for: .powerOutage, household: noGas).home.map(\.id))
+        let gasIDs = Set(SupplyPrioritizer.recommendations(for: .powerOutage, household: withGas).home.map(\.id))
+
+        #expect(!noGasIDs.contains("gasInstallationSupplies"))
+        #expect(gasIDs.contains("gasInstallationSupplies"))
+    }
+
+    @Test func recommendationEngineNeverMutatesExistingSupplyItem() throws {
+        let reviewDate = try #require(ISO8601DateFormatter().date(from: "2027-04-01T09:00:00Z"))
+        let item = SupplyItem(
+            name: "Personal radio",
+            detail: "User note",
+            isPacked: true,
+            storageLocation: "Custom shelf",
+            quantity: "2",
+            reviewDate: reviewDate
+        )
+
+        _ = SupplyPrioritizer.recommendations(
+            for: .powerOutage,
+            household: HouseholdProfile(countryCode: "NO", householdSize: 1)
+        )
+
+        #expect(item.name == "Personal radio")
+        #expect(item.detail == "User note")
+        #expect(item.storageLocation == "Custom shelf")
+        #expect(item.quantity == "2")
+        #expect(item.isPacked)
+        #expect(item.reviewDate == reviewDate)
+    }
+
+    @Test func ownershipMatchingIsExactAndDoesNotUseFuzzyClaims() {
+        let exact = SupplyItem(name: "Battery lighting", detail: "", isPacked: false, storageLocation: "home")
+        #expect(SupplyOwnershipMatcher.appearsRecorded(recommendationName: "battery lighting", in: [exact]))
+        #expect(!SupplyOwnershipMatcher.appearsRecorded(recommendationName: "Batteries", in: [exact]))
+        #expect(!SupplyOwnershipMatcher.appearsRecorded(recommendationName: "Lighting", in: [exact]))
     }
 
     private func metAlertsJSON(features: [String]) -> String {

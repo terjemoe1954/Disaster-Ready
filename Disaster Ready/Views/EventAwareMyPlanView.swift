@@ -4,6 +4,7 @@ struct EventAwareMyPlanView: View {
     @Binding var selectedEmergencyType: EmergencyType
     @Bindable var plan: HouseholdPlan
     let household: HouseholdProfile
+    let savedSupplies: [SupplyItem]
     let familyContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
     let language: AppLanguage
@@ -29,7 +30,12 @@ struct EventAwareMyPlanView: View {
                     emergencyType: selectedEmergencyType,
                     language: language
                 )
-                MyPlanSuppliesPreviewStep(template: template, language: language)
+                MyPlanSmartSuppliesStep(
+                    emergencyType: selectedEmergencyType,
+                    household: household,
+                    savedSupplies: savedSupplies,
+                    language: language
+                )
                 MyPlanContactsStep(
                     familyContacts: familyContacts,
                     importantNumbers: importantNumbers,
@@ -260,29 +266,106 @@ private struct MyPlanLocationsStep: View {
     }
 }
 
-private struct MyPlanSuppliesPreviewStep: View {
-    let template: EmergencyPlanTemplate
+private struct MyPlanSmartSuppliesStep: View {
+    let emergencyType: EmergencyType
+    let household: HouseholdProfile
+    let savedSupplies: [SupplyItem]
     let language: AppLanguage
 
     var body: some View {
         MyPlanStepCard(number: 4, titleKey: "myplan.supplies.title", icon: "shippingbox.fill", language: language) {
-            Text(L10n.text("myplan.supplies.preview_notice", language: language))
+            Text(L10n.text("smart_supply.recommended.detail", language: language))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
-            supplyGroup(titleKey: "myplan.supplies.home", items: template.supplyPriorities)
-            supplyGroup(titleKey: "myplan.supplies.evacuation", items: template.evacuationItems)
+            Label(L10n.text(plan.safetyNoticeKey, language: language), systemImage: "exclamationmark.shield.fill")
+                .font(.footnote)
+                .foregroundStyle(.orange)
+                .accessibilityIdentifier("smartSupplySafetyNotice")
+
+            Text(L10n.text("smart_supply.recommended.title", language: language))
+                .font(.title3.weight(.bold))
+                .accessibilityHeading(.h3)
+
+            recommendationGroup(titleKey: "smart_supply.home.title", items: plan.home)
+            recommendationGroup(titleKey: "smart_supply.grab.title", items: plan.grab)
+
+            Divider()
+
+            Text(L10n.text("smart_supply.my_supplies.title", language: language))
+                .font(.title3.weight(.bold))
+                .accessibilityHeading(.h3)
+            Text(L10n.text("smart_supply.my_supplies.detail", language: language))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            if savedSupplies.isEmpty {
+                Text(L10n.text("smart_supply.my_supplies.empty", language: language))
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(savedSupplies) { supply in
+                    savedSupplyRow(supply)
+                }
+            }
         }
+        .accessibilityIdentifier("smartSupplyPlanSection")
     }
 
-    private func supplyGroup(titleKey: String, items: [TemplateSupplyItem]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private var plan: SmartSupplyPlan {
+        SupplyPrioritizer.recommendations(for: emergencyType, household: household)
+    }
+
+    private func recommendationGroup(titleKey: String, items: [SupplyRecommendation]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
             Text(L10n.text(titleKey, language: language))
                 .font(.headline)
             ForEach(items) { item in
-                Label(item.localizedName(in: language), systemImage: "circle.fill")
-                    .font(.subheadline)
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Image(systemName: "circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(priorityColor(item.priority))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.localizedName(in: language))
+                            .font(.subheadline)
+                        Text(L10n.text(item.priority.localizationKey, language: language))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 8)
+                    if SupplyOwnershipMatcher.appearsRecorded(
+                        recommendationName: item.localizedName(in: language),
+                        in: savedSupplies
+                    ) {
+                        Text(L10n.text("smart_supply.appears_recorded", language: language))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.green)
+                    }
+                }
+                .accessibilityElement(children: .combine)
             }
+        }
+    }
+
+    private func savedSupplyRow(_ supply: SupplyItem) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: supply.isPacked ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(supply.isPacked ? .green : .secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(supply.name)
+                    .font(.subheadline)
+                Text("\(L10n.text("smart_supply.quantity", language: language)): \(supply.quantity)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func priorityColor(_ priority: SupplyRecommendationPriority) -> Color {
+        switch priority {
+        case .critical: .red
+        case .high: .orange
+        case .normal: .secondary
         }
     }
 }

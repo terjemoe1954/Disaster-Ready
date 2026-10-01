@@ -5680,6 +5680,366 @@
         }
       }
     },
+    "smart_supply.appears_recorded" : {
+      "comment" : "Exact-name match only; does not claim ownership",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recorded"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Registrert"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บันทึกแล้ว"
+          }
+        }
+      }
+    },
+    "smart_supply.grab.title" : {
+      "comment" : "Supplies prepared for leaving quickly",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Grab / evacuation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ta med / evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ของสำหรับหยิบไป / อพยพ"
+          }
+        }
+      }
+    },
+    "smart_supply.home.title" : {
+      "comment" : "Supplies for remaining at home",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Home preparedness"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hjemmeberedskap"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การเตรียมพร้อมที่บ้าน"
+          }
+        }
+      }
+    },
+    "smart_supply.my_supplies.detail" : {
+      "comment" : "Persistence distinction",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Items you have recorded. Recommendations never change quantities, packed status, or review dates."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ting du har registrert. Anbefalingene endrer aldri mengde, pakket status eller kontrolldato."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "รายการที่คุณบันทึกไว้ คำแนะนำจะไม่เปลี่ยนจำนวน สถานะการจัดเตรียม หรือวันที่ตรวจสอบ"
+          }
+        }
+      }
+    },
+    "smart_supply.my_supplies.empty" : {
+      "comment" : "Empty saved supply list",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No saved supplies yet."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ingen forsyninger er lagret ennå."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ยังไม่มีเสบียงที่บันทึกไว้"
+          }
+        }
+      }
+    },
+    "smart_supply.my_supplies.title" : {
+      "comment" : "Heading for persisted user supply records",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "My supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mine forsyninger"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เสบียงของฉัน"
+          }
+        }
+      }
+    },
+    "smart_supply.priority.critical" : {
+      "comment" : "Highest planning priority",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Critical priority"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kritisk prioritet"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ลำดับความสำคัญสูงสุด"
+          }
+        }
+      }
+    },
+    "smart_supply.priority.high" : {
+      "comment" : "High planning priority",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "High priority"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Høy prioritet"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ลำดับความสำคัญสูง"
+          }
+        }
+      }
+    },
+    "smart_supply.priority.normal" : {
+      "comment" : "Normal planning priority",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Normal priority"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Normal prioritet"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ลำดับความสำคัญปกติ"
+          }
+        }
+      }
+    },
+    "smart_supply.quantity" : {
+      "comment" : "Saved supply quantity label",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Quantity"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mengde"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "จำนวน"
+          }
+        }
+      }
+    },
+    "smart_supply.recommended.detail" : {
+      "comment" : "Smart list explanation",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recommendations combine basic preparedness, the selected emergency, and your household profile. They are planning guidance, not a guarantee of safety."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Anbefalingene kombinerer grunnleggende beredskap, den valgte nødsituasjonen og husstandsprofilen. De er veiledning for planlegging, ikke en garanti for trygghet."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำแนะนำนี้พิจารณาจากการเตรียมพร้อมขั้นพื้นฐาน เหตุฉุกเฉินที่เลือก และข้อมูลครัวเรือน เป็นแนวทางเพื่อการวางแผน ไม่ใช่การรับประกันความปลอดภัย"
+          }
+        }
+      }
+    },
+    "smart_supply.recommended.title" : {
+      "comment" : "Heading for app recommendations",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recommended"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Anbefalt"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำแนะนำ"
+          }
+        }
+      }
+    },
+    "smart_supply.safety.authority_first" : {
+      "comment" : "Authority-first security incident notice",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Current authority instructions determine whether to shelter or evacuate. This supply list does not make that decision."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gjeldende instrukser fra myndighetene avgjør om du skal søke ly eller evakuere. Forsyningslisten tar ikke denne avgjørelsen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "คำสั่งล่าสุดจากหน่วยงานรัฐจะกำหนดว่าควรหลบภัยอยู่กับที่หรืออพยพ รายการเสบียงนี้ไม่ได้เป็นผู้ตัดสินใจเรื่องดังกล่าว"
+          }
+        }
+      }
+    },
+    "smart_supply.safety.general" : {
+      "comment" : "General supply safety notice",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Prepare in advance and follow current instructions from emergency services and public authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forbered deg på forhånd, og følg gjeldende instrukser fra nødetatene og offentlige myndigheter."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เตรียมพร้อมล่วงหน้าและปฏิบัติตามคำสั่งล่าสุดจากหน่วยบริการฉุกเฉินและหน่วยงานรัฐ"
+          }
+        }
+      }
+    },
+    "smart_supply.safety.house_fire" : {
+      "comment" : "Safety-critical active fire notice",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "During an active fire, leave immediately. Never delay evacuation to collect supplies or belongings."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Forlat stedet umiddelbart ved en pågående brann. Utsett aldri evakueringen for å hente forsyninger eller eiendeler."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เมื่อเกิดไฟไหม้อยู่ในขณะนั้น ให้ออกไปทันที อย่าชะลอการอพยพเพื่อเก็บเสบียงหรือทรัพย์สิน"
+          }
+        }
+      }
+    },
     "stocked" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6274,6 +6634,894 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ผ้าห่ม ถุงมือ เสื้อกันฝน รองเท้าบูต และเสื้อสะท้อนแสง"
+          }
+        }
+      }
+    },
+    "supply.alternativeHeatingPreparedness" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Alternative heating preparedness"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Beredskap for alternativ oppvarming"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การเตรียมพร้อมด้านระบบทำความร้อนทางเลือก"
+          }
+        }
+      }
+    },
+    "supply.assistanceInformation" : {
+      "comment" : "Special assistance grab list",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Assistance needs information"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Informasjon om behov for hjelp"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลความต้องการความช่วยเหลือ"
+          }
+        }
+      }
+    },
+    "supply.assistiveDevices" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Assistive devices"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hjelpemidler"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อุปกรณ์ช่วยเหลือ"
+          }
+        }
+      }
+    },
+    "supply.bankCards" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bank cards"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bankkort"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "บัตรธนาคาร"
+          }
+        }
+      }
+    },
+    "supply.batteries" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Batteries"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Batterier"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แบตเตอรี่"
+          }
+        }
+      }
+    },
+    "supply.batteryLighting" : {
+      "comment" : "Legacy template supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Battery lighting"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Batteridrevet belysning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไฟส่องสว่างใช้แบตเตอรี่"
+          }
+        }
+      }
+    },
+    "supply.cash" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cash"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kontanter"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เงินสด"
+          }
+        }
+      }
+    },
+    "supply.chargerPowerBank" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Charger and power bank"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Lader og batteribank"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่ชาร์จและแบตสำรอง"
+          }
+        }
+      }
+    },
+    "supply.childEvacuationSupplies" : {
+      "comment" : "Child grab list",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Essential child evacuation supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nødvendig utstyr for barn ved evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สิ่งของจำเป็นสำหรับเด็กในการอพยพ"
+          }
+        }
+      }
+    },
+    "supply.childHomeSupplies" : {
+      "comment" : "Child home preparedness",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Essential child supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nødvendig utstyr for barn"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ของใช้จำเป็นสำหรับเด็ก"
+          }
+        }
+      }
+    },
+    "supply.cookingMethod" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cooking method without normal power"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mulighet for matlaging uten vanlig strømforsyning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วิธีประกอบอาหารเมื่อไม่มีไฟฟ้าตามปกติ"
+          }
+        }
+      }
+    },
+    "supply.documentCopies" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Critical document copies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kopier av viktige dokumenter"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สำเนาเอกสารสำคัญ"
+          }
+        }
+      }
+    },
+    "supply.drinkingWater" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Drinking water for evacuation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Drikkevann til evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "น้ำดื่มสำหรับการอพยพ"
+          }
+        }
+      }
+    },
+    "supply.essentialSupportSupplies" : {
+      "comment" : "Special assistance household supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Essential support supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nødvendig hjelpeutstyr"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "สิ่งของจำเป็นเพื่อการช่วยเหลือ"
+          }
+        }
+      }
+    },
+    "supply.evChargingPlan" : {
+      "comment" : "Does not imply EV is preferred transport",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "EV charging and route plan"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Lade- og ruteplan for elbil"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แผนการชาร์จ EV และเส้นทาง"
+          }
+        }
+      }
+    },
+    "supply.firstAid" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "First aid supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Førstehjelpsutstyr"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อุปกรณ์ปฐมพยาบาล"
+          }
+        }
+      }
+    },
+    "supply.foodAndDrink" : {
+      "comment" : "Legacy template supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Food and drink"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mat og drikke"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อาหารและเครื่องดื่ม"
+          }
+        }
+      }
+    },
+    "supply.gasInstallationSupplies" : {
+      "comment" : "Only shown for explicit gas installations",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Gas installation preparedness"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Beredskap for gassinstallasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การเตรียมพร้อมสำหรับระบบแก๊ส"
+          }
+        }
+      }
+    },
+    "supply.grabFood" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Food for evacuation"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mat til evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อาหารสำหรับการอพยพ"
+          }
+        }
+      }
+    },
+    "supply.hygiene" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hygiene supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hygieneutstyr"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ของใช้สุขอนามัย"
+          }
+        }
+      }
+    },
+    "supply.hygieneSupplies" : {
+      "comment" : "Legacy template supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hygiene supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Hygieneutstyr"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ของใช้สุขอนามัย"
+          }
+        }
+      }
+    },
+    "supply.identification" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Identification"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Legitimasjon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เอกสารประจำตัว"
+          }
+        }
+      }
+    },
+    "supply.lighting" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Battery lighting"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Batteridrevet belysning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไฟส่องสว่างใช้แบตเตอรี่"
+          }
+        }
+      }
+    },
+    "supply.medicines" : {
+      "comment" : "Preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Necessary medicines"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nødvendige medisiner"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ยาที่จำเป็น"
+          }
+        }
+      }
+    },
+    "supply.paymentOptions" : {
+      "comment" : "Legacy template supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Payment options"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Betalingsalternativer"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ช่องทางชำระเงิน"
+          }
+        }
+      }
+    },
+    "supply.paymentPreparedness" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Payment preparedness"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Betalingsberedskap"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "การเตรียมพร้อมด้านการชำระเงิน"
+          }
+        }
+      }
+    },
+    "supply.petEvacuationSupplies" : {
+      "comment" : "Pet grab list",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Essential pet evacuation supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Nødvendig utstyr til kjæledyr ved evakuering"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ของใช้จำเป็นสำหรับสัตว์เลี้ยงในการอพยพ"
+          }
+        }
+      }
+    },
+    "supply.petHomeSupplies" : {
+      "comment" : "Pet home preparedness",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pet food, water, and supplies"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mat, vann og utstyr til kjæledyr"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อาหาร น้ำ และของใช้สำหรับสัตว์เลี้ยง"
+          }
+        }
+      }
+    },
+    "supply.phone" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mobile phone"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Mobiltelefon"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "โทรศัพท์มือถือ"
+          }
+        }
+      }
+    },
+    "supply.phoneAndCharger" : {
+      "comment" : "Legacy template supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Phone, charger, and power bank"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Telefon, lader og batteribank"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "โทรศัพท์มือถือ ที่ชาร์จ และแบตสำรอง"
+          }
+        }
+      }
+    },
+    "supply.powerBank" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Power banks"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Batteribanker"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แบตสำรอง"
+          }
+        }
+      }
+    },
+    "supply.radio" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Battery or crank radio"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Batteri- eller sveiveradio"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วิทยุใช้แบตเตอรี่หรือมือหมุน"
+          }
+        }
+      }
+    },
+    "supply.shelfStableFood" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shelf-stable food"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Holdbar mat"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "อาหารเก็บได้นาน"
+          }
+        }
+      }
+    },
+    "supply.warmClothing" : {
+      "comment" : "Grab list supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Warm clothing"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Varme klær"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เสื้อผ้ากันหนาว"
+          }
+        }
+      }
+    },
+    "supply.warmth" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Warm clothing and blankets"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Varme klær og tepper"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "เสื้อผ้ากันหนาวและผ้าห่ม"
+          }
+        }
+      }
+    },
+    "supply.water" : {
+      "comment" : "Home preparedness supply",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Drinking water"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Drikkevann"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "น้ำดื่ม"
+          }
+        }
+      }
+    },
+    "supply.woodStoveFuel" : {
+      "comment" : "Wood stove preparedness",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Dry firewood and matches"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tørr ved og fyrstikker"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ฟืนแห้งและไม้ขีดไฟ"
           }
         }
       }
