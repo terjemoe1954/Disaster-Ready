@@ -272,9 +272,10 @@ private struct PublicShelterRow: View {
     }
 
     private var mapURL: URL {
-        var components = URLComponents(string: "https://maps.apple.com/")
+        var components = URLComponents(string: "https://maps.apple.com/place")
         components?.queryItems = [
-            URLQueryItem(name: "ll", value: "\(shelter.latitude),\(shelter.longitude)")
+            URLQueryItem(name: "coordinate", value: "\(shelter.latitude),\(shelter.longitude)"),
+            URLQueryItem(name: "name", value: primaryTitle)
         ]
         return components?.url ?? URL(string: "https://maps.apple.com/")!
     }

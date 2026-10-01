@@ -167,3 +167,71 @@ No crash or runtime exit occurred during simulator verification.
 - No production shelter data is bundled or invented. Records appear only after an official WFS download or from its attributed local cache.
 
 Stop point: Milestone 8 only. Milestone 9 has not been started.
+
+## Final verification — 2026-10-01
+
+This section supersedes the earlier incomplete manual-simulator notes above. No shelter architecture or product code was changed during final verification, and Milestone 9 was not started.
+
+### Manual verification matrix
+
+| Check | Final result | Evidence |
+|---|---|---|
+| Open Public Shelters without location permission | **Passed** | The feature opened without a system permission prompt. The manual-search field, search action, no-permission explanation and **Use my location** action were present. |
+| Manual official-register search without permission | **Passed** | Search ran before permission was requested. The official record at `Nils Leuchsvei 40`, shelter number `16127`, registered capacity `465`, was displayed with a refresh timestamp. |
+| Permission requested only from Use My Location | **Passed** | The iOS permission alert appeared only after pressing **Use my location**. |
+| Denial resilience | **Passed** | Denial produced the explicit message that location was unavailable and manual register search remained available. The app and manual search remained functional. |
+| Grant and nearby distance results | **Passed on physical device** | Granting location permission produced nearby results with understandable approximate distances, including Vigernes skole, shelter number `20300`, at approximately `10 km`. |
+| No continuous location tracking | **Passed by implementation audit** | The location provider uses one-shot `requestLocation()` only. It never calls a continuous location-update API and stores no location history. |
+| Apple Maps handoff | **Passed** | **View on map** handed off to Apple Maps at the official shelter coordinate, displayed the corrected place marker, and did not automatically calculate a route or start navigation. Returning to Disaster Ready preserved the result and screen state. |
+| Cached/offline and no-cache/offline presentation | **Not manually reverified** | Network/airplane-mode controls were unavailable in the interaction environment. Automated cache tests passed, and source inspection confirms explicit cached/last-refreshed wording plus an understandable no-cache state. A physical-device airplane-mode pass remains required. |
+| War/security My Plan | **Passed** | Authority-first guidance remained visible, alongside the neutral **View public civil-defence shelters** reference action. No instruction said to go to the nearest shelter. |
+| Flood, Power outage, Extreme weather, House fire, Evacuation | **Passed** | Each scenario was selected and inspected. None exposed the public-shelter action or automatically directed the user to a civil-defence shelter. |
+| English localization | **Passed** | No raw keys, clipping or overlapping controls were observed. Safety text wrapped readably; controls were tappable and content scrolled. |
+| Norwegian Bokmål localization | **Passed** | No raw keys, clipping or overlap were observed. Localized search/location controls and safety wording were readable and usable. |
+| Thai localization | **Passed** | No raw keys, clipping or overlap were observed. Long safety wording wrapped cleanly; controls remained visible/tappable and scrolling worked. |
+| VoiceOver control labels | **Passed by accessibility hierarchy** | Search was exposed as **Search official shelter data**; **Use my location** and **View on map** had human-readable labels. Result fields exposed the address, shelter number, registered capacity and official-data label. |
+| VoiceOver distance wording | **Not reverified** | The grant/nearby runtime path was unavailable after denial. Source and localization audit confirm the human-readable label **Approximate distance: …**. |
+| Largest Dynamic Type | **Not reverified** | The launch override did not change the simulator's actual rendered content size, so no visual pass is claimed. Source audit passed: semantic scalable fonts, 44-point minimum action targets and scrollable presentation are used. |
+| Buttons and scrolling | **Passed** | Search, location and map actions were tappable, and shelter screens remained scrollable in English, Bokmål and Thai. |
+| Data integrity | **Passed** | No user location or location history is persisted. Cache entries contain official shelter reference records, refresh time and schema version only. No shelter is labelled recommended/best/safest, and registered capacity is explicitly distinguished from live availability. |
+
+No functional defect, crash, overlap or unsafe shelter direction was observed during the final simulator pass.
+
+### Final build and test result
+
+| Metric | Result |
+|---|---|
+| Tests run | 89 |
+| Passed | 89 |
+| Failed | 0 |
+| Skipped | 0 |
+| Expected failures | 0 |
+| Not run | 0 |
+| Compiler errors | 0 |
+| Compiler warnings | 0 reported |
+
+The complete active `Disaster Ready` test plan passed, including 81 unit tests and 8 UI/launch tests. A separate full project build also succeeded.
+
+### Remaining release-gate checks
+
+The following require a physical device or a simulator whose privacy/network/content-size controls can be changed reliably:
+
+- verify cached and no-cache states under true airplane mode;
+- visually exercise the largest supported Dynamic Type size, including the distance result announcement.
+
+Milestone 8 is otherwise verified as described above. Milestone 9 has not been started.
+
+### Maps marker defect found and corrected
+
+Physical-device verification found that the original Apple Maps URL centered the map on the official coordinate but did not display a marker. The link used only the legacy `ll` parameter.
+
+The handoff now uses Apple's documented unified Maps place URL:
+
+- path: `/place`;
+- `coordinate`: the unchanged official shelter latitude and longitude;
+- `name`: the neutral shelter result title;
+- no `/directions` path, route parameters or navigation-start parameter.
+
+This is a narrow Maps-presentation correction and does not change the shelter architecture, dataset, safety policy, proximity logic or routing behavior. After the correction, the complete test plan passed again: 89 run, 89 passed, 0 failed and 0 skipped. The project also built successfully with 0 reported compiler errors or warnings.
+
+Final physical-device verification confirmed that **View on map** now displays the marker at the official coordinate. The handoff still starts no route or navigation.
