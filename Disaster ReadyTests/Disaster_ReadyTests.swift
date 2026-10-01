@@ -1004,34 +1004,190 @@ struct Disaster_ReadyTests {
         #expect(active.first?.messageType == .update)
     }
 
-    @Test func metAlertsRequestUsesHTTPSContactAndRoundedCoordinates() throws {
-        let request = try METWeatherAlertService().makeRequest(
-            latitude: 59.123456,
-            longitude: 10.987654,
-            languageCode: "no"
-        )
+    @Test func metAlertsRequestUsesHTTPSContactWithoutLocationDisclosure() throws {
+        let request = try METWeatherAlertService().makeRequest(languageCode: "no")
 
         #expect(request.url?.scheme == "https")
         #expect(request.value(forHTTPHeaderField: "User-Agent")?.contains("github.com/terjemoe1954/Disaster-Ready") == true)
-        #expect(request.url?.absoluteString.contains("lat=59.1235") == true)
-        #expect(request.url?.absoluteString.contains("lon=10.9877") == true)
+        #expect(request.url?.absoluteString.contains("lat=") == false)
+        #expect(request.url?.absoluteString.contains("lon=") == false)
+        #expect(request.url?.absoluteString.contains("geographicDomain=land") == true)
     }
 
     @Test func weatherAlertCachePreservesFreshnessTimestamp() async throws {
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("weather-alert-cache-\(UUID().uuidString).json")
         let cache = WeatherAlertCache(fileURL: fileURL)
-        let updatedAt = try #require(ISO8601DateFormatter().date(from: "2026-09-30T12:00:00Z"))
+        let fetchedAt = try #require(ISO8601DateFormatter().date(from: "2026-09-30T12:00:00Z"))
         let alert = try #require(METAlertsDecoder.decode(Data(metAlertsJSON(features: [
             metAlertFeature(id: "cached", type: "Alert", color: "Yellow", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z")
         ]).utf8)).first)
 
-        try await cache.save(.init(alerts: [alert], updatedAt: updatedAt, latitude: 59.9139, longitude: 10.7522))
-        let entry = await cache.load(latitude: 59.9139, longitude: 10.7522)
+        try await cache.save(.init(alerts: [alert], fetchedAt: fetchedAt, languageCode: "no", lastModified: "value"))
+        let entry = await cache.load(languageCode: "no")
 
-        #expect(entry?.updatedAt == updatedAt)
+        #expect(entry?.fetchedAt == fetchedAt)
         #expect(entry?.alerts == [alert])
-        #expect(await cache.load(latitude: 60.3929, longitude: 5.3242) == nil)
+        #expect(await cache.load(languageCode: "en") == nil)
+    }
+
+    @Test func metAlertsMissingOptionalFieldsRemainNil() throws {
+        let json = """
+        {"features":[{"geometry":{"type":"Polygon","coordinates":[[[10,59],[11,59],[11,60],[10,60],[10,59]]]},"properties":{"id":"minimal","event":"wind","status":"Actual","type":"Alert"},"when":{"interval":["2026-09-30T10:00:00Z","2026-09-30T14:00:00Z"]}}]}
+        """
+        let alert = try #require(METAlertsDecoder.decode(Data(json.utf8)).first)
+        #expect(alert.headline == nil)
+        #expect(alert.instruction == nil)
+        #expect(alert.sentAt == nil)
+        #expect(alert.updatedAt == nil)
+    }
+
+    @Test func metAlertIdentityAndOfficialSeverityAreStable() throws {
+        let data = Data(metAlertsJSON(features: [metAlertFeature(id: "stable-cap-id", type: "Alert", color: "Red", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z")]).utf8)
+        let first = try #require(METAlertsDecoder.decode(data).first)
+        let second = try #require(METAlertsDecoder.decode(data).first)
+        #expect(first.id == second.id)
+        #expect(first.severity == .red)
+        #expect(first.officialCAPSeverity == "Severe")
+    }
+
+    @Test func futureAndExpiredAlertsNeverAppearActive() throws {
+        let data = Data(metAlertsJSON(features: [
+            metAlertFeature(id: "future", type: "Alert", color: "Yellow", start: "2026-10-01T13:00:00Z", end: "2026-10-01T15:00:00Z"),
+            metAlertFeature(id: "expired", type: "Alert", color: "Orange", start: "2026-10-01T09:00:00Z", end: "2026-10-01T11:00:00Z")
+        ]).utf8)
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        #expect(METAlertsDecoder.activeAlerts(from: try METAlertsDecoder.decode(data), at: now).isEmpty)
+    }
+
+    @Test func geographicMatchingIsDeterministicAndHonorsPolygonHoles() throws {
+        let outer = [AlertCoordinate(longitude: 0, latitude: 0), AlertCoordinate(longitude: 10, latitude: 0), AlertCoordinate(longitude: 10, latitude: 10), AlertCoordinate(longitude: 0, latitude: 10)]
+        let hole = [AlertCoordinate(longitude: 4, latitude: 4), AlertCoordinate(longitude: 6, latitude: 4), AlertCoordinate(longitude: 6, latitude: 6), AlertCoordinate(longitude: 4, latitude: 6)]
+        let geometry = OfficialAlertGeometry.polygon([outer, hole])
+        #expect(geometry.contains(latitude: 2, longitude: 2))
+        #expect(!geometry.contains(latitude: 5, longitude: 5))
+        #expect(!geometry.contains(latitude: 20, longitude: 20))
+    }
+
+    @Test func invalidWeatherCoordinatesAreRejectedBeforeNetwork() async {
+        do {
+            _ = try await METWeatherAlertService().activeAlerts(latitude: .nan, longitude: 10)
+            Issue.record("Expected invalid coordinate")
+        } catch {
+            #expect(error as? WeatherAlertServiceError == .invalidCoordinate)
+        }
+    }
+
+    @Test func alertPlanMappingIsConservativeAndDoesNotMutateAlert() throws {
+        let flood = try #require(METAlertsDecoder.decode(Data(metAlertsJSON(features: [metAlertFeature(id: "flood", type: "Alert", color: "Yellow", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z", event: "rainFlood")]).utf8)).first)
+        let unknown = try #require(METAlertsDecoder.decode(Data(metAlertsJSON(features: [metAlertFeature(id: "unknown", type: "Alert", color: "Orange", start: "2026-09-30T10:00:00Z", end: "2026-09-30T14:00:00Z", event: "newEvent")]).utf8)).first)
+        let copy = flood
+        #expect(flood.planType == .flood)
+        #expect(unknown.planType == nil)
+        #expect(copy == flood)
+    }
+
+    @Test func conditionalRefreshUsesLastModifiedWithoutCoordinates() throws {
+        let request = try METWeatherAlertService().makeRequest(languageCode: "en", lastModified: "Wed, 01 Oct 2026 10:00:00 GMT")
+        #expect(request.value(forHTTPHeaderField: "If-Modified-Since") != nil)
+        #expect(request.url?.query?.contains("lat") == false)
+        #expect(request.url?.query?.contains("lon") == false)
+    }
+
+    @Test func metExpiresAndCacheControlHeadersAreParsed() throws {
+        let received = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let service = METWeatherAlertService()
+        let expiresResponse = try #require(HTTPURLResponse(
+            url: URL(string: "https://api.met.no")!, statusCode: 200, httpVersion: nil,
+            headerFields: ["Expires": "Thu, 01 Oct 2026 12:15:00 GMT"]
+        ))
+        let maxAgeResponse = try #require(HTTPURLResponse(
+            url: URL(string: "https://api.met.no")!, statusCode: 200, httpVersion: nil,
+            headerFields: ["Cache-Control": "public, max-age=600"]
+        ))
+        #expect(service.cacheExpiry(from: expiresResponse, receivedAt: received) == received.addingTimeInterval(900))
+        #expect(service.cacheExpiry(from: maxAgeResponse, receivedAt: received) == received.addingTimeInterval(600))
+    }
+
+    @Test func requestBeforeServerExpiryDoesNotHitNetwork() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-before-expiry-\(UUID()).json"))
+        let alert = try #require(METAlertsDecoder.decode(activeMETFixture()).first)
+        try await cache.save(.init(alerts: [alert], fetchedAt: now.addingTimeInterval(-60), languageCode: "en", lastModified: "old", expiresAt: now.addingTimeInterval(300)))
+        let client = WeatherAlertHTTPClientStub(responses: [])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(await client.requestCount == 0)
+        #expect(snapshot.isCached)
+        #expect(snapshot.alerts.count == 1)
+    }
+
+    @Test func requestAfterServerExpiryMayRefresh() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-after-expiry-\(UUID()).json"))
+        let alert = try #require(METAlertsDecoder.decode(activeMETFixture()).first)
+        try await cache.save(.init(alerts: [alert], fetchedAt: now.addingTimeInterval(-600), languageCode: "en", lastModified: "old", expiresAt: now.addingTimeInterval(-1)))
+        let client = WeatherAlertHTTPClientStub(responses: [(activeMETFixture(), metResponse(status: 200, headers: ["Expires": "Thu, 01 Oct 2026 12:15:00 GMT"]))])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(await client.requestCount == 1)
+        #expect(!snapshot.isCached)
+    }
+
+    @Test func notModifiedPreservesSnapshotAndReevaluatesExpiry() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-304-\(UUID()).json"))
+        let expiredData = Data(metAlertsJSON(features: [metAlertFeature(id: "expired-at-check", type: "Alert", color: "Yellow", start: "2026-10-01T10:00:00Z", end: "2026-10-01T11:59:00Z")]).utf8)
+        let alert = try #require(METAlertsDecoder.decode(expiredData).first)
+        try await cache.save(.init(alerts: [alert], fetchedAt: now.addingTimeInterval(-600), languageCode: "en", lastModified: "old", expiresAt: now.addingTimeInterval(-1)))
+        let client = WeatherAlertHTTPClientStub(responses: [(Data(), metResponse(status: 304, headers: ["Expires": "Thu, 01 Oct 2026 12:15:00 GMT", "Last-Modified": "old"]))])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(snapshot.alerts.isEmpty)
+        let saved = await cache.load(languageCode: "en")
+        #expect(saved?.alerts.first?.id == "expired-at-check")
+        #expect(saved?.checkedAt == now)
+        #expect(saved?.expiresAt == now.addingTimeInterval(900))
+    }
+
+    @Test func deprecated203ResponseIsUsableAndObservable() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-203-\(UUID()).json"))
+        let client = WeatherAlertHTTPClientStub(responses: [(activeMETFixture(), metResponse(status: 203))])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(snapshot.alerts.count == 1)
+        #expect(snapshot.diagnostics.contains(.deprecatedProduct))
+    }
+
+    @Test func throttlingUsesCacheWithoutRetryLoop() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-429-cache-\(UUID()).json"))
+        let alert = try #require(METAlertsDecoder.decode(activeMETFixture()).first)
+        try await cache.save(.init(alerts: [alert], fetchedAt: now.addingTimeInterval(-600), languageCode: "en", lastModified: "old", expiresAt: now.addingTimeInterval(-1)))
+        let client = WeatherAlertHTTPClientStub(responses: [(Data(), metResponse(status: 429))])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(snapshot.isCached)
+        #expect(snapshot.alerts.count == 1)
+        #expect(snapshot.diagnostics.contains(.throttled))
+        #expect(await client.requestCount == 1)
+    }
+
+    @Test func throttlingWithoutCacheIsUnavailableAndDoesNotRetry() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-429-empty-\(UUID()).json"))
+        let client = WeatherAlertHTTPClientStub(responses: [(Data(), metResponse(status: 429))])
+        do {
+            _ = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+            Issue.record("Expected throttled error")
+        } catch {
+            #expect(error as? WeatherAlertServiceError == .throttled)
+        }
+        #expect(await client.requestCount == 1)
+    }
+
+    private func activeMETFixture() -> Data {
+        Data(metAlertsJSON(features: [metAlertFeature(id: "active", type: "Alert", color: "Yellow", start: "2026-10-01T10:00:00Z", end: "2026-10-01T14:00:00Z")]).utf8)
+    }
+
+    private func metResponse(status: Int, headers: [String: String] = [:]) -> HTTPURLResponse {
+        HTTPURLResponse(url: URL(string: "https://api.met.no/weatherapi/metalerts/2.0/current.json")!, statusCode: status, httpVersion: nil, headerFields: headers)!
     }
 
     @Test func shelterCachePreservesReferenceDataTimestamp() async throws {
@@ -1055,6 +1211,92 @@ struct Disaster_ReadyTests {
 
         #expect(entry?.updatedAt == updatedAt)
         #expect(entry?.shelters == [shelter])
+    }
+
+    @Test func shelterNetworkFailureReturnsCachedReferenceState() async throws {
+        let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent("shelter-offline-cache-\(UUID()).json")
+        let cache = ShelterCache(fileURL: fileURL)
+        let refreshedAt = try #require(ISO8601DateFormatter().date(from: "2026-10-01T08:00:00Z"))
+        let shelter = CivilDefenceShelter(id: "cached", address: "Oslo gate 1", latitude: 59.9, longitude: 10.7, sourceID: GeonorgeShelterService.sourceID)
+        try await cache.save(.init(shelters: [shelter], updatedAt: refreshedAt))
+        let client = ShelterHTTPClientStub()
+        let snapshot = try await GeonorgeShelterService(client: client, cache: cache).searchSnapshot(matching: "Oslo")
+        #expect(snapshot.isCached)
+        #expect(snapshot.lastUpdated == refreshedAt)
+        #expect(snapshot.shelters == [shelter])
+        #expect(await client.requestCount == 1)
+    }
+
+    @Test func shelterNetworkFailureWithoutCacheIsUnavailableWithoutRetry() async {
+        let cache = ShelterCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("shelter-offline-empty-\(UUID()).json"))
+        let client = ShelterHTTPClientStub()
+        do {
+            _ = try await GeonorgeShelterService(client: client, cache: cache).searchSnapshot(matching: "Oslo")
+            Issue.record("Expected offline shelter failure")
+        } catch {
+            #expect(await client.requestCount == 1)
+        }
+    }
+
+    @Test func metNetworkFailureUsesCacheAndFiltersExpiredAndCancelledAlerts() async throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-01T12:00:00Z"))
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-offline-lifecycle-\(UUID()).json"))
+        let data = Data(metAlertsJSON(features: [
+            metAlertFeature(id: "expired", type: "Alert", color: "Yellow", start: "2026-10-01T08:00:00Z", end: "2026-10-01T11:00:00Z"),
+            metAlertFeature(id: "cancelled", type: "Alert", color: "Orange", start: "2026-10-01T08:00:00Z", end: "2026-10-01T14:00:00Z"),
+            metAlertFeature(id: "cancelled", type: "Cancel", color: "Orange", start: "2026-10-01T08:00:00Z", end: "2026-10-01T14:00:00Z"),
+            metAlertFeature(id: "active", type: "Alert", color: "Yellow", start: "2026-10-01T08:00:00Z", end: "2026-10-01T14:00:00Z")
+        ]).utf8)
+        try await cache.save(.init(alerts: try METAlertsDecoder.decode(data), fetchedAt: now.addingTimeInterval(-600), languageCode: "en", lastModified: "old"))
+        let client = WeatherAlertHTTPClientStub(responses: [])
+        let snapshot = try await METWeatherAlertService(client: client, cache: cache, now: { now }).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+        #expect(snapshot.isCached)
+        #expect(snapshot.alerts.map(\.id) == ["active"])
+        #expect(await client.requestCount == 1)
+    }
+
+    @Test func metNetworkFailureWithoutCacheIsUnavailableWithoutRetry() async {
+        let cache = WeatherAlertCache(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("met-offline-empty-\(UUID()).json"))
+        let client = WeatherAlertHTTPClientStub(responses: [])
+        do {
+            _ = try await METWeatherAlertService(client: client, cache: cache).alertSnapshot(latitude: 59.5, longitude: 10.5, languageCode: "en")
+            Issue.record("Expected offline MET failure")
+        } catch {
+            #expect(await client.requestCount == 1)
+        }
+    }
+
+    @Test func referenceCachesContainNoLookupOriginOrFinancialCredentials() async throws {
+        let shelterURL = FileManager.default.temporaryDirectory.appendingPathComponent("shelter-privacy-audit-\(UUID()).json")
+        let metURL = FileManager.default.temporaryDirectory.appendingPathComponent("met-privacy-audit-\(UUID()).json")
+        let shelterCache = ShelterCache(fileURL: shelterURL)
+        let metCache = WeatherAlertCache(fileURL: metURL)
+        try await shelterCache.save(.init(shelters: [], updatedAt: .now))
+        try await metCache.save(.init(alerts: [], fetchedAt: .now, languageCode: "en", lastModified: nil))
+        for url in [shelterURL, metURL] {
+            let object = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+            let keys = Set(object.keys.map { $0.lowercased() })
+            #expect(keys.isDisjoint(with: ["origin", "lookuplatitude", "lookuplongitude", "locationhistory", "iban", "accountnumber", "cardnumber", "password", "token"]))
+        }
+    }
+
+    @Test func userBackupExcludesReferenceCachesAndPreservesVersion101Compatibility() throws {
+        let payload = DisasterBackupPayload(exportDate: .now, familyContacts: [], importantNumbers: [], householdPlans: [], householdRoles: [], supplies: [])
+        let encoded = try payload.encodedData()
+        let text = try #require(String(data: encoded, encoding: .utf8)).lowercased()
+        #expect(!text.contains("sheltercache"))
+        #expect(!text.contains("weatheralertcache"))
+        #expect(!text.contains("met-alerts-cache"))
+        #expect(try DisasterBackupPayload.decode(from: encoded).schemaVersion == 1)
+    }
+
+    @Test func bundledSourceMetadataSurvivesExternalLinkFailureIndependently() throws {
+        let source = try #require(GuidanceSourceRegistry.source(for: "met-weather-warnings"))
+        let copy = source
+        #expect(copy == source)
+        #expect(source.url.scheme == "https")
+        #expect(!source.title.isEmpty)
+        #expect(!source.authority.isEmpty)
     }
 
     @Test func shelterIdentifiersAreStableUniqueAndAuthoritative() throws {
@@ -1308,10 +1550,34 @@ struct Disaster_ReadyTests {
         "{\"features\":[\(features.joined(separator: ","))]}"
     }
 
-    private func metAlertFeature(id: String, type: String, color: String, start: String, end: String) -> String {
+    private func metAlertFeature(id: String, type: String, color: String, start: String, end: String, event: String = "wind") -> String {
         """
-        {"properties":{"id":"\(id)","title":"Strong wind","event":"Wind","area":"Oslo","description":"Strong wind is expected.","instruction":"Stay away from exposed areas.","consequences":"Objects may be blown away.","riskMatrixColor":"\(color)","severity":"Severe","status":"Actual","type":"\(type)","web":"https://www.met.no/"},"when":{"interval":["\(start)","\(end)"]}}
+        {"geometry":{"type":"Polygon","coordinates":[[[10,59],[11,59],[11,60],[10,60],[10,59]]]},"properties":{"id":"\(id)","title":"Strong wind","event":"\(event)","area":"Oslo","description":"Strong wind is expected.","instruction":"Stay away from exposed areas.","consequences":"Objects may be blown away.","riskMatrixColor":"\(color)","severity":"Severe","status":"Actual","type":"\(type)","web":"https://www.met.no/"},"when":{"interval":["\(start)","\(end)"]}}
         """
     }
 
+}
+
+private actor WeatherAlertHTTPClientStub: WeatherAlertHTTPClient {
+    private var responses: [(Data, URLResponse)]
+    private(set) var requestCount = 0
+
+    init(responses: [(Data, URLResponse)]) {
+        self.responses = responses
+    }
+
+    func weatherAlertData(for request: URLRequest) async throws -> (Data, URLResponse) {
+        requestCount += 1
+        guard !responses.isEmpty else { throw WeatherAlertServiceError.noUsableData }
+        return responses.removeFirst()
+    }
+}
+
+private actor ShelterHTTPClientStub: ShelterHTTPClient {
+    private(set) var requestCount = 0
+
+    func shelterData(for request: URLRequest) async throws -> (Data, URLResponse) {
+        requestCount += 1
+        throw URLError(.notConnectedToInternet)
+    }
 }

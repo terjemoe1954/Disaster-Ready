@@ -55,6 +55,14 @@ enum GuidanceSourceRegistry {
             lastReviewed: reviewedDate
         ),
         GuidanceSource(
+            id: "met-norway-metalerts-2",
+            authority: "Meteorologisk institutt (MET Norway)",
+            title: "MetAlerts 2.0 API",
+            url: officialURL("https://api.met.no/weatherapi/metalerts/2.0/documentation"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
             id: "nve-hazard-information",
             authority: "Norges vassdrags- og energidirektorat (NVE)",
             title: "Naturfare",

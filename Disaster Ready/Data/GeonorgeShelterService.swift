@@ -7,11 +7,27 @@ enum ShelterServiceError: Error {
     case decodingFailed
 }
 
+nonisolated protocol ShelterHTTPClient: Sendable {
+    func shelterData(for request: URLRequest) async throws -> (Data, URLResponse)
+}
+
+extension URLSession: ShelterHTTPClient {
+    func shelterData(for request: URLRequest) async throws -> (Data, URLResponse) {
+        try await data(for: request)
+    }
+}
+
 actor ShelterCache {
     struct Entry: Codable, Sendable {
         let shelters: [CivilDefenceShelter]
         let updatedAt: Date
-        let schemaVersion: Int = 2
+        let schemaVersion: Int
+
+        init(shelters: [CivilDefenceShelter], updatedAt: Date, schemaVersion: Int = 2) {
+            self.shelters = shelters
+            self.updatedAt = updatedAt
+            self.schemaVersion = schemaVersion
+        }
     }
 
     private let fileURL: URL
@@ -47,7 +63,7 @@ actor ShelterCache {
 struct GeonorgeShelterService: ShelterService {
     static let sourceID = "dsb-geonorge-public-shelters-wfs"
 
-    private let session: URLSession
+    private let client: any ShelterHTTPClient
     private let cache: ShelterCache
     private let now: @Sendable () -> Date
     private let radiusKilometers = 25.0
@@ -57,7 +73,13 @@ struct GeonorgeShelterService: ShelterService {
         cache: ShelterCache = ShelterCache(),
         now: @escaping @Sendable () -> Date = { .now }
     ) {
-        self.session = session
+        self.client = session
+        self.cache = cache
+        self.now = now
+    }
+
+    init(client: any ShelterHTTPClient, cache: ShelterCache, now: @escaping @Sendable () -> Date = { .now }) {
+        self.client = client
         self.cache = cache
         self.now = now
     }
@@ -116,7 +138,7 @@ struct GeonorgeShelterService: ShelterService {
 
     private func referenceSnapshot() async throws -> ShelterSnapshot {
         do {
-            let (data, response) = try await session.data(for: makeRequest())
+            let (data, response) = try await client.shelterData(for: makeRequest())
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
                 throw ShelterServiceError.invalidResponse

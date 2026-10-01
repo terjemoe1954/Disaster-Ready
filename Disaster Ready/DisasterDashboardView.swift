@@ -59,7 +59,10 @@ struct DisasterDashboardView: View {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
                         HeroCardSection(language: selectedLanguage)
-                        OfficialWeatherAlertsSection(language: selectedLanguage)
+                        OfficialWeatherAlertsSection(language: selectedLanguage) { emergencyType in
+                            selectedEmergencyType = emergencyType
+                            selectedTab = .plan
+                        }
                         PreparednessOverviewSection(
                             completedPlanItems: completedPlanItems,
                             totalPlanItems: 3,
