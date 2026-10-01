@@ -147,7 +147,9 @@ struct DisasterDashboardView: View {
                             sources: GuidanceSourceRegistry.norway,
                             language: selectedLanguage
                         )
-                        PublicSheltersSection(language: selectedLanguage)
+                        if householdProfile.countryCode == "NO" {
+                            PublicSheltersSection(language: selectedLanguage)
+                        }
                     }
                 }
 

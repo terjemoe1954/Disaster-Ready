@@ -39,6 +39,14 @@ enum GuidanceSourceRegistry {
             lastReviewed: reviewedDate
         ),
         GuidanceSource(
+            id: GeonorgeShelterService.sourceID,
+            authority: "Direktoratet for samfunnssikkerhet og beredskap (DSB) / Geonorge",
+            title: "Tilfluktsrom – Offentlige",
+            url: officialURL("https://kartkatalog.geonorge.no/Metadata/uuid/dbae9aae-10e7-4b75-8d67-7f0e8828f3d8"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
             id: "met-weather-warnings",
             authority: "Meteorologisk institutt (MET)",
             title: "Ekstremværvarsler og andre farevarsler",

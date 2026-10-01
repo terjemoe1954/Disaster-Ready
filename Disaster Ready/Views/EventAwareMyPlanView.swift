@@ -26,6 +26,10 @@ struct EventAwareMyPlanView: View {
             if let template {
                 MyPlanActionsStep(template: template, language: language)
                 MyPlanShelterStep(template: template, language: language)
+                if household.countryCode == "NO",
+                   ShelterSafetyPolicy.isRelevantInMyPlan(for: selectedEmergencyType) {
+                    MyPlanPublicShelterReference(language: language)
+                }
                 MyPlanLocationsStep(
                     plan: plan,
                     emergencyType: selectedEmergencyType,
@@ -77,6 +81,42 @@ struct EventAwareMyPlanView: View {
         EmergencyTemplateCatalog
             .provider(for: household.countryCode)?
             .template(for: selectedEmergencyType, household: household)
+    }
+}
+
+private struct MyPlanPublicShelterReference: View {
+    @State private var isPresented = false
+    let language: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(L10n.text("shelter_reference.myplan.detail", language: language))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Button {
+                isPresented = true
+            } label: {
+                Label(
+                    L10n.text("shelter_reference.myplan.button", language: language),
+                    systemImage: "shield.lefthalf.filled"
+                )
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("openPublicSheltersFromMyPlanButton")
+        }
+        .padding(14)
+        .background(.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
+        .sheet(isPresented: $isPresented) {
+            NavigationStack {
+                ScrollView {
+                    PublicSheltersSection(language: language)
+                        .padding()
+                }
+                .navigationTitle(L10n.text("shelter_reference.title", language: language))
+                .navigationBarTitleDisplayMode(.inline)
+            }
+        }
     }
 }
 

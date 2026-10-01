@@ -5563,6 +5563,627 @@
         }
       }
     },
+    "shelter_reference.cached" : {
+      "comment" : "Cached dataset label; placeholder is local date and time",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Cached shelter information — last refreshed %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bufret informasjon om tilfluktsrom – sist hentet %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลอ้างอิงเกี่ยวกับที่พักพิงที่บันทึกไว้ในแคช — ดึงข้อมูลล่าสุดเมื่อ %@"
+          }
+        }
+      }
+    },
+    "shelter_reference.capacity" : {
+      "comment" : "Official registered capacity, not live available space",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Registered capacity: %lld"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Registrert kapasitet (antall personer): %lld"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ความจุที่ลงทะเบียนไว้: %lld คน"
+          }
+        }
+      }
+    },
+    "shelter_reference.dataset_date" : {
+      "comment" : "Dataset-provided extraction date; separate from guidance review date",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Official dataset extraction: %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Uttrekksdato for offisielt datasett: %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "วันที่ดึงข้อมูลจากชุดข้อมูลทางการ: %@"
+          }
+        }
+      }
+    },
+    "shelter_reference.distance" : {
+      "comment" : "On-device straight-line distance label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Approximate distance: %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Omtrentlig avstand: %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ระยะทางโดยประมาณ: %@"
+          }
+        }
+      }
+    },
+    "shelter_reference.distance_notice" : {
+      "comment" : "Safety explanation for distance-sorted shelter results",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Distance is approximate. The nearest entry is not a recommendation or an instruction to travel there."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Avstanden er omtrentlig. Den nærmeste oppføringen er ikke en anbefaling eller en instruks om å dra dit."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ระยะทางเป็นเพียงค่าประมาณ รายการที่อยู่ใกล้ที่สุดไม่ใช่คำแนะนำหรือคำสั่งให้เดินทางไปที่นั่น"
+          }
+        }
+      }
+    },
+    "shelter_reference.location.button" : {
+      "comment" : "Explicit action that triggers location permission and one-shot lookup",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Use my location"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bruk posisjonen min"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ใช้ตำแหน่งที่ตั้งของฉัน"
+          }
+        }
+      }
+    },
+    "shelter_reference.location.detail" : {
+      "comment" : "Privacy explanation for one-shot location lookup",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Your location is used once on this device to calculate approximate distances. It is not stored or sent with the shelter-data request."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Posisjonen brukes én gang på denne enheten til å beregne omtrentlige avstander. Den lagres ikke eller sendes med forespørselen om tilfluktsromdata."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "แอปจะใช้ตำแหน่งที่ตั้งของคุณหนึ่งครั้งบนอุปกรณ์เครื่องนี้เพื่อคำนวณระยะทางโดยประมาณ โดยจะไม่จัดเก็บหรือส่งตำแหน่งไปพร้อมกับคำขอข้อมูลที่พักพิง"
+          }
+        }
+      }
+    },
+    "shelter_reference.location.error" : {
+      "comment" : "One-shot location lookup failure",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Your location could not be obtained. You can still search the official register manually."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Posisjonen kunne ikke hentes. Du kan fortsatt søke manuelt i det offisielle registeret."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไม่สามารถรับตำแหน่งที่ตั้งของคุณได้ คุณยังค้นหาในทะเบียนทางการด้วยตนเองได้"
+          }
+        }
+      }
+    },
+    "shelter_reference.location.permission_error" : {
+      "comment" : "Location permission failure with manual alternative",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Location is unavailable or permission was not granted. You can still search the official register manually."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Posisjonen er utilgjengelig, eller tilgang ble ikke gitt. Du kan fortsatt søke manuelt i det offisielle registeret."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ตำแหน่งที่ตั้งไม่พร้อมใช้งานหรือไม่ได้รับอนุญาตให้เข้าถึง คุณยังค้นหาในทะเบียนทางการด้วยตนเองได้"
+          }
+        }
+      }
+    },
+    "shelter_reference.location.title" : {
+      "comment" : "Heading for optional nearby lookup",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Public shelters nearby"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offentlige tilfluktsrom i nærheten"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่หลบภัยสาธารณะในบริเวณใกล้เคียง"
+          }
+        }
+      }
+    },
+    "shelter_reference.manual.detail" : {
+      "comment" : "Description for manual official-register search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Search an official address or shelter number. No location permission is needed."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Søk etter en offisiell adresse eller et tilfluktsromnummer. Ingen posisjonstilgang er nødvendig."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ค้นหาที่อยู่ทางการหรือหมายเลขที่หลบภัยโดยไม่ต้องอนุญาตให้เข้าถึงตำแหน่งที่ตั้ง"
+          }
+        }
+      }
+    },
+    "shelter_reference.manual.placeholder" : {
+      "comment" : "Manual shelter register search field placeholder",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Address or shelter number"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Adresse eller tilfluktsromnummer"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่อยู่หรือหมายเลขที่หลบภัย"
+          }
+        }
+      }
+    },
+    "shelter_reference.manual.title" : {
+      "comment" : "Heading for manual shelter lookup without location permission",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Search the official register"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Søk i det offisielle registeret"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ค้นหาในทะเบียนทางการ"
+          }
+        }
+      }
+    },
+    "shelter_reference.myplan.button" : {
+      "comment" : "Neutral My Plan link shown only for war or security incident",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "View public civil-defence shelters"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vis offentlige tilfluktsrom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดูที่หลบภัยป้องกันภัยฝ่ายพลเรือนสาธารณะ"
+          }
+        }
+      }
+    },
+    "shelter_reference.myplan.detail" : {
+      "comment" : "Authority-first explanation beside My Plan shelter link",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Reference information only. Current authority instructions determine whether and when shelters should be used."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Kun referanseinformasjon. Gjeldende instrukser fra myndighetene avgjør om og når tilfluktsrom skal brukes."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลนี้ใช้เพื่อการอ้างอิงเท่านั้น ให้ปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานที่เกี่ยวข้องในการตัดสินใจว่าควรใช้ที่หลบภัยหรือไม่และเมื่อใด"
+          }
+        }
+      }
+    },
+    "shelter_reference.no_results" : {
+      "comment" : "Empty result for official shelter register",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "No matching registered public shelters were found. The register may not cover every location."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Fant ingen samsvarende registrerte offentlige tilfluktsrom. Registeret dekker kanskje ikke alle steder."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ไม่พบที่หลบภัยสาธารณะที่ลงทะเบียนซึ่งตรงกับการค้นหา ทะเบียนอาจไม่ครอบคลุมทุกพื้นที่"
+          }
+        }
+      }
+    },
+    "shelter_reference.not_live" : {
+      "comment" : "Explains that register data is not a live shelter status",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "This is official reference data, not live information about whether a shelter is open, ready, or has available capacity."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dette er offisielle referansedata, ikke sanntidsinformasjon om hvorvidt et tilfluktsrom er åpent, klart til bruk eller har ledig kapasitet."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "นี่เป็นข้อมูลอ้างอิงทางการ ไม่ใช่ข้อมูลแบบเรียลไทม์ว่าที่หลบภัยเปิดให้บริการ พร้อมใช้งาน หรือยังรองรับคนได้หรือไม่"
+          }
+        }
+      }
+    },
+    "shelter_reference.official_data" : {
+      "comment" : "Attribution label for DSB Geonorge records",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Official shelter data"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offisielle data om tilfluktsrom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลที่หลบภัยทางการ"
+          }
+        }
+      }
+    },
+    "shelter_reference.refreshed" : {
+      "comment" : "Successful dataset download time; placeholder is local date and time",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Shelter information refreshed %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Informasjon om tilfluktsrom hentet %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดึงข้อมูลที่หลบภัยล่าสุดเมื่อ %@"
+          }
+        }
+      }
+    },
+    "shelter_reference.room" : {
+      "comment" : "Official shelter room number; placeholder is the source value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Shelter number %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tilfluktsromnummer %@"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "หมายเลขที่หลบภัย %@"
+          }
+        }
+      }
+    },
+    "shelter_reference.safety" : {
+      "comment" : "Prominent safety-critical shelter explanation",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Public civil-defence shelters are intended for situations where authorities instruct the population to use them. A nearby shelter is not automatically the correct place to go. Follow current instructions from Norwegian authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offentlige tilfluktsrom er beregnet for situasjoner der myndighetene ber befolkningen om å bruke dem. Et tilfluktsrom i nærheten er ikke automatisk riktig sted å dra. Følg gjeldende instrukser fra norske myndigheter."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่หลบภัยป้องกันภัยฝ่ายพลเรือนสาธารณะมีไว้สำหรับสถานการณ์ที่หน่วยงานทางการสั่งให้ประชาชนใช้ ที่หลบภัยในบริเวณใกล้เคียงอาจไม่ใช่สถานที่ที่ควรไปเสมอ โปรดปฏิบัติตามคำแนะนำล่าสุดจากหน่วยงานทางการของนอร์เวย์"
+          }
+        }
+      }
+    },
+    "shelter_reference.search" : {
+      "comment" : "Button and VoiceOver label for manual shelter search",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Search official shelter data"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Søk i offisielle data om tilfluktsrom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ค้นหาข้อมูลที่หลบภัยทางการ"
+          }
+        }
+      }
+    },
+    "shelter_reference.source_section" : {
+      "comment" : "Heading above source attribution cards",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Official data and guidance"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offisielle data og veiledning"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลและคำแนะนำทางการ"
+          }
+        }
+      }
+    },
+    "shelter_reference.title" : {
+      "comment" : "Title for the official Norwegian public shelter reference feature",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Public civil-defence shelters"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Offentlige tilfluktsrom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่หลบภัยป้องกันภัยฝ่ายพลเรือนสาธารณะ"
+          }
+        }
+      }
+    },
+    "shelter_reference.unavailable" : {
+      "comment" : "Offline state when no official shelter cache exists",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Shelter reference data is unavailable and no cached copy exists. Try again when a network connection is available."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Referansedata om tilfluktsrom er utilgjengelige, og det finnes ingen bufret kopi. Prøv igjen når en nettverkstilkobling er tilgjengelig."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ข้อมูลอ้างอิงเกี่ยวกับที่หลบภัยไม่พร้อมใช้งานและไม่มีสำเนาที่บันทึกไว้ในแคช โปรดลองอีกครั้งเมื่อเชื่อมต่อเครือข่ายได้"
+          }
+        }
+      }
+    },
+    "shelter_reference.unnamed" : {
+      "comment" : "Neutral label when official data contains no name or address",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Registered public shelter"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Registrert offentlig tilfluktsrom"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ที่หลบภัยสาธารณะที่ลงทะเบียน"
+          }
+        }
+      }
+    },
+    "shelter_reference.view_map" : {
+      "comment" : "Neutral button that opens a shelter coordinate in Maps without routing",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "View on map"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Vis på kart"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "ดูบนแผนที่"
+          }
+        }
+      }
+    },
     "shelter_zone" : {
       "extractionState" : "stale",
       "localizations" : {

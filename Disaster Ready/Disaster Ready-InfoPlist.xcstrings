@@ -24,6 +24,30 @@
           }
         }
       }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Disaster Ready uses your location once to calculate approximate distances to official public shelter records. Your location is not stored."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready bruker posisjonen én gang til å beregne omtrentlige avstander til oppføringer i det offisielle registeret over offentlige tilfluktsrom. Posisjonen lagres ikke."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready จะใช้ตำแหน่งที่ตั้งของคุณหนึ่งครั้งเพื่อคำนวณระยะทางโดยประมาณไปยังรายการที่หลบภัยสาธารณะในทะเบียนทางการ โดยจะไม่จัดเก็บตำแหน่งที่ตั้ง"
+          }
+        }
+      }
     }
   },
   "version" : "1.3"

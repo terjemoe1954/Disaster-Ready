@@ -1050,12 +1050,150 @@ struct Disaster_ReadyTests {
             dataUpdatedAt: nil
         )
 
-        try await cache.save(.init(shelters: [shelter], updatedAt: updatedAt, latitude: 59.9139, longitude: 10.7522))
-        let entry = await cache.load(latitude: 59.9139, longitude: 10.7522)
+        try await cache.save(.init(shelters: [shelter], updatedAt: updatedAt))
+        let entry = await cache.load()
 
         #expect(entry?.updatedAt == updatedAt)
         #expect(entry?.shelters == [shelter])
-        #expect(await cache.load(latitude: 60.3929, longitude: 5.3242) == nil)
+    }
+
+    @Test func shelterIdentifiersAreStableUniqueAndAuthoritative() throws {
+        let xml = """
+        <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:app="http://example.com/app">
+          <wfs:member><app:Tilfluktsrom><app:identifikasjon><app:Identifikasjon><app:lokalId>official-1</app:lokalId></app:Identifikasjon></app:identifikasjon><app:posisjon><gml:Point><gml:pos>59.91 10.75</gml:pos></gml:Point></app:posisjon></app:Tilfluktsrom></wfs:member>
+          <wfs:member><app:Tilfluktsrom><app:identifikasjon><app:Identifikasjon><app:lokalId>official-1</app:lokalId></app:Identifikasjon></app:identifikasjon><app:posisjon><gml:Point><gml:pos>59.92 10.76</gml:pos></gml:Point></app:posisjon></app:Tilfluktsrom></wfs:member>
+          <wfs:member><app:Tilfluktsrom><app:identifikasjon><app:Identifikasjon><app:lokalId>official-2</app:lokalId></app:Identifikasjon></app:identifikasjon><app:posisjon><gml:Point><gml:pos>59.93 10.77</gml:pos></gml:Point></app:posisjon></app:Tilfluktsrom></wfs:member>
+        </wfs:FeatureCollection>
+        """
+        let shelters = try ShelterGMLDecoder.decode(Data(xml.utf8))
+
+        #expect(shelters.map(\.id) == ["official-1", "official-2"])
+        #expect(shelters.allSatisfy { $0.sourceID == GeonorgeShelterService.sourceID })
+    }
+
+    @Test func shelterDecoderRejectsMissingIDsAndInvalidCoordinates() throws {
+        let xml = """
+        <wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:app="http://example.com/app">
+          <wfs:member><app:Tilfluktsrom><app:posisjon><gml:Point><gml:pos>59.91 10.75</gml:pos></gml:Point></app:posisjon></app:Tilfluktsrom></wfs:member>
+          <wfs:member><app:Tilfluktsrom><app:identifikasjon><app:Identifikasjon><app:lokalId>invalid</app:lokalId></app:Identifikasjon></app:identifikasjon><app:posisjon><gml:Point><gml:pos>100 10.75</gml:pos></gml:Point></app:posisjon></app:Tilfluktsrom></wfs:member>
+        </wfs:FeatureCollection>
+        """
+        #expect(try ShelterGMLDecoder.decode(Data(xml.utf8)).isEmpty)
+    }
+
+    @Test func invalidLookupCoordinatesFailBeforeNetworkUse() async {
+        await #expect(throws: ShelterServiceError.self) {
+            try await GeonorgeShelterService().nearbyShelters(latitude: 91, longitude: 10)
+        }
+        await #expect(throws: ShelterServiceError.self) {
+            try await GeonorgeShelterService().nearbyShelters(latitude: 60, longitude: 181)
+        }
+    }
+
+    @Test func shelterDistanceIsDeterministic() throws {
+        let origin = ShelterCoordinate(latitude: 59.9139, longitude: 10.7522)
+        let shelter = CivilDefenceShelter(
+            id: "distance",
+            latitude: 59.9239,
+            longitude: 10.7522,
+            sourceID: GeonorgeShelterService.sourceID
+        )
+        let first = try ShelterProximity.distance(from: origin, to: shelter)
+        let second = try ShelterProximity.distance(from: origin, to: shelter)
+
+        #expect(first == second)
+        #expect(first > 1 && first < 1.2)
+    }
+
+    @Test func nearbySheltersSortByDistanceThenStableID() throws {
+        let origin = ShelterCoordinate(latitude: 60, longitude: 10)
+        let shelters = [
+            CivilDefenceShelter(id: "far", latitude: 60.2, longitude: 10, sourceID: GeonorgeShelterService.sourceID),
+            CivilDefenceShelter(id: "near-b", latitude: 60.01, longitude: 10, sourceID: GeonorgeShelterService.sourceID),
+            CivilDefenceShelter(id: "near-a", latitude: 60.01, longitude: 10, sourceID: GeonorgeShelterService.sourceID)
+        ]
+        #expect(try ShelterProximity.sorted(shelters: shelters, from: origin).map(\.shelter.id) == ["near-a", "near-b", "far"])
+    }
+
+    @Test func missingShelterMetadataRemainsNilRatherThanFabricated() {
+        let shelter = CivilDefenceShelter(
+            id: "minimal",
+            latitude: 60,
+            longitude: 10,
+            sourceID: GeonorgeShelterService.sourceID
+        )
+        #expect(shelter.name == nil)
+        #expect(shelter.address == nil)
+        #expect(shelter.municipality == nil)
+        #expect(shelter.capacity == nil)
+        #expect(shelter.roomNumber == nil)
+    }
+
+    @Test func manualRegisterSearchNeedsNoLocationAndUsesOnlyOfficialFields() throws {
+        let shelters = [
+            CivilDefenceShelter(id: "1", roomNumber: "16127", address: "Nils Leuchsvei 40", latitude: 59, longitude: 10, sourceID: GeonorgeShelterService.sourceID),
+            CivilDefenceShelter(id: "2", roomNumber: "200", address: "Bergen gate 1", latitude: 60, longitude: 5, sourceID: GeonorgeShelterService.sourceID)
+        ]
+        #expect(try ShelterRegisterSearch.results(matching: "Leuchsvei", in: shelters).map(\.id) == ["1"])
+        #expect(try ShelterRegisterSearch.results(matching: "200", in: shelters).map(\.id) == ["2"])
+    }
+
+    @Test func shelterCacheDoesNotStoreLookupLocationHistory() async throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("shelter-location-privacy-\(UUID().uuidString).json")
+        let cache = ShelterCache(fileURL: fileURL)
+        let shelter = CivilDefenceShelter(id: "1", latitude: 59, longitude: 10, sourceID: GeonorgeShelterService.sourceID)
+        try await cache.save(.init(shelters: [shelter], updatedAt: .now))
+        let object = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: fileURL)) as? [String: Any])
+
+        #expect(object["latitude"] == nil)
+        #expect(object["longitude"] == nil)
+        #expect(object["origin"] == nil)
+        #expect(object["locationHistory"] == nil)
+    }
+
+    @Test func cachedStatusAndDatasetTimestampAreSeparate() throws {
+        let datasetDate = try #require(ISO8601DateFormatter().date(from: "2026-09-29T23:40:57Z"))
+        let refreshedDate = try #require(ISO8601DateFormatter().date(from: "2026-10-01T08:00:00Z"))
+        let snapshot = ShelterSnapshot(
+            shelters: [],
+            lastUpdated: refreshedDate,
+            isCached: true,
+            datasetUpdatedAt: datasetDate
+        )
+
+        #expect(snapshot.isCached)
+        #expect(snapshot.lastUpdated == refreshedDate)
+        #expect(snapshot.datasetUpdatedAt == datasetDate)
+        #expect(snapshot.datasetUpdatedAt != GuidanceSourceRegistry.source(for: GeonorgeShelterService.sourceID)?.lastReviewed)
+    }
+
+    @Test func shelterDatasetSourceResolvesToOfficialHTTPSMetadata() throws {
+        let source = try #require(GuidanceSourceRegistry.source(for: GeonorgeShelterService.sourceID))
+        #expect(source.countryCode == "NO")
+        #expect(source.url.scheme == "https")
+        #expect(source.url.host == "kartkatalog.geonorge.no")
+        #expect(source.authority.contains("DSB"))
+    }
+
+    @Test func nearestShelterIsNeverClassifiedAsRecommended() {
+        #expect(!ShelterSafetyPolicy.nearestMeansRecommended)
+    }
+
+    @Test func onlyWarOrSecurityMyPlanSurfacesShelterReference() {
+        for emergency in EmergencyType.allCases {
+            #expect(ShelterSafetyPolicy.isRelevantInMyPlan(for: emergency) == (emergency == .warOrSecurityIncident))
+        }
+    }
+
+    @Test func shelterRequestDownloadsReferenceDataWithoutUserCoordinates() throws {
+        let request = try GeonorgeShelterService().makeRequest()
+        let queryNames = Set(URLComponents(url: try #require(request.url), resolvingAgainstBaseURL: false)?.queryItems?.map(\.name) ?? [])
+        #expect(request.url?.scheme == "https")
+        #expect(!queryNames.contains("bbox"))
+        #expect(!queryNames.contains("latitude"))
+        #expect(!queryNames.contains("longitude"))
+        #expect(queryNames.contains("typeNames"))
     }
 
     @Test func smartSupplyRecommendationsAreDeterministicAndOffline() {
