@@ -170,6 +170,7 @@ struct DisasterDashboardView: View {
                             PublicSheltersSection(language: selectedLanguage)
                         }
                     }
+                    .accessibilityIdentifier("suppliesScrollView")
                 }
 
                 Tab(contactsTabTitle, systemImage: "person.2.fill", value: DashboardTab.contacts) {

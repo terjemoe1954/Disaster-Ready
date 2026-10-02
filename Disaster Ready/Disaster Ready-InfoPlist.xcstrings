@@ -32,19 +32,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Disaster Ready uses your location once to calculate approximate distances to official public shelter records. Your location is not stored."
+            "value" : "Disaster Ready uses one location reading when you choose Use My Location to calculate shelter distances or match official weather warnings. Your location is not stored."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "machine_translated",
-            "value" : "Disaster Ready bruker posisjonen én gang til å beregne omtrentlige avstander til oppføringer i det offisielle registeret over offentlige tilfluktsrom. Posisjonen lagres ikke."
+            "value" : "Disaster Ready bruker én posisjonsmåling når du velger Bruk min posisjon, for å beregne avstander til tilfluktsrom eller finne relevante offisielle farevarsler. Posisjonen lagres ikke."
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "machine_translated",
-            "value" : "Disaster Ready จะใช้ตำแหน่งที่ตั้งของคุณหนึ่งครั้งเพื่อคำนวณระยะทางโดยประมาณไปยังรายการที่หลบภัยสาธารณะในทะเบียนทางการ โดยจะไม่จัดเก็บตำแหน่งที่ตั้ง"
+            "value" : "Disaster Ready ใช้ข้อมูลตำแหน่งหนึ่งครั้งเมื่อคุณเลือกใช้ตำแหน่งของฉัน เพื่อคำนวณระยะทางไปยังที่หลบภัยหรือจับคู่คำเตือนสภาพอากาศทางการ โดยจะไม่จัดเก็บตำแหน่งของคุณ"
           }
         }
       }

@@ -16,10 +16,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testCanReopenAndFinishOnboardingFromSettings() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let settingsButton = app.buttons["settingsButton"]
@@ -43,10 +40,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testSupplySearchShowsEmptyState() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let suppliesTab = app.tabBars.buttons["Utstyr"]
@@ -54,10 +48,9 @@ final class Disaster_ReadyUITests: XCTestCase {
         suppliesTab.tap()
 
         let searchField = app.descendants(matching: .any)["supplySearchField"]
-        for _ in 0..<10 where !searchField.isHittable {
-            app.swipeUp()
-        }
-        XCTAssertTrue(searchField.isHittable)
+        let suppliesScrollView = app.scrollViews["suppliesScrollView"]
+        XCTAssertTrue(suppliesScrollView.waitForExistence(timeout: 5))
+        scrollToHittable(searchField, in: suppliesScrollView)
         searchField.tap()
         searchField.typeText("zzzz-no-supply")
 
@@ -68,10 +61,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testEventAwarePlanIsAvailable() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let planTab = app.tabBars.buttons["Plan"]
@@ -85,10 +75,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testPaymentPreparednessChecklistIsAvailable() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let suppliesTab = app.tabBars.buttons["Utstyr"]
@@ -102,10 +89,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testOfficialWeatherWarningsAreAvailableFromOverview() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let searchField = app.descendants(matching: .any)["weatherAlertAreaSearchField"]
@@ -118,10 +102,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testHouseholdProfileCanBeOpenedFromSettings() throws {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "nb"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
         let settingsButton = app.buttons["settingsButton"]
@@ -143,9 +124,12 @@ final class Disaster_ReadyUITests: XCTestCase {
         scrollToHittable(button, in: app)
         button.tap()
 
+        let planTab = app.tabBars.buttons["Plan"]
+        XCTAssertTrue(waitUntilSelected(planTab))
+
         XCTAssertTrue(
             app.descendants(matching: .any)["emergencyTypePicker"]
-                .waitForExistence(timeout: 5)
+                .waitForExistence(timeout: 10)
         )
     }
 
@@ -198,10 +182,7 @@ final class Disaster_ReadyUITests: XCTestCase {
     func testHomeLocalizationAvailableInAllSupportedLanguages() throws {
         for language in ["en", "nb", "th"] {
             let app = XCUIApplication()
-            app.launchArguments = [
-                "-hasSeenOnboarding", "YES",
-                "-preferredLanguageCode", language
-            ]
+            app.launchArguments = standardLaunchArguments(language: language)
             app.launch()
 
             XCTAssertTrue(
@@ -227,23 +208,35 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     private func launchEnglishApp() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-hasSeenOnboarding", "YES",
-            "-preferredLanguageCode", "en"
-        ]
+        app.launchArguments = standardLaunchArguments(language: "en")
         app.launch()
         return app
     }
 
     @MainActor
-    private func scrollToHittable(_ element: XCUIElement, in app: XCUIApplication) {
-        for _ in 0..<12 where !element.exists {
-            app.swipeUp()
+    private func standardLaunchArguments(language: String) -> [String] {
+        [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", language,
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"
+        ]
+    }
+
+    @MainActor
+    private func scrollToHittable(_ element: XCUIElement, in scrollContainer: XCUIElement) {
+        for _ in 0..<10 where !element.isHittable {
+            scrollContainer.swipeUp()
         }
-        XCTAssertTrue(element.waitForExistence(timeout: 5))
-        for _ in 0..<12 where !element.isHittable {
-            app.swipeUp()
+        for _ in 0..<10 where !element.isHittable {
+            scrollContainer.swipeDown()
         }
         XCTAssertTrue(element.isHittable)
+    }
+
+    @MainActor
+    private func waitUntilSelected(_ element: XCUIElement) -> Bool {
+        let predicate = NSPredicate(format: "isSelected == true")
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        return XCTWaiter.wait(for: [expectation], timeout: 10) == .completed
     }
 }
