@@ -615,6 +615,7 @@ struct HouseholdPlanSection: View {
 struct ContactsSection: View {
     let familyContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
+    let countryCode: String
     let language: AppLanguage
     let addFamily: () -> Void
     let addImportant: () -> Void
@@ -638,6 +639,15 @@ struct ContactsSection: View {
             Text(L10n.text("contacts_subtitle", language: language))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            OfficialEmergencyContactsSection(
+                countryCode: countryCode,
+                language: language
+            )
+
+            Text(EmergencyContactsLocalizationResources.text("official_contacts.my_contacts", language: language))
+                .font(.headline)
+                .accessibilityHeading(.h3)
 
             contactGroup(
                 title: L10n.text("family", language: language),
@@ -795,7 +805,15 @@ struct SuppliesSection: View {
                     .font(.title3.weight(.bold))
                     .accessibilityHeading(.h2)
                 Spacer()
-                Text("\(completionCount)/\(totalCount) \(L10n.text("ready", language: language).lowercased())")
+                Text(
+                    L10n.format(
+                        "%lld/%lld %@",
+                        language: language,
+                        completionCount,
+                        totalCount,
+                        L10n.text("ready", language: language).lowercased()
+                    )
+                )
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)

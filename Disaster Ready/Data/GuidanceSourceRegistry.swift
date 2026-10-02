@@ -77,6 +77,30 @@ enum GuidanceSourceRegistry {
             url: officialURL("https://www.dsb.no/sikkerhverdag/egenberedskap/eigenberedskap-for-betalingar/"),
             countryCode: "NO",
             lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
+            id: "no-emergency-fire-110",
+            authority: "Direktoratet for samfunnssikkerhet og beredskap (DSB)",
+            title: "110-sentralene",
+            url: officialURL("https://www.dsb.no/brannsikkerhet/nodmelding/110-sentralene/"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
+            id: "no-emergency-police-112",
+            authority: "Politiet",
+            title: "Ring politiet",
+            url: officialURL("https://www.politiet.no/kontakt-politiet/ring-politiet"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
+            id: "no-medical-numbers",
+            authority: "Helsenorge / Helsedirektoratet",
+            title: "Legevakt og medisinsk nødhjelp",
+            url: officialURL("https://www.helsenorge.no/hjelpetilbud-i-kommunene/legevakt/"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
         )
     ]
 

@@ -1546,6 +1546,679 @@ struct Disaster_ReadyTests {
         #expect(!SupplyOwnershipMatcher.appearsRecorded(recommendationName: "Lighting", in: [exact]))
     }
 
+    @Test func norwayEmergencyConfigurationLoadsOfflineWithUniqueStableIDs() throws {
+        let configuration = try #require(CountryEmergencyConfigurationCatalog.configuration(for: "no"))
+        let ids = configuration.emergencyNumbers.map(\.id)
+
+        #expect(configuration.countryCode == "NO")
+        #expect(ids.count == Set(ids).count)
+        #expect(!EmergencyContactPrivacyPolicy.requiresNetworkForOfficialNumbers)
+    }
+
+    @Test(arguments: [
+        ("110", EmergencyService.fire, OfficialNumberClassification.emergency),
+        ("112", EmergencyService.police, OfficialNumberClassification.emergency),
+        ("113", EmergencyService.medicalEmergency, OfficialNumberClassification.emergency),
+        ("116 117", EmergencyService.outOfHoursMedical, OfficialNumberClassification.nonEmergencyMedicalAdvice)
+    ])
+    func verifiedNorwayNumbersRemainExactAndClassified(
+        number: String,
+        service: EmergencyService,
+        classification: OfficialNumberClassification
+    ) throws {
+        let match = try #require(
+            CountryEmergencyConfigurationCatalog.norway.emergencyNumbers.first { $0.number == number }
+        )
+        #expect(match.number == number)
+        #expect(match.service == service)
+        #expect(match.classification == classification)
+        #expect(GuidanceSourceRegistry.source(for: match.sourceID) != nil)
+    }
+
+    @Test func legevaktIsDistinctFromMedicalEmergency() throws {
+        let numbers = CountryEmergencyConfigurationCatalog.norway.emergencyNumbers
+        let emergency = try #require(numbers.first { $0.number == "113" })
+        let legevakt = try #require(numbers.first { $0.number == "116 117" })
+
+        #expect(emergency.classification == .emergency)
+        #expect(legevakt.classification == .nonEmergencyMedicalAdvice)
+        #expect(emergency.service != legevakt.service)
+    }
+
+    @Test func unsupportedCountriesNeverReceiveNorwegianNumbers() {
+        #expect(CountryEmergencyConfigurationCatalog.configuration(for: "SE") == nil)
+        #expect(CountryEmergencyConfigurationCatalog.numbers(for: "TH").isEmpty)
+        #expect(CountryEmergencyConfigurationCatalog.numbers(for: "XX").isEmpty)
+    }
+
+    @Test func officialCallingRequiresExplicitConfirmationAndUsesExactDialString() throws {
+        let legevakt = try #require(
+            CountryEmergencyConfigurationCatalog.norway.emergencyNumbers.first { $0.number == "116 117" }
+        )
+        #expect(EmergencyCallHandoff.requiresExplicitUserAction)
+        #expect(!EmergencyCallHandoff.automaticallyPlacesCalls)
+        #expect(EmergencyCallHandoff.url(for: legevakt)?.absoluteString == "tel:116117")
+    }
+
+    @Test func milestoneElevenIntroducesNoContactPermissionOrUpload() {
+        #expect(!EmergencyContactPrivacyPolicy.requiresContactsFrameworkAccess)
+        #expect(!EmergencyContactPrivacyPolicy.uploadsUserContacts)
+    }
+
+    @Test func myPlanSurfacesFireReferenceWithoutDuplicatingPersonalContacts() {
+        let family = FamilyContact(name: "Alex", role: "Parent", phoneNumber: "555", notes: "")
+        let important = ImportantNumber(label: "School", phoneNumber: "444", notes: "")
+        let official = CountryEmergencyConfigurationCatalog.numbersRelevantToPlan(.houseFire, countryCode: "NO")
+
+        #expect(official.map(\.number) == ["110"])
+        #expect(family.name == "Alex")
+        #expect(important.label == "School")
+        #expect(!official.contains { $0.number == family.phoneNumber || $0.number == important.phoneNumber })
+        #expect(CountryEmergencyConfigurationCatalog.numbersRelevantToPlan(.warOrSecurityIncident, countryCode: "NO").isEmpty)
+    }
+
+    @Test func familyContactAndImportantNumberRemainUnchanged() {
+        let contactID = UUID()
+        let numberID = UUID()
+        let contact = FamilyContact(id: contactID, name: "Sam", role: "Sibling", phoneNumber: "+47 99 99 99 99", notes: "Personal")
+        let number = ImportantNumber(id: numberID, label: "Neighbour", phoneNumber: "22 22 22 22", notes: "User entered")
+
+        _ = CountryEmergencyConfigurationCatalog.norway
+
+        #expect(contact.id == contactID)
+        #expect(contact.name == "Sam")
+        #expect(contact.role == "Sibling")
+        #expect(contact.phoneNumber == "+47 99 99 99 99")
+        #expect(contact.notes == "Personal")
+        #expect(number.id == numberID)
+        #expect(number.label == "Neighbour")
+        #expect(number.phoneNumber == "22 22 22 22")
+        #expect(number.notes == "User entered")
+    }
+
+    @Test func officialNumbersAreNotPartOfUserBackupPayload() throws {
+        let payload = DisasterBackupPayload(
+            exportDate: .now,
+            familyContacts: [FamilyContactSnapshot(name: "A", role: "B", phoneNumber: "C", notes: "D")],
+            importantNumbers: [ImportantNumberSnapshot(label: "E", phoneNumber: "F", notes: "G")],
+            householdPlans: [],
+            householdRoles: [],
+            supplies: []
+        )
+        let encoded = try JSONEncoder().encode(payload)
+        let json = String(decoding: encoded, as: UTF8.self)
+
+        #expect(!json.contains("no.emergency.fire.110"))
+        #expect(!json.contains("official_contacts"))
+        #expect(json.contains("familyContacts"))
+        #expect(json.contains("importantNumbers"))
+    }
+
+    @Test func homePreparednessSummaryUsesChecklistFactsOnly() {
+        let empty = HomePreparednessSummary(
+            household: HouseholdProfile(countryCode: "NO", householdSize: 1),
+            completedPlanItems: 0,
+            totalPlanItems: 3,
+            packedSupplies: 0,
+            totalSupplies: 0,
+            suppliesNeedingReview: 0,
+            paymentCompleted: 0,
+            paymentTotal: 5,
+            contactCount: 0
+        )
+
+        #expect(!HomePreparednessSummary.measuresSafety)
+        #expect(empty.household == .needsAttention)
+        #expect(empty.supplies == .needsAttention)
+        #expect(empty.plan == .needsAttention)
+        #expect(empty.payment == .needsAttention)
+        #expect(empty.contacts == .needsAttention)
+    }
+
+    @Test func homePreparednessSummaryReportsOnlyCompletedChecklistCategories() {
+        let profile = HouseholdProfile(
+            countryCode: "NO",
+            municipality: "Oslo",
+            householdSize: 2,
+            knowsWaterStopcock: true,
+            knowsMainElectricalPanel: true
+        )
+        let complete = HomePreparednessSummary(
+            household: profile,
+            completedPlanItems: 3,
+            totalPlanItems: 3,
+            packedSupplies: 8,
+            totalSupplies: 8,
+            suppliesNeedingReview: 0,
+            paymentCompleted: 5,
+            paymentTotal: 5,
+            contactCount: 1
+        )
+
+        #expect(complete.household == .prepared)
+        #expect(complete.supplies == .prepared)
+        #expect(complete.plan == .prepared)
+        #expect(complete.payment == .prepared)
+        #expect(complete.contacts == .prepared)
+    }
+
+    @Test func homePreparednessSummaryOmitsUnsupportedPaymentChecklist() {
+        let summary = HomePreparednessSummary(
+            household: HouseholdProfile(countryCode: "SE", householdSize: 1),
+            completedPlanItems: 1,
+            totalPlanItems: 3,
+            packedSupplies: 1,
+            totalSupplies: 2,
+            suppliesNeedingReview: 0,
+            paymentCompleted: 0,
+            paymentTotal: 0,
+            contactCount: 1
+        )
+
+        #expect(summary.payment == nil)
+        #expect(summary.plan == .inProgress)
+        #expect(summary.supplies == .inProgress)
+    }
+
+    @Test func homeOfficialToolDestinationsRemainStableAndDistinct() {
+        #expect(Set(HomeOfficialTool.allCases.map(\.id)) == ["weather", "shelters", "sources"])
+    }
+
+    @Test func homeCoreNavigationIsOfflineAndIndependentOfMET() {
+        #expect(!HomeNavigationPolicy.coreNavigationRequiresWeatherData)
+        #expect(HomeNavigationPolicy.retainedTabs == [.overview, .plan, .supplies, .contacts])
+    }
+
+    @Test func noWarningPresentationDoesNotClaimSafety() {
+        #expect(!WeatherAlertPresentation.absenceGuaranteesSafety)
+        for language in AppLanguage.allCases {
+            let message = WeatherAlertPresentation.noActiveMessage(language: language)
+            #expect(!message.isEmpty)
+            #expect(!message.lowercased().contains("you are safe"))
+        }
+    }
+
+    @Test func cachedWarningPresentationIsExplicitlyCachedInEveryLanguage() {
+        let date = Date(timeIntervalSince1970: 1_800_000_000)
+        for language in AppLanguage.allCases {
+            let expectedTerm = switch language {
+            case .english: "CACHED"
+            case .norwegian: "HURTIGLAGRET"
+            case .thai: "แคช"
+            }
+            let text = WeatherAlertPresentation.refreshText(
+                isCached: true,
+                fetchedAt: date,
+                language: language
+            )
+            #expect(text.localizedCaseInsensitiveContains(expectedTerm))
+        }
+    }
+
+    @Test func officialContactLocalizationIsCompleteForSupportedLanguages() {
+        let keys = [
+            "official_contacts.title",
+            "official_contacts.unsupported",
+            "official_contacts.service.fire",
+            "official_contacts.service.police",
+            "official_contacts.service.medical_emergency",
+            "official_contacts.service.legevakt",
+            "official_contacts.confirm_call",
+            "official_contacts.my_contacts"
+        ]
+
+        #expect(EmergencyContactsLocalizationResources.values.count == 22)
+
+        for language in AppLanguage.allCases {
+            for key in keys {
+                let value = EmergencyContactsLocalizationResources.text(key, language: language)
+                #expect(value != key)
+                #expect(!value.isEmpty)
+            }
+        }
+    }
+
+    @Test func everyProductionLocalizationKeyResolvesInAllSupportedLanguages() {
+        #expect(Self.productionLocalizationKeys.count == 394)
+
+        for language in AppLanguage.allCases {
+            for key in Self.productionLocalizationKeys {
+                let value = L10n.text(key, language: language)
+                #expect(!value.isEmpty, Comment("Missing \(language.rawValue): \(key)"))
+
+                if Self.isSemanticLocalizationKey(key) {
+                    #expect(value != key, Comment("Raw key in \(language.rawValue): \(key)"))
+                }
+            }
+        }
+    }
+
+    @Test func releaseCriticalLocalizationDomainsResolveInAllSupportedLanguages() {
+        let groups = [
+            ["emergency.powerOutage.title", "emergency.flood.title", "emergency.extremeWeather.title"],
+            ["myplan.safety_context.title", "myplan.actions.official.detail"],
+            ["smart_supply.recommended.title", "supply.radio"],
+            ["payment.title", "payment.privacy_notice"],
+            ["shelter_reference.title", "shelter_reference.cached", "shelter_reference.distance"],
+            ["official_contacts.title", "official_contacts.accessibility_call"],
+            ["source.section.title", "source.link.accessibility"],
+            ["offline", "shelter_reference.unavailable"]
+        ]
+
+        for language in AppLanguage.allCases {
+            for key in groups.flatMap({ $0 }) {
+                let value = L10n.text(key, language: language)
+                #expect(!value.isEmpty)
+                #expect(value != key)
+            }
+        }
+    }
+
+    private static func isSemanticLocalizationKey(_ key: String) -> Bool {
+        guard key.first?.isLetter == true else { return false }
+        return key.allSatisfy { character in
+            character.isLowercase || character.isNumber || character == "." || character == "_"
+        }
+    }
+
+    private static let productionLocalizationKeys = [
+        "%@ • %@",
+        "%@: %@",
+        "%lld/%lld",
+        "%lld/%lld %@",
+        "action",
+        "action.evacuation.prepare.detail",
+        "action.evacuation.prepare.title",
+        "action.extremeWeather.prepare.detail",
+        "action.extremeWeather.prepare.title",
+        "action.flood.prepare.detail",
+        "action.flood.prepare.title",
+        "action.follow_official_information.detail",
+        "action.follow_official_information.title",
+        "action.gas_installation.prepare.detail",
+        "action.gas_installation.prepare.title",
+        "action.hazardousRelease.prepare.detail",
+        "action.hazardousRelease.prepare.title",
+        "action.houseFire.prepare.detail",
+        "action.houseFire.prepare.title",
+        "action.landslide.prepare.detail",
+        "action.landslide.prepare.title",
+        "action.powerOutage.prepare.detail",
+        "action.powerOutage.prepare.title",
+        "action.warOrSecurityIncident.prepare.detail",
+        "action.warOrSecurityIncident.prepare.title",
+        "action.waterOutage.prepare.detail",
+        "action.waterOutage.prepare.title",
+        "action.wildfire.prepare.detail",
+        "action.wildfire.prepare.title",
+        "add_car_item",
+        "add_family",
+        "add_home_item",
+        "add_number",
+        "assigned",
+        "business_bullet_1",
+        "business_bullet_2",
+        "business_bullet_3",
+        "business_model",
+        "business_model_body",
+        "call",
+        "car",
+        "car_item",
+        "communications",
+        "contacts",
+        "contacts_subtitle",
+        "drill_bag_race",
+        "drill_gas_breaker",
+        "drill_pet_walkthrough",
+        "drill_reunion",
+        "emergency.evacuation.summary",
+        "emergency.evacuation.title",
+        "emergency.extremeWeather.summary",
+        "emergency.extremeWeather.title",
+        "emergency.flood.summary",
+        "emergency.flood.title",
+        "emergency.hazardousRelease.summary",
+        "emergency.hazardousRelease.title",
+        "emergency.houseFire.summary",
+        "emergency.houseFire.title",
+        "emergency.landslide.summary",
+        "emergency.landslide.title",
+        "emergency.powerOutage.summary",
+        "emergency.powerOutage.title",
+        "emergency.warOrSecurityIncident.summary",
+        "emergency.warOrSecurityIncident.title",
+        "emergency.waterOutage.summary",
+        "emergency.waterOutage.title",
+        "emergency.wildfire.summary",
+        "emergency.wildfire.title",
+        "emergency_supplies",
+        "evacuation_destination",
+        "family",
+        "family_contact",
+        "family_password",
+        "gas_shutoff_note",
+        "go",
+        "hero_subtitle",
+        "hero_title",
+        "home",
+        "home_item",
+        "household_plan",
+        "household_plan_subtitle",
+        "household_roles",
+        "immediate_checklist",
+        "important_number",
+        "important_numbers",
+        "item_name",
+        "label",
+        "language",
+        "live",
+        "medical",
+        "medical_lead",
+        "message_templates_subtitle",
+        "missing",
+        "monthly",
+        "msg_help_body",
+        "msg_help_title",
+        "msg_leaving_body",
+        "msg_leaving_title",
+        "msg_safe_body",
+        "msg_safe_title",
+        "myplan.actions.during.detail",
+        "myplan.actions.during.title",
+        "myplan.actions.now.detail",
+        "myplan.actions.now.title",
+        "myplan.actions.official.detail",
+        "myplan.actions.official.title",
+        "myplan.actions.title",
+        "myplan.contacts.manage",
+        "myplan.contacts.reuse_notice",
+        "myplan.contacts.title",
+        "myplan.contacts.unnamed",
+        "myplan.context.official.detail",
+        "myplan.context.official.title",
+        "myplan.context.personal.detail",
+        "myplan.context.personal.title",
+        "myplan.context.preparedness.detail",
+        "myplan.context.preparedness.title",
+        "myplan.country_template_unavailable.detail",
+        "myplan.country_template_unavailable.title",
+        "myplan.location.alternative",
+        "myplan.location.evacuation_legacy",
+        "myplan.location.family_friend",
+        "myplan.location.meeting_point",
+        "myplan.location.personal_note",
+        "myplan.location.secondary_home",
+        "myplan.location.shelter_legacy",
+        "myplan.locations.personal_notice",
+        "myplan.locations.title",
+        "myplan.safety_context.title",
+        "myplan.save.button",
+        "myplan.save.failure",
+        "myplan.save.success",
+        "myplan.save.title",
+        "myplan.shelter.title",
+        "myplan.supplies.evacuation",
+        "myplan.supplies.home",
+        "myplan.supplies.preview_notice",
+        "myplan.supplies.title",
+        "name",
+        "no_go",
+        "not_set",
+        "notes",
+        "official_contacts.accessibility_call",
+        "official_contacts.call",
+        "official_contacts.cancel",
+        "official_contacts.confirm_call",
+        "official_contacts.confirm_message",
+        "official_contacts.confirm_title",
+        "official_contacts.description.fire",
+        "official_contacts.description.legevakt",
+        "official_contacts.description.medical_emergency",
+        "official_contacts.description.police",
+        "official_contacts.emergency_heading",
+        "official_contacts.my_contacts",
+        "official_contacts.myplan_notice",
+        "official_contacts.other_heading",
+        "official_contacts.service.fire",
+        "official_contacts.service.legevakt",
+        "official_contacts.service.medical_emergency",
+        "official_contacts.service.police",
+        "official_contacts.source",
+        "official_contacts.subtitle",
+        "official_contacts.title",
+        "official_contacts.unsupported",
+        "offline",
+        "offline_field_guides",
+        "offline_field_guides_detail",
+        "offline_first_24",
+        "offline_first_24_detail",
+        "offline_home_map",
+        "offline_home_map_detail",
+        "offline_kit",
+        "one_tap_family_updates",
+        "payment.complete",
+        "payment.incomplete",
+        "payment.introduction",
+        "payment.item.cashAvailable",
+        "payment.item.multipleCards",
+        "payment.item.multiplePaymentOptions",
+        "payment.item.physicalCard",
+        "payment.item.smallerDenominations",
+        "payment.myplan.detail",
+        "payment.myplan.title",
+        "payment.privacy_notice",
+        "payment.progress",
+        "payment.title",
+        "pet_lead",
+        "pets",
+        "phone_number",
+        "plan_summary",
+        "plan_summary_format",
+        "pricing",
+        "quarterly",
+        "ready",
+        "reunion_point",
+        "role",
+        "role_comms_task",
+        "role_medical_task",
+        "role_pets_task",
+        "role_utilities_task",
+        "roles_metric",
+        "scenario",
+        "scenario.brownout.action",
+        "scenario.brownout.checklist.1",
+        "scenario.brownout.checklist.2",
+        "scenario.brownout.checklist.3",
+        "scenario.brownout.go",
+        "scenario.brownout.name",
+        "scenario.brownout.no_go",
+        "scenario.brownout.summary",
+        "scenario.earthquake.action",
+        "scenario.earthquake.checklist.1",
+        "scenario.earthquake.checklist.2",
+        "scenario.earthquake.checklist.3",
+        "scenario.earthquake.go",
+        "scenario.earthquake.name",
+        "scenario.earthquake.no_go",
+        "scenario.earthquake.summary",
+        "scenario.flood.action",
+        "scenario.flood.checklist.1",
+        "scenario.flood.checklist.2",
+        "scenario.flood.checklist.3",
+        "scenario.flood.go",
+        "scenario.flood.name",
+        "scenario.flood.no_go",
+        "scenario.flood.summary",
+        "scenario.invasion.action",
+        "scenario.invasion.checklist.1",
+        "scenario.invasion.checklist.2",
+        "scenario.invasion.checklist.3",
+        "scenario.invasion.go",
+        "scenario.invasion.name",
+        "scenario.invasion.no_go",
+        "scenario.invasion.summary",
+        "scenario.storm.action",
+        "scenario.storm.checklist.1",
+        "scenario.storm.checklist.2",
+        "scenario.storm.checklist.3",
+        "scenario.storm.go",
+        "scenario.storm.name",
+        "scenario.storm.no_go",
+        "scenario.storm.summary",
+        "scenario.volcano.action",
+        "scenario.volcano.checklist.1",
+        "scenario.volcano.checklist.2",
+        "scenario.volcano.checklist.3",
+        "scenario.volcano.go",
+        "scenario.volcano.name",
+        "scenario.volcano.no_go",
+        "scenario.volcano.summary",
+        "scenario_drills",
+        "scenarios_metric",
+        "seed_emergency_contact",
+        "seed_emergency_contact_note",
+        "seed_family_alex",
+        "seed_family_jordan",
+        "seed_family_sam",
+        "seed_neighborhood_checkin",
+        "seed_neighborhood_checkin_note",
+        "seed_poison_info",
+        "seed_poison_info_note",
+        "share",
+        "shelter.follow_shelter_instructions.detail",
+        "shelter.follow_shelter_instructions.title",
+        "shelter.home_or_alternative_accommodation.detail",
+        "shelter.home_or_alternative_accommodation.title",
+        "shelter.outdoor_meeting_point.detail",
+        "shelter.outdoor_meeting_point.title",
+        "shelter.outside_risk_area.detail",
+        "shelter.outside_risk_area.title",
+        "shelter.planned_alternative_accommodation.detail",
+        "shelter.planned_alternative_accommodation.title",
+        "shelter.preparedness_not_official.notice",
+        "shelter.robust_indoor_location.detail",
+        "shelter.robust_indoor_location.title",
+        "shelter_reference.cached",
+        "shelter_reference.capacity",
+        "shelter_reference.dataset_date",
+        "shelter_reference.distance",
+        "shelter_reference.distance_notice",
+        "shelter_reference.location.button",
+        "shelter_reference.location.detail",
+        "shelter_reference.location.error",
+        "shelter_reference.location.permission_error",
+        "shelter_reference.location.title",
+        "shelter_reference.manual.detail",
+        "shelter_reference.manual.placeholder",
+        "shelter_reference.manual.title",
+        "shelter_reference.myplan.button",
+        "shelter_reference.myplan.detail",
+        "shelter_reference.no_results",
+        "shelter_reference.not_live",
+        "shelter_reference.official_data",
+        "shelter_reference.refreshed",
+        "shelter_reference.room",
+        "shelter_reference.safety",
+        "shelter_reference.search",
+        "shelter_reference.source_section",
+        "shelter_reference.title",
+        "shelter_reference.unavailable",
+        "shelter_reference.unnamed",
+        "shelter_reference.view_map",
+        "shelter_zone",
+        "smart_supply.appears_recorded",
+        "smart_supply.grab.title",
+        "smart_supply.home.title",
+        "smart_supply.my_supplies.detail",
+        "smart_supply.my_supplies.empty",
+        "smart_supply.my_supplies.title",
+        "smart_supply.priority.critical",
+        "smart_supply.priority.high",
+        "smart_supply.priority.normal",
+        "smart_supply.quantity",
+        "smart_supply.recommended.detail",
+        "smart_supply.recommended.title",
+        "smart_supply.safety.authority_first",
+        "smart_supply.safety.general",
+        "smart_supply.safety.house_fire",
+        "source.label",
+        "source.link.accessibility",
+        "source.review_semantics",
+        "source.reviewed.label",
+        "source.section.description",
+        "source.section.title",
+        "source.view_advice",
+        "stocked",
+        "supplies_subtitle",
+        "supply.alternativeHeatingPreparedness",
+        "supply.assistanceInformation",
+        "supply.assistiveDevices",
+        "supply.bankCards",
+        "supply.batteries",
+        "supply.batteryLighting",
+        "supply.cash",
+        "supply.chargerPowerBank",
+        "supply.childEvacuationSupplies",
+        "supply.childHomeSupplies",
+        "supply.cookingMethod",
+        "supply.documentCopies",
+        "supply.drinkingWater",
+        "supply.essentialSupportSupplies",
+        "supply.evChargingPlan",
+        "supply.firstAid",
+        "supply.foodAndDrink",
+        "supply.gasInstallationSupplies",
+        "supply.grabFood",
+        "supply.hygiene",
+        "supply.hygieneSupplies",
+        "supply.identification",
+        "supply.lighting",
+        "supply.medicines",
+        "supply.paymentOptions",
+        "supply.paymentPreparedness",
+        "supply.petEvacuationSupplies",
+        "supply.petHomeSupplies",
+        "supply.phone",
+        "supply.phoneAndCharger",
+        "supply.powerBank",
+        "supply.radio",
+        "supply.shelfStableFood",
+        "supply.warmClothing",
+        "supply.warmth",
+        "supply.water",
+        "supply.woodStoveFuel",
+        "supply_cooking_backup",
+        "supply_cooking_backup_detail",
+        "supply_medical_kit",
+        "supply_medical_kit_detail",
+        "supply_navigation",
+        "supply_navigation_detail",
+        "supply_phone_backup",
+        "supply_phone_backup_detail",
+        "supply_power_light",
+        "supply_power_light_detail",
+        "supply_safety_kit",
+        "supply_safety_kit_detail",
+        "supply_shelf_food",
+        "supply_shelf_food_detail",
+        "supply_vehicle_recovery",
+        "supply_vehicle_recovery_detail",
+        "supply_warmth_shelter",
+        "supply_warmth_shelter_detail",
+        "supply_water",
+        "supply_water_detail",
+        "supply_water_snacks",
+        "supply_water_snacks_detail",
+        "supply_weather_gear",
+        "supply_weather_gear_detail",
+        "text",
+        "utilities",
+        "weekly",
+        "what_to_keep_notes",
+        "works_without_internet",
+    ]
+
+
     private func metAlertsJSON(features: [String]) -> String {
         "{\"features\":[\(features.joined(separator: ","))]}"
     }

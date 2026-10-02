@@ -10,6 +10,7 @@ import XCTest
 final class Disaster_ReadyUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
     }
 
     @MainActor
@@ -136,10 +137,113 @@ final class Disaster_ReadyUITests: XCTestCase {
     }
 
     @MainActor
+    func testHomeOpensMyPlanDirectly() throws {
+        let app = launchEnglishApp()
+        let button = app.buttons["homeOpenMyPlan"]
+        scrollToHittable(button, in: app)
+        button.tap()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["emergencyTypePicker"]
+                .waitForExistence(timeout: 5)
+        )
+    }
+
+    @MainActor
+    func testHomeQuickAccessOpensSuppliesAndContacts() throws {
+        let app = launchEnglishApp()
+        let supplies = app.descendants(matching: .any)["homeOpenSupplies"]
+        scrollToHittable(supplies, in: app)
+        supplies.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["supplySearchField"].waitForExistence(timeout: 5))
+
+        app.tabBars.buttons["Overview"].tap()
+        let contacts = app.descendants(matching: .any)["homeOpenContacts"]
+        scrollToHittable(contacts, in: app)
+        contacts.tap()
+        XCTAssertTrue(app.navigationBars["Contacts"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testHomeQuickAccessOpensHouseholdAndPaymentPreparedness() throws {
+        let app = launchEnglishApp()
+        let household = app.descendants(matching: .any)["homeOpenHousehold"]
+        scrollToHittable(household, in: app)
+        household.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["householdCountryCode"].waitForExistence(timeout: 5))
+        app.buttons["homeHouseholdDone"].tap()
+
+        let payment = app.descendants(matching: .any)["homeOpenPayment"]
+        scrollToHittable(payment, in: app)
+        payment.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["paymentPreparednessSection"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testHomeOfficialToolsOpenSheltersAndSources() throws {
+        let app = launchEnglishApp()
+        let shelters = app.descendants(matching: .any)["homeOpenShelters"]
+        scrollToHittable(shelters, in: app)
+        shelters.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["searchOfficialSheltersButton"].waitForExistence(timeout: 5))
+        app.buttons["homeOfficialToolDone"].tap()
+
+        let sources = app.descendants(matching: .any)["homeOpenSources"]
+        scrollToHittable(sources, in: app)
+        sources.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["officialSourcesSection"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testHomeLocalizationAvailableInAllSupportedLanguages() throws {
+        for language in ["en", "nb", "th"] {
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "-hasSeenOnboarding", "YES",
+                "-preferredLanguageCode", language
+            ]
+            app.launch()
+
+            XCTAssertTrue(
+                app.descendants(matching: .any)["homePreparednessOverview"]
+                    .waitForExistence(timeout: 5)
+            )
+            let planButton = app.buttons["homeOpenMyPlan"]
+            scrollToHittable(planButton, in: app)
+            XCTAssertFalse(planButton.label.isEmpty)
+            XCTAssertFalse(planButton.label.contains("home."))
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             XCUIApplication().launch()
         }
+    }
+
+    @MainActor
+    private func launchEnglishApp() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "YES",
+            "-preferredLanguageCode", "en"
+        ]
+        app.launch()
+        return app
+    }
+
+    @MainActor
+    private func scrollToHittable(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<12 where !element.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.waitForExistence(timeout: 5))
+        for _ in 0..<12 where !element.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.isHittable)
     }
 }

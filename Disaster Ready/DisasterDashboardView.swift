@@ -36,6 +36,8 @@ struct DisasterDashboardView: View {
     @State private var selectedTab: DashboardTab = .overview
     @State private var selectedLanguage: AppLanguage = .current
     @State private var showingSettings = false
+    @State private var showingHomeHouseholdProfile = false
+    @State private var presentedHomeTool: HomeOfficialTool?
     @State private var showingOnboarding = false
     @State private var backupDocument = DisasterBackupDocument(payload: .empty)
     @State private var showingBackupExporter = false
@@ -58,30 +60,36 @@ struct DisasterDashboardView: View {
             TabView(selection: $selectedTab) {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
-                        HeroCardSection(language: selectedLanguage)
-                        OfficialWeatherAlertsSection(language: selectedLanguage) { emergencyType in
+                        OfficialWeatherAlertsSection(
+                            language: selectedLanguage,
+                            isCompact: true
+                        ) { emergencyType in
                             selectedEmergencyType = emergencyType
                             selectedTab = .plan
                         }
-                        PreparednessOverviewSection(
-                            completedPlanItems: completedPlanItems,
-                            totalPlanItems: 3,
-                            packedSupplies: supplyCompletionCount,
-                            totalSupplies: totalSupplyCount,
-                            suppliesNeedingReview: suppliesNeedingReviewCount,
-                            contactCount: familyContacts.count + importantNumbers.count,
+                        HomePreparednessSection(
+                            summary: homePreparednessSummary,
+                            language: selectedLanguage
+                        )
+                        HomeEmergencyPlanSection(
+                            selectedEmergencyTitle: selectedEmergencyType.localizedName(in: selectedLanguage),
                             language: selectedLanguage,
-                            openPlan: { selectedTab = .plan },
+                            openPlan: { selectedTab = .plan }
+                        )
+                        HomeQuickAccessSection(
+                            showsPayment: householdProfile.countryCode == "NO",
+                            language: selectedLanguage,
                             openSupplies: { selectedTab = .supplies },
-                            openContacts: { selectedTab = .contacts }
+                            openContacts: { selectedTab = .contacts },
+                            openHousehold: { showingHomeHouseholdProfile = true },
+                            openPayment: { selectedTab = .supplies }
                         )
-                        ScenarioSelectorSection(
-                            selectedScenario: $selectedScenario,
-                            language: selectedLanguage
-                        )
-                        DecisionCardSection(
-                            scenario: selectedScenario,
-                            language: selectedLanguage
+                        HomeOfficialToolsSection(
+                            showsShelters: householdProfile.countryCode == "NO",
+                            language: selectedLanguage,
+                            openWeather: { presentedHomeTool = .weather },
+                            openShelters: { presentedHomeTool = .shelters },
+                            openSources: { presentedHomeTool = .sources }
                         )
                     }
                 }
@@ -102,6 +110,14 @@ struct DisasterDashboardView: View {
                                 savePlan: saveCurrentPlan
                             )
                         }
+                        ScenarioSelectorSection(
+                            selectedScenario: $selectedScenario,
+                            language: selectedLanguage
+                        )
+                        DecisionCardSection(
+                            scenario: selectedScenario,
+                            language: selectedLanguage
+                        )
                         RolesSection(
                             roles: householdRoles,
                             language: selectedLanguage,
@@ -161,6 +177,7 @@ struct DisasterDashboardView: View {
                         ContactsSection(
                             familyContacts: familyContacts,
                             importantNumbers: importantNumbers,
+                            countryCode: householdProfile.countryCode,
                             language: selectedLanguage,
                             addFamily: addFamilyContact,
                             addImportant: addImportantNumber,
@@ -244,6 +261,22 @@ struct DisasterDashboardView: View {
                 language: selectedLanguage
             )
             .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $presentedHomeTool) { tool in
+            HomeOfficialToolSheet(
+                tool: tool,
+                language: selectedLanguage
+            ) { emergencyType in
+                presentedHomeTool = nil
+                selectedEmergencyType = emergencyType
+                selectedTab = .plan
+            }
+        }
+        .sheet(isPresented: $showingHomeHouseholdProfile) {
+            HomeHouseholdProfileSheet(
+                profile: $householdProfile,
+                language: selectedLanguage
+            )
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView(
@@ -535,6 +568,22 @@ struct DisasterDashboardView: View {
         return [plan.reunionPoint, plan.evacuationDestination, plan.shelterZone]
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             .count
+    }
+
+    private var homePreparednessSummary: HomePreparednessSummary {
+        HomePreparednessSummary(
+            household: householdProfile,
+            completedPlanItems: completedPlanItems,
+            totalPlanItems: 3,
+            packedSupplies: supplyCompletionCount,
+            totalSupplies: totalSupplyCount,
+            suppliesNeedingReview: suppliesNeedingReviewCount,
+            paymentCompleted: paymentPreparedness.completedCount,
+            paymentTotal: PaymentPreparednessCatalog.checklist(
+                for: householdProfile.countryCode
+            ).count,
+            contactCount: familyContacts.count + importantNumbers.count
+        )
     }
 
     private var backgroundGradient: some View {

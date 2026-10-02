@@ -47,7 +47,7 @@ struct ReleaseReadinessSection: View {
     }
 
     private var title: String {
-        L10n.pick(
+        return L10n.pick(
             language: language,
             english: "App Store Readiness",
             norwegian: "App Store-beredskap",
@@ -294,11 +294,16 @@ struct SettingsSheet: View {
     }
 
     private var householdProfileSummary: String {
-        L10n.pick(
+        let count = householdProfile.householdSize
+        let formattedCount = count.formatted(
+            .number.locale(AppLanguage.locale(for: language))
+        )
+
+        return L10n.pick(
             language: language,
-            english: "\(householdProfile.countryCode), \(householdProfile.householdSize) people",
-            norwegian: "\(householdProfile.countryCode), \(householdProfile.householdSize) personer",
-            thai: "\(householdProfile.countryCode), \(householdProfile.householdSize) คน"
+            english: "\(householdProfile.countryCode), \(formattedCount) \(count == 1 ? "person" : "people")",
+            norwegian: "\(householdProfile.countryCode), \(formattedCount) \(count == 1 ? "person" : "personer")",
+            thai: "\(householdProfile.countryCode), \(formattedCount) คน"
         )
     }
 

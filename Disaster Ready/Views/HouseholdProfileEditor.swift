@@ -77,7 +77,12 @@ private struct HouseholdProfileLocationSection: View {
                 .accessibilityIdentifier("householdMunicipality")
 
             Stepper(value: $householdSize, in: 1...12) {
-                LabeledContent(householdSizeTitle, value: householdSize.formatted())
+                LabeledContent(
+                    householdSizeTitle,
+                    value: householdSize.formatted(
+                        .number.locale(AppLanguage.locale(for: language))
+                    )
+                )
             }
             .accessibilityIdentifier("householdSize")
         } header: {

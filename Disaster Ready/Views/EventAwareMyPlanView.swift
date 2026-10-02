@@ -51,6 +51,10 @@ struct EventAwareMyPlanView: View {
                 MyPlanContactsStep(
                     familyContacts: familyContacts,
                     importantNumbers: importantNumbers,
+                    officialNumbers: CountryEmergencyConfigurationCatalog.numbersRelevantToPlan(
+                        selectedEmergencyType,
+                        countryCode: household.countryCode
+                    ),
                     language: language,
                     openContacts: openContacts
                 )
@@ -425,6 +429,7 @@ private struct MyPlanSmartSuppliesStep: View {
 private struct MyPlanContactsStep: View {
     let familyContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
+    let officialNumbers: [OfficialEmergencyNumber]
     let language: AppLanguage
     let openContacts: () -> Void
 
@@ -433,6 +438,15 @@ private struct MyPlanContactsStep: View {
             Text(L10n.text("myplan.contacts.reuse_notice", language: language))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+
+            if !officialNumbers.isEmpty {
+                Text(EmergencyContactsLocalizationResources.text("official_contacts.myplan_notice", language: language))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                ForEach(officialNumbers) { number in
+                    OfficialEmergencyNumberRow(number: number, language: language)
+                }
+            }
 
             ForEach(familyContacts.prefix(3)) { contact in
                 Label(contact.name.isEmpty ? L10n.text("myplan.contacts.unnamed", language: language) : contact.name, systemImage: "person.fill")

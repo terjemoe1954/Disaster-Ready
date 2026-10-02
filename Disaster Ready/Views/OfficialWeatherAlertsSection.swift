@@ -1,7 +1,36 @@
 import MapKit
 import SwiftUI
 
+enum WeatherAlertPresentation {
+    static let absenceGuaranteesSafety = false
+
+    static func noActiveMessage(language: AppLanguage) -> String {
+        L10n.pick(
+            language: language,
+            english: "No active official weather warnings found for this area. This is not a guarantee of safety.",
+            norwegian: "Ingen aktive offisielle farevarsler funnet for området. Dette er ingen garanti for sikkerhet.",
+            thai: "ไม่พบคำเตือนสภาพอากาศทางการที่ยังมีผลสำหรับพื้นที่นี้ ข้อมูลนี้ไม่ใช่การรับประกันความปลอดภัย"
+        )
+    }
+
+    static func refreshText(
+        isCached: Bool,
+        fetchedAt: Date,
+        language: AppLanguage
+    ) -> String {
+        let date = fetchedAt.formatted(
+            .dateTime.day().month().year().hour().minute()
+                .locale(AppLanguage.locale(for: language))
+        )
+        return isCached
+            ? L10n.pick(language: language, english: "CACHED INFORMATION — last successful refresh: \(date)", norwegian: "HURTIGLAGRET INFORMASJON — sist oppdatert: \(date)", thai: "ข้อมูลที่แคชไว้ — รีเฟรชสำเร็จล่าสุด: \(date)")
+            : L10n.pick(language: language, english: "REFRESHED OFFICIAL ALERT DATA: \(date)", norwegian: "OPPDATERTE OFFISIELLE FAREVARSLER: \(date)", thai: "ข้อมูลคำเตือนทางการที่รีเฟรชแล้ว: \(date)")
+    }
+}
+
 struct OfficialWeatherAlertsSection: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @State private var area = ""
     @State private var snapshot: WeatherAlertSnapshot?
     @State private var isLoading = false
@@ -10,6 +39,7 @@ struct OfficialWeatherAlertsSection: View {
     @State private var locationProvider = ShelterLocationProvider()
 
     let language: AppLanguage
+    var isCompact = false
     let openPlan: (EmergencyType) -> Void
     private let service = METWeatherAlertService()
 
@@ -20,9 +50,17 @@ struct OfficialWeatherAlertsSection: View {
                 .accessibilityHeading(.h2)
                 .accessibilityIdentifier("officialWeatherAlertsSection")
             Text(explanation).font(.subheadline).foregroundStyle(.secondary)
-            ViewThatFits(in: .horizontal) {
-                HStack { searchField; searchButton; locationButton }
-                VStack(alignment: .leading, spacing: 10) { searchField; HStack { searchButton; locationButton } }
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 10) {
+                    searchField
+                    searchButton.frame(maxWidth: .infinity, alignment: .leading)
+                    locationButton.frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack { searchField; searchButton; locationButton }
+                    VStack(alignment: .leading, spacing: 10) { searchField; HStack { searchButton; locationButton } }
+                }
             }
             if let message { Text(message).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("weatherAlertStatus") }
             if let snapshot {
@@ -34,12 +72,14 @@ struct OfficialWeatherAlertsSection: View {
                     OfficialWeatherAlertRow(alert: alert, language: language, openPlan: openPlan)
                 }
             }
-            Link(destination: officialURL) { Label(officialLinkTitle, systemImage: "safari") }
-                .font(.subheadline.weight(.semibold))
-            Link(licenceTitle, destination: licenceURL)
-                .font(.caption)
+            if !isCompact {
+                Link(destination: officialURL) { Label(officialLinkTitle, systemImage: "safari") }
+                    .font(.subheadline.weight(.semibold))
+                Link(licenceTitle, destination: licenceURL)
+                    .font(.caption)
+            }
         }
-        .padding(20)
+        .padding(isCompact ? 16 : 20)
         .background(DashboardCardBackground())
         .onChange(of: locationProvider.coordinate) { _, coordinate in
             guard let coordinate else { return }
@@ -52,7 +92,13 @@ struct OfficialWeatherAlertsSection: View {
             message = locationUnavailableMessage
         }
         .onChange(of: language) { _, _ in
-            if snapshot?.alerts.isEmpty == true { message = noAlertsMessage }
+            if locationProvider.error != nil {
+                message = locationUnavailableMessage
+            } else if snapshot?.alerts.isEmpty == true {
+                message = noAlertsMessage
+            } else if snapshot == nil, message != nil {
+                message = unavailableMessage
+            }
         }
     }
 
@@ -101,10 +147,11 @@ struct OfficialWeatherAlertsSection: View {
         isLoading = false
     }
     private func refreshText(_ snapshot: WeatherAlertSnapshot) -> String {
-        let date = snapshot.fetchedAt.formatted(.dateTime.day().month().year().hour().minute().locale(AppLanguage.locale(for: language)))
-        return snapshot.isCached
-            ? L10n.pick(language: language, english: "CACHED INFORMATION — last successful refresh: \(date)", norwegian: "HURTIGLAGRET INFORMASJON — sist oppdatert: \(date)", thai: "ข้อมูลที่แคชไว้ — รีเฟรชสำเร็จล่าสุด: \(date)")
-            : L10n.pick(language: language, english: "REFRESHED OFFICIAL ALERT DATA: \(date)", norwegian: "OPPDATERTE OFFISIELLE FAREVARSLER: \(date)", thai: "ข้อมูลคำเตือนทางการที่รีเฟรชแล้ว: \(date)")
+        WeatherAlertPresentation.refreshText(
+            isCached: snapshot.isCached,
+            fetchedAt: snapshot.fetchedAt,
+            language: language
+        )
     }
 
     private let officialURL = URL(string: "https://www.met.no/vaer-og-klima/ekstremvaervarsler-og-andre-farevarsler")!
@@ -114,7 +161,7 @@ struct OfficialWeatherAlertsSection: View {
     private var searchPlaceholder: String { L10n.pick(language: language, english: "Municipality, town, or address", norwegian: "Kommune, sted eller adresse", thai: "เทศบาล เมือง หรือที่อยู่") }
     private var searchTitle: String { L10n.pick(language: language, english: "Search", norwegian: "Søk", thai: "ค้นหา") }
     private var useLocationTitle: String { L10n.pick(language: language, english: "Use My Location", norwegian: "Bruk min posisjon", thai: "ใช้ตำแหน่งของฉัน") }
-    private var noAlertsMessage: String { L10n.pick(language: language, english: "No active official weather warnings found for this area. This is not a guarantee of safety.", norwegian: "Ingen aktive offisielle farevarsler funnet for området. Dette er ingen garanti for sikkerhet.", thai: "ไม่พบคำเตือนสภาพอากาศทางการที่ยังมีผลสำหรับพื้นที่นี้ ข้อมูลนี้ไม่ใช่การรับประกันความปลอดภัย") }
+    private var noAlertsMessage: String { WeatherAlertPresentation.noActiveMessage(language: language) }
     private var unavailableMessage: String { L10n.pick(language: language, english: "Official warning data is unavailable and no usable cache exists. The rest of Disaster Ready remains available.", norwegian: "Offisielle farevarsler er utilgjengelige, og ingen brukbar hurtigbuffer finnes. Resten av Disaster Ready er fortsatt tilgjengelig.", thai: "ข้อมูลคำเตือนทางการไม่พร้อมใช้งานและไม่มีแคชที่ใช้ได้ ส่วนอื่นของ Disaster Ready ยังคงใช้งานได้") }
     private var locationUnavailableMessage: String { L10n.pick(language: language, english: "Location is unavailable. You can still search manually.", norwegian: "Posisjon er utilgjengelig. Du kan fortsatt søke manuelt.", thai: "ตำแหน่งไม่พร้อมใช้งาน คุณยังคงค้นหาด้วยตนเองได้") }
     private var officialLinkTitle: String { L10n.pick(language: language, english: "Open MET's official warnings", norwegian: "Åpne METs offisielle farevarsler", thai: "เปิดคำเตือนทางการของ MET") }
