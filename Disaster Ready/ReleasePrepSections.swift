@@ -227,6 +227,10 @@ struct SettingsSheet: View {
                     Text(privacyBody)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+
+                    Text(L10n.text("settings.safety_disclaimer", language: language))
+                        .font(.subheadline.weight(.semibold))
+                        .accessibilityIdentifier("safetyDisclaimer")
                 }
 
                 Section(releaseNotesTitle) {

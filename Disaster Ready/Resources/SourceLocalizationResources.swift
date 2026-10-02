@@ -8,6 +8,7 @@ enum SourceLocalizationResources {
         LocalizedStringResource("source.reviewed.label", defaultValue: "Source reviewed:", comment: "Date when Disaster Ready last reviewed its bundled guidance, not a live update"),
         LocalizedStringResource("source.view_advice", defaultValue: "View official advice", comment: "Link that opens an official website"),
         LocalizedStringResource("source.link.accessibility", defaultValue: "Open official advice from %@", comment: "VoiceOver label; placeholder is the authority name"),
-        LocalizedStringResource("source.review_semantics", defaultValue: "Disaster Ready reviewed this guidance against the listed official source on the date above. This is not a live-update time. During an emergency, follow current instructions from public authorities.", comment: "Safety explanation distinguishing a source review date from live information")
+        LocalizedStringResource("source.review_semantics", defaultValue: "Disaster Ready reviewed this guidance against the listed official source on the date above. This is not a live-update time. During an emergency, follow current instructions from public authorities.", comment: "Safety explanation distinguishing a source review date from live information"),
+        LocalizedStringResource("settings.safety_disclaimer", defaultValue: "Disaster Ready is a preparedness planning tool. It does not replace current instructions from emergency services or public authorities.", comment: "Concise About/Settings safety disclaimer")
     ]
 }

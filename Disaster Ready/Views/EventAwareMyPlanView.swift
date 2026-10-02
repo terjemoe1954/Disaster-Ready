@@ -197,7 +197,7 @@ private struct MyPlanActionsStep: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(L10n.text("myplan.actions.during.title", language: language))
                     .font(.headline)
-                Text(L10n.text("myplan.actions.during.detail", language: language))
+                Text(L10n.text(duringEmergencyDetailKey, language: language))
                     .foregroundStyle(.secondary)
             }
             .padding(12)
@@ -211,6 +211,12 @@ private struct MyPlanActionsStep: View {
                 color: .orange
             )
         }
+    }
+
+    private var duringEmergencyDetailKey: String {
+        template.type == .houseFire
+            ? "myplan.actions.during.house_fire"
+            : "myplan.actions.during.detail"
     }
 
     private func actionGroup(

@@ -912,7 +912,7 @@ struct Disaster_ReadyTests {
 
     @Test func sourceReviewCopyDoesNotDescribeALiveUpdate() {
         #expect(!GuidanceSourceRegistry.reviewDateRepresentsLiveUpdate)
-        #expect(SourceLocalizationResources.values.count == 7)
+        #expect(SourceLocalizationResources.values.count == 8)
     }
 
     @Test func shelterGMLDecoderPreservesOfficialFields() throws {
@@ -1755,6 +1755,74 @@ struct Disaster_ReadyTests {
         }
     }
 
+    @Test func planningAndEvacuationLocationsNeverBecomeOfficialDestinations() {
+        for template in NorwayEmergencyTemplates.all {
+            #expect(template.shelterGuidance.allSatisfy { !$0.isOfficialLocation })
+            #expect(template.shelterGuidance.allSatisfy {
+                $0.safetyNoticeKey == "shelter.preparedness_not_official.notice"
+            })
+        }
+
+        let evacuation = NorwayEmergencyTemplates.template(for: .evacuation)
+        #expect(evacuation.shelterGuidance.map(\.detailKey) == [
+            "shelter.planned_alternative_accommodation.detail"
+        ])
+    }
+
+    @Test func houseFireActiveGuidancePrioritizesImmediateExitOverBelongings() {
+        let text = L10n.text("myplan.actions.during.house_fire", language: .english).lowercased()
+        #expect(text.contains("leave immediately"))
+        #expect(text.contains("stay outside"))
+        #expect(text.contains("do not delay"))
+        #expect(text.contains("belongings"))
+
+        let supplyNotice = L10n.text("smart_supply.safety.house_fire", language: .english).lowercased()
+        #expect(supplyNotice.contains("leave immediately"))
+        #expect(supplyNotice.contains("never delay evacuation"))
+    }
+
+    @Test func warSecurityTemplateDefersShelterAndEvacuationDecisionToAuthorities() {
+        let template = NorwayEmergencyTemplates.template(for: .warOrSecurityIncident)
+        #expect(template.shelterGuidance.map(\.detailKey) == [
+            "shelter.follow_shelter_instructions.detail"
+        ])
+        #expect(ShelterSafetyPolicy.isRelevantInMyPlan(for: .warOrSecurityIncident))
+        #expect(!ShelterSafetyPolicy.nearestMeansRecommended)
+    }
+
+    @Test func paymentCopyDisclaimsAdviceAndSafetyGuarantees() {
+        let text = L10n.text("payment.introduction", language: .english).lowercased()
+        #expect(text.contains("not financial advice"))
+        #expect(text.contains("does not guarantee"))
+        #expect(text.contains("safety"))
+    }
+
+    @Test func emergencyContactsRemainStaticReferencesWithoutTriageOrAutomaticCalling() {
+        let numbers = CountryEmergencyConfigurationCatalog.numbers(for: "NO")
+        let emergency = numbers.first { $0.number == "113" }
+        let advice = numbers.first { $0.number == "116 117" }
+
+        #expect(emergency?.classification == .emergency)
+        #expect(advice?.classification == .nonEmergencyMedicalAdvice)
+        #expect(emergency?.service == .medicalEmergency)
+        #expect(advice?.service == .outOfHoursMedical)
+        #expect(EmergencyCallHandoff.requiresExplicitUserAction)
+        #expect(!EmergencyCallHandoff.automaticallyPlacesCalls)
+    }
+
+    @Test func safetyDisclaimerResolvesWithoutClaimingAuthority() {
+        for language in AppLanguage.allCases {
+            let value = L10n.text("settings.safety_disclaimer", language: language)
+            #expect(value != "settings.safety_disclaimer")
+            #expect(!value.isEmpty)
+        }
+
+        let english = L10n.text("settings.safety_disclaimer", language: .english).lowercased()
+        #expect(english.contains("preparedness planning tool"))
+        #expect(english.contains("does not replace"))
+        #expect(english.contains("public authorities"))
+    }
+
     @Test func officialContactLocalizationIsCompleteForSupportedLanguages() {
         let keys = [
             "official_contacts.title",
@@ -1779,7 +1847,7 @@ struct Disaster_ReadyTests {
     }
 
     @Test func everyProductionLocalizationKeyResolvesInAllSupportedLanguages() {
-        #expect(Self.productionLocalizationKeys.count == 394)
+        #expect(Self.productionLocalizationKeys.count == 396)
 
         for language in AppLanguage.allCases {
             for key in Self.productionLocalizationKeys {
@@ -1924,6 +1992,7 @@ struct Disaster_ReadyTests {
         "msg_safe_body",
         "msg_safe_title",
         "myplan.actions.during.detail",
+        "myplan.actions.during.house_fire",
         "myplan.actions.during.title",
         "myplan.actions.now.detail",
         "myplan.actions.now.title",
@@ -2061,6 +2130,7 @@ struct Disaster_ReadyTests {
         "scenario.storm.checklist.1",
         "scenario.storm.checklist.2",
         "scenario.storm.checklist.3",
+        "settings.safety_disclaimer",
         "scenario.storm.go",
         "scenario.storm.name",
         "scenario.storm.no_go",

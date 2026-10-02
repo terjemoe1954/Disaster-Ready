@@ -2367,6 +2367,29 @@
         }
       }
     },
+    "myplan.actions.during.house_fire" : {
+      "comment" : "Safety-critical active house-fire guidance; immediate evacuation must come before belongings",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "If there is an active fire, leave immediately and stay outside. Do not delay to collect belongings. Call 110 when you are in a safe place to do so, and follow emergency-service instructions."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ved en pågående brann må du forlate boligen umiddelbart og bli værende ute. Ikke forsink evakueringen for å hente eiendeler. Ring 110 når du er på et sted der det er trygt å ringe, og følg instruksene fra nødetatene."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "หากกำลังเกิดไฟไหม้ ให้ออกไปทันทีและอยู่ด้านนอกต่อไป อย่าชะลอการออกจากอาคารเพื่อเก็บทรัพย์สิน โทร 110 เมื่อสามารถโทรได้อย่างปลอดภัย และปฏิบัติตามคำแนะนำจากหน่วยบริการฉุกเฉิน"
+          }
+        }
+      }
+    },
     "myplan.actions.during.title" : {
       "comment" : "Actual-event guidance category title",
       "localizations" : {
@@ -4092,24 +4115,24 @@
       }
     },
     "payment.introduction" : {
-      "comment" : "Friendly preparedness guidance, not financial advice",
+      "comment" : "Friendly preparedness guidance, not financial advice or a safety guarantee",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "machine_translated",
-            "value" : "Prepare alternatives in case ordinary electronic payment is unavailable. No fixed cash amount is recommended here."
+            "value" : "Prepare alternatives in case ordinary electronic payment is unavailable. No fixed cash amount is recommended here. This is preparedness guidance, not financial advice, and checklist completion does not guarantee financial security or safety."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "machine_translated",
-            "value" : "Forbered alternative betalingsmåter i tilfelle vanlige elektroniske betalingstjenester ikke er tilgjengelige. Her anbefales ikke noe fast kontantbeløp."
+            "value" : "Forbered alternative betalingsmåter i tilfelle vanlig elektronisk betaling ikke er tilgjengelig. Det anbefales ikke et bestemt kontantbeløp her. Dette er beredskapsveiledning, ikke økonomisk rådgivning, og en fullført sjekkliste garanterer ikke økonomisk trygghet eller personlig sikkerhet."
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "machine_translated",
-            "value" : "เตรียมช่องทางสำรองไว้เผื่อระบบชำระเงินอิเล็กทรอนิกส์ตามปกติใช้งานไม่ได้ ส่วนนี้ไม่ได้แนะนำจำนวนเงินสดที่แน่นอน"
+            "value" : "เตรียมช่องทางอื่นไว้เผื่อไม่สามารถใช้การชำระเงินทางอิเล็กทรอนิกส์ตามปกติได้ ที่นี่ไม่มีการแนะนำจำนวนเงินสดที่แน่นอน ข้อมูลนี้เป็นแนวทางการเตรียมพร้อม ไม่ใช่คำแนะนำทางการเงิน และไม่ได้รับประกันความปลอดภัยหรือความมั่นคงทางการเงิน"
           }
         }
       }
@@ -6065,6 +6088,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "คำแนะนำทางการแพทย์กรณีได้รับพิษ"
+          }
+        }
+      }
+    },
+    "settings.safety_disclaimer" : {
+      "comment" : "Concise About/Settings safety disclaimer",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready is a preparedness planning tool. It does not replace current instructions from emergency services or public authorities."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready er et verktøy for beredskapsplanlegging. Det erstatter ikke gjeldende instrukser fra nødetatene eller offentlige myndigheter."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Disaster Ready เป็นเครื่องมือสำหรับการวางแผนเตรียมพร้อม ไม่สามารถใช้แทนคำแนะนำล่าสุดจากหน่วยบริการฉุกเฉินหรือหน่วยงานภาครัฐได้"
           }
         }
       }

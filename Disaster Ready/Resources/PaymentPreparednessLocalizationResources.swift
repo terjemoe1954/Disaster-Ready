@@ -3,7 +3,7 @@ import Foundation
 enum PaymentPreparednessLocalizationResources {
     static let values: [LocalizedStringResource] = [
         LocalizedStringResource("payment.title", defaultValue: "Payment preparedness", comment: "Norwegian payment preparedness card title"),
-        LocalizedStringResource("payment.introduction", defaultValue: "Prepare alternatives in case ordinary electronic payment is unavailable. No fixed cash amount is recommended here.", comment: "Friendly preparedness guidance, not financial advice"),
+        LocalizedStringResource("payment.introduction", defaultValue: "Prepare alternatives in case ordinary electronic payment is unavailable. No fixed cash amount is recommended here. This is preparedness guidance, not financial advice, and checklist completion does not guarantee financial security or safety.", comment: "Friendly preparedness guidance, not financial advice or a safety guarantee"),
         LocalizedStringResource("payment.privacy_notice", defaultValue: "Only checklist completion is stored. Never enter or store amounts, account or card numbers, PINs, BankID information, passwords, balances, or banking credentials.", comment: "Financial privacy notice"),
         LocalizedStringResource("payment.progress", defaultValue: "%lld of %lld completed", comment: "Payment checklist completion count"),
         LocalizedStringResource("payment.complete", defaultValue: "Completed", comment: "Accessibility value for completed task"),
