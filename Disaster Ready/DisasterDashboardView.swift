@@ -214,9 +214,14 @@ struct DisasterDashboardView: View {
                                 deleteRole: deleteHouseholdRole
                             )
                             MessageTemplatesSection(
+                                includePlanSummary: $includePlanSummaryInMessages,
                                 templates: messageTemplates,
                                 shareText: messageBody(for:),
-                                language: selectedLanguage
+                                householdMembers: householdMembers,
+                                hasPlanSummary: hasMessagePlanSummary,
+                                language: selectedLanguage,
+                                openContacts: { selectedTab = .contacts },
+                                openPlanLocations: { locationScrollRequest += 1 }
                             )
                             DrillsSection(drills: drills, language: selectedLanguage)
                                 .id(PlanScrollTarget.drills)
@@ -380,7 +385,6 @@ struct DisasterDashboardView: View {
             SettingsSheet(
                 selectedLanguage: $selectedLanguage,
                 selectedAppearance: $preferredAppearance,
-                includePlanSummaryInMessages: $includePlanSummaryInMessages,
                 showOnlyMissingSupplies: $showOnlyMissingSupplies,
                 supplyReviewRemindersEnabled: $supplyReviewRemindersEnabled,
                 householdProfile: $householdProfile,
@@ -914,19 +918,25 @@ struct DisasterDashboardView: View {
         }.count
     }
 
-    private func planSummary(for plan: HouseholdPlan) -> String {
-        let reunion = plan.reunionPoint.isEmpty ? L10n.text("not_set", language: selectedLanguage) : plan.reunionPoint
-        let evacuation = plan.evacuationDestination.isEmpty ? L10n.text("not_set", language: selectedLanguage) : plan.evacuationDestination
-        let shelter = plan.shelterZone.isEmpty ? L10n.text("not_set", language: selectedLanguage) : plan.shelterZone
+    private func planSummary(for plan: HouseholdPlan) -> String? {
+        let fields = [
+            (L10n.text("reunion_point", language: selectedLanguage), plan.reunionPoint),
+            (L10n.text("evacuation_destination", language: selectedLanguage), plan.evacuationDestination),
+            (L10n.text("shelter_zone", language: selectedLanguage), plan.shelterZone)
+        ]
+        let completedFields = fields.compactMap { title, value -> String? in
+            let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmedValue.isEmpty ? nil : "\(title): \(trimmedValue)"
+        }
+        guard !completedFields.isEmpty else { return nil }
+        return completedFields.joined(separator: "\n")
+    }
 
-        return L10n.format(
-            "plan_summary_format",
-            language: selectedLanguage,
-            selectedEmergencyType.localizedName(in: selectedLanguage),
-            reunion,
-            evacuation,
-            shelter
-        )
+    private var hasMessagePlanSummary: Bool {
+        guard let plan = currentEmergencyPlan else { return false }
+        return [plan.reunionPoint, plan.evacuationDestination, plan.shelterZone].contains { value in
+            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
     }
 
     private func saveCurrentPlan() -> Bool {
@@ -945,12 +955,13 @@ struct DisasterDashboardView: View {
     private func messageBody(for template: FamilyMessageTemplate) -> String {
         var lines = [
             template.body,
-            "\(L10n.text("scenario", language: selectedLanguage)): \(selectedEmergencyType.localizedName(in: selectedLanguage))",
-            "\(L10n.text("action", language: selectedLanguage)): \(selectedEmergencyType.preparationGuidance(in: selectedLanguage))"
+            "\(L10n.text("scenario", language: selectedLanguage)): \(selectedEmergencyType.localizedName(in: selectedLanguage))"
         ]
 
-        if includePlanSummaryInMessages, let plan = currentEmergencyPlan {
-            lines.append(planSummary(for: plan))
+        if includePlanSummaryInMessages,
+           let plan = currentEmergencyPlan,
+           let summary = planSummary(for: plan) {
+            lines.append(summary)
         }
 
         return lines.joined(separator: "\n")
@@ -1135,7 +1146,8 @@ struct DisasterDashboardView: View {
                         gasShutoffNote: $0.gasShutoffNote,
                         medicalLead: $0.medicalLead,
                         petLead: $0.petLead,
-                        familyPassword: $0.familyPassword,
+                        // Kept in the schema for legacy imports, but excluded from new unencrypted backups.
+                        familyPassword: "",
                         alternativeAccommodation: $0.alternativeAccommodation,
                         familyFriendLocation: $0.familyFriendLocation,
                         secondaryHome: $0.secondaryHome,

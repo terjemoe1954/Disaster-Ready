@@ -272,6 +272,32 @@ struct Disaster_ReadyTests {
         }
     }
 
+    @Test func familyMessageRecipientsAreTrimmedAndDeduplicated() {
+        let recipients = FamilyMessageRecipientResolver.recipients(from: [
+            "  +47 900 00 000  ",
+            "+4790000000",
+            "",
+            "   ",
+            "+47 911 11 111"
+        ])
+
+        #expect(recipients == ["+47 900 00 000", "+47 911 11 111"])
+    }
+
+    @Test func familyMessageRecipientsRejectInvalidPhoneNumbers() {
+        let recipients = FamilyMessageRecipientResolver.recipients(from: [
+            "abc12345",
+            "1234",
+            "12+345",
+            "+47 (900) 00 000",
+            "0047 911 11 111"
+        ])
+
+        #expect(recipients == ["+47 (900) 00 000", "0047 911 11 111"])
+        #expect(FamilyMessageRecipientResolver.isValid("+47 900 00 000"))
+        #expect(!FamilyMessageRecipientResolver.isValid("abc12345"))
+    }
+
     @Test func backupValidationAcceptsHouseholdSettingsWithoutOtherData() {
         let payload = DisasterBackupPayload(
             householdMemberCount: 4,

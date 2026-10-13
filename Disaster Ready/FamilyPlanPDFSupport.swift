@@ -46,7 +46,9 @@ struct FamilyPlanPDFExportSheet: View {
                 Section(optionsTitle) {
                     Toggle(rolesTitle, isOn: $includesRoles)
                     Toggle(contactsTitle, isOn: $includesContacts)
-                    Toggle(passwordTitle, isOn: $includesFamilyPassword)
+                    if !plan.familyPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Toggle(passwordTitle, isOn: $includesFamilyPassword)
+                    }
                 }
 
                 Section {
@@ -133,9 +135,9 @@ private struct FamilyPlanPDFPrivacySection: View {
     private var detail: String {
         L10n.pick(
             language: language,
-            english: "The PDF may contain personal information. Only share it with people you trust.",
-            norwegian: "PDF-en kan inneholde personopplysninger. Del den bare med personer du stoler på.",
-            thai: "PDF อาจมีข้อมูลส่วนบุคคล โปรดแชร์เฉพาะกับบุคคลที่คุณไว้วางใจ"
+            english: "The PDF may contain personal information and is not encrypted. Store it securely and only share it with people you trust.",
+            norwegian: "PDF-en kan inneholde personopplysninger og er ikke kryptert. Oppbevar den sikkert og del den bare med personer du stoler på.",
+            thai: "PDF อาจมีข้อมูลส่วนบุคคลและไม่ได้เข้ารหัส โปรดจัดเก็บอย่างปลอดภัยและแชร์เฉพาะกับบุคคลที่คุณไว้วางใจ"
         )
     }
 }

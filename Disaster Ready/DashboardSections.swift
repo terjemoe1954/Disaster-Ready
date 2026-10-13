@@ -3,6 +3,7 @@
 //  Disaster Ready
 //
 
+import MessageUI
 import SwiftUI
 
 enum DashboardTab: Hashable {
@@ -756,43 +757,90 @@ struct ContactsSection: View {
 }
 
 struct MessageTemplatesSection: View {
+    @Binding var includePlanSummary: Bool
     @State private var showsTemplates = false
+    @State private var messageDraft: FamilyMessageDraft?
+    @State private var showsMessageUnavailable = false
+    @State private var pendingMessageWithoutRecipients: String?
+    @State private var showsNoRecipients = false
 
     let templates: [FamilyMessageTemplate]
     let shareText: (FamilyMessageTemplate) -> String
+    let householdMembers: [FamilyContact]
+    let hasPlanSummary: Bool
     let language: AppLanguage
+    let openContacts: () -> Void
+    let openPlanLocations: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             DisclosureGroup(isExpanded: $showsTemplates) {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(L10n.text("message_templates_subtitle", language: language))
+                    Text(messageInstructions)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
+                    HStack(spacing: 10) {
+                        Label(recipientStatusTitle, systemImage: validRecipients.isEmpty ? "person.crop.circle.badge.exclamationmark" : "person.2.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(validRecipients.isEmpty ? .orange : .secondary)
+
+                        Spacer(minLength: 8)
+
+                        if validRecipients.isEmpty {
+                            Button(addPhoneNumberTitle, action: openContacts)
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+
+                    if !recipientNames.isEmpty {
+                        Text(recipientNamesTitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+
+                    if validRecipients.count > 1 {
+                        Label(groupMessageNotice, systemImage: "person.3.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if hasPlanSummary {
+                        Toggle(includePlanSummaryTitle, isOn: $includePlanSummary)
+                            .font(.subheadline)
+                    } else {
+                        Button(action: openPlanLocations) {
+                            Label(addPlanLocationsTitle, systemImage: "mappin.and.ellipse")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+
                     ForEach(templates) { template in
-                        HStack(alignment: .top, spacing: 14) {
-                            Image(systemName: "paperplane.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(.blue)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(template.title)
-                                    .font(.headline)
-                                Text(shareText(template))
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(alignment: .top, spacing: 14) {
+                                Image(systemName: "paperplane.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.blue)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(template.title)
+                                        .font(.headline)
+                                    Text(shareText(template))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(3)
+                                }
                             }
-                            Spacer()
-                            ShareLink(
-                                item: shareText(template),
-                                preview: SharePreview(template.title, image: Image(systemName: "paperplane.circle.fill"))
-                            ) {
-                                Text(L10n.text("share", language: language))
-                                    .font(.caption.weight(.semibold))
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(.blue.opacity(0.12), in: Capsule())
+
+                            Button {
+                                openMessageComposer(for: template)
+                            } label: {
+                                Label(smsTitle, systemImage: "message.fill")
+                                    .frame(maxWidth: .infinity)
                             }
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                            .accessibilityLabel("\(smsTitle): \(template.title)")
                         }
                         .padding(14)
                         .background(InsetCardBackground())
@@ -801,7 +849,7 @@ struct MessageTemplatesSection: View {
                 .padding(.top, 12)
             } label: {
                 HStack {
-                    Text(L10n.text("one_tap_family_updates", language: language))
+                    Text(sectionTitle)
                         .font(.title3.weight(.bold))
                         .accessibilityHeading(.h2)
                     Spacer(minLength: 8)
@@ -813,6 +861,233 @@ struct MessageTemplatesSection: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
+        .sheet(item: $messageDraft) { draft in
+            FamilyMessageComposer(recipients: draft.recipients, body: draft.body)
+        }
+        .alert(messageUnavailableTitle, isPresented: $showsMessageUnavailable) {
+            Button(messageUnavailableDismissTitle, role: .cancel) {}
+        } message: {
+            Text(messageUnavailableMessage)
+        }
+        .alert(noRecipientsTitle, isPresented: $showsNoRecipients) {
+            Button(addPhoneNumberTitle) {
+                pendingMessageWithoutRecipients = nil
+                openContacts()
+            }
+            Button(continueWithoutRecipientTitle) {
+                guard let body = pendingMessageWithoutRecipients else { return }
+                pendingMessageWithoutRecipients = nil
+                messageDraft = FamilyMessageDraft(recipients: [], body: body)
+            }
+            Button(cancelTitle, role: .cancel) {
+                pendingMessageWithoutRecipients = nil
+            }
+        } message: {
+            Text(noRecipientsMessage)
+        }
+    }
+
+    private func openMessageComposer(for template: FamilyMessageTemplate) {
+        guard MFMessageComposeViewController.canSendText() else {
+            showsMessageUnavailable = true
+            return
+        }
+
+        let body = shareText(template)
+        guard !validRecipients.isEmpty else {
+            pendingMessageWithoutRecipients = body
+            showsNoRecipients = true
+            return
+        }
+        messageDraft = FamilyMessageDraft(
+            recipients: validRecipients,
+            body: body
+        )
+    }
+
+    private var smsTitle: String {
+        L10n.pick(language: language, english: "Open Messages", norwegian: "Åpne Meldinger", thai: "เปิดแอปข้อความ")
+    }
+
+    private var validRecipients: [String] {
+        FamilyMessageRecipientResolver.recipients(from: householdMembers.map(\.phoneNumber))
+    }
+
+    private var recipientNames: [String] {
+        var seenNumbers: Set<String> = []
+        return householdMembers.compactMap { member in
+            let name = member.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let comparisonKey = member.phoneNumber.filter(\.isNumber)
+            guard !name.isEmpty,
+                  FamilyMessageRecipientResolver.isValid(member.phoneNumber),
+                  seenNumbers.insert(comparisonKey).inserted else {
+                return nil
+            }
+            return name
+        }
+    }
+
+    private var recipientNamesTitle: String {
+        let names = recipientNames.formatted(
+            .list(type: .and)
+                .locale(AppLanguage.locale(for: language))
+        )
+        return L10n.pick(
+            language: language,
+            english: "Recipients: \(names)",
+            norwegian: "Mottakere: \(names)",
+            thai: "ผู้รับ: \(names)"
+        )
+    }
+
+    private var groupMessageNotice: String {
+        L10n.pick(
+            language: language,
+            english: "Messages may create a group conversation where recipients can see each other.",
+            norwegian: "Meldinger kan opprette en gruppesamtale der mottakerne kan se hverandre.",
+            thai: "แอปข้อความอาจสร้างการสนทนากลุ่มซึ่งผู้รับสามารถเห็นกันและกันได้"
+        )
+    }
+
+    private var includePlanSummaryTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Include meeting point and evacuation plan",
+            norwegian: "Ta med møtepunkt og evakueringsplan",
+            thai: "รวมจุดนัดพบและแผนอพยพ"
+        )
+    }
+
+    private var addPlanLocationsTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Add meeting point or evacuation destination",
+            norwegian: "Legg til møtepunkt eller evakueringssted",
+            thai: "เพิ่มจุดนัดพบหรือปลายทางอพยพ"
+        )
+    }
+
+    private var recipientStatusTitle: String {
+        guard !validRecipients.isEmpty else {
+            return L10n.pick(
+                language: language,
+                english: "No recipients registered",
+                norwegian: "Ingen mottakere registrert",
+                thai: "ยังไม่ได้ลงทะเบียนผู้รับ"
+            )
+        }
+
+        let count = validRecipients.count
+        return L10n.pick(
+            language: language,
+            english: count == 1 ? "1 registered recipient" : "\(count) registered recipients",
+            norwegian: count == 1 ? "1 registrert mottaker" : "\(count) registrerte mottakere",
+            thai: "ผู้รับที่ลงทะเบียน \(count) คน"
+        )
+    }
+
+    private var sectionTitle: String {
+        L10n.pick(
+            language: language,
+            english: "SMS updates to the family",
+            norwegian: "SMS-oppdateringer til familien",
+            thai: "ส่งอัปเดต SMS ให้ครอบครัว"
+        )
+    }
+
+    private var messageInstructions: String {
+        L10n.pick(
+            language: language,
+            english: "Choose an update to open Messages with recipients and text filled in. Review it, then tap Send in Messages.",
+            norwegian: "Velg en oppdatering for å åpne Meldinger med mottakere og tekst ferdig utfylt. Kontroller innholdet og trykk deretter Send i Meldinger.",
+            thai: "เลือกอัปเดตเพื่อเปิดแอปข้อความพร้อมผู้รับและข้อความที่กรอกไว้ ตรวจสอบแล้วแตะส่งในแอปข้อความ"
+        )
+    }
+
+    private var messageUnavailableTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Messages unavailable",
+            norwegian: "Meldinger er ikke tilgjengelig",
+            thai: "ไม่สามารถใช้ข้อความได้"
+        )
+    }
+
+    private var messageUnavailableMessage: String {
+        L10n.pick(
+            language: language,
+            english: "This device is not configured to send SMS or iMessage.",
+            norwegian: "Denne enheten er ikke konfigurert for å sende SMS eller iMessage.",
+            thai: "อุปกรณ์นี้ไม่ได้ตั้งค่าให้ส่ง SMS หรือ iMessage"
+        )
+    }
+
+    private var messageUnavailableDismissTitle: String {
+        L10n.pick(language: language, english: "OK", norwegian: "OK", thai: "ตกลง")
+    }
+
+    private var noRecipientsTitle: String {
+        L10n.pick(
+            language: language,
+            english: "No phone numbers",
+            norwegian: "Ingen telefonnumre",
+            thai: "ไม่มีหมายเลขโทรศัพท์"
+        )
+    }
+
+    private var noRecipientsMessage: String {
+        L10n.pick(
+            language: language,
+            english: "No household member has a phone number. Add one in Contacts, or continue and enter a recipient in Messages.",
+            norwegian: "Ingen husstandsmedlemmer har telefonnummer. Legg til et nummer under Kontakter, eller fortsett og skriv inn mottaker i Meldinger.",
+            thai: "สมาชิกครัวเรือนไม่มีหมายเลขโทรศัพท์ เพิ่มหมายเลขในรายชื่อติดต่อ หรือดำเนินการต่อแล้วป้อนผู้รับในแอปข้อความ"
+        )
+    }
+
+    private var addPhoneNumberTitle: String {
+        L10n.pick(language: language, english: "Open Contacts", norwegian: "Åpne Kontakter", thai: "เปิดรายชื่อติดต่อ")
+    }
+
+    private var continueWithoutRecipientTitle: String {
+        L10n.pick(language: language, english: "Continue", norwegian: "Fortsett", thai: "ดำเนินการต่อ")
+    }
+
+    private var cancelTitle: String {
+        L10n.pick(language: language, english: "Cancel", norwegian: "Avbryt", thai: "ยกเลิก")
+    }
+}
+
+private struct FamilyMessageDraft: Identifiable {
+    let id = UUID()
+    let recipients: [String]
+    let body: String
+}
+
+private struct FamilyMessageComposer: UIViewControllerRepresentable {
+    let recipients: [String]
+    let body: String
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIViewController(context: Context) -> MFMessageComposeViewController {
+        let controller = MFMessageComposeViewController()
+        controller.messageComposeDelegate = context.coordinator
+        controller.recipients = recipients
+        controller.body = body
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: MFMessageComposeViewController, context: Context) {}
+
+    final class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
+        func messageComposeViewController(
+            _ controller: MFMessageComposeViewController,
+            didFinishWith result: MessageComposeResult
+        ) {
+            controller.dismiss(animated: true)
+        }
     }
 }
 
@@ -1723,6 +1998,11 @@ private struct FamilyContactEditor: View {
                 .textFieldStyle(.roundedBorder)
                 .keyboardType(.phonePad)
                 .textContentType(.telephoneNumber)
+            if showsInvalidPhoneNumber {
+                Label(invalidPhoneNumberTitle, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
             TextField(L10n.text("notes", language: language), text: $contact.notes, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
                 .lineLimit(2...4)
@@ -1769,6 +2049,18 @@ private struct FamilyContactEditor: View {
     private var contactTypeTitle: String { L10n.pick(language: language, english: "Contact type", norwegian: "Kontakttype", thai: "ประเภทผู้ติดต่อ") }
     private var householdMemberTitle: String { L10n.pick(language: language, english: "Household", norwegian: "Husstand", thai: "ครัวเรือน") }
     private var outsideContactTitle: String { L10n.pick(language: language, english: "External", norwegian: "Ekstern", thai: "ภายนอก") }
+    private var showsInvalidPhoneNumber: Bool {
+        !contact.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !FamilyMessageRecipientResolver.isValid(contact.phoneNumber)
+    }
+    private var invalidPhoneNumberTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Check the phone number. It will not be included in family SMS updates.",
+            norwegian: "Kontroller telefonnummeret. Det blir ikke tatt med i SMS-oppdateringer til familien.",
+            thai: "ตรวจสอบหมายเลขโทรศัพท์ หมายเลขนี้จะไม่รวมอยู่ในการอัปเดต SMS สำหรับครอบครัว"
+        )
+    }
 }
 
 private struct ImportantNumberEditor: View {

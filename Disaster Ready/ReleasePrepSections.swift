@@ -12,7 +12,6 @@ struct SettingsSheet: View {
 
     @Binding var selectedLanguage: AppLanguage
     @Binding var selectedAppearance: String
-    @Binding var includePlanSummaryInMessages: Bool
     @Binding var showOnlyMissingSupplies: Bool
     @Binding var supplyReviewRemindersEnabled: Bool
     @Binding var householdProfile: HouseholdProfile
@@ -58,7 +57,6 @@ struct SettingsSheet: View {
                 }
 
                 Section(preferencesTitle) {
-                    Toggle(includePlanSummaryTitle, isOn: $includePlanSummaryInMessages)
                     Toggle(showMissingOnlyTitle, isOn: $showOnlyMissingSupplies)
                     Toggle(supplyReviewRemindersTitle, isOn: $supplyReviewRemindersEnabled)
 
@@ -154,10 +152,6 @@ struct SettingsSheet: View {
 
     private var languageTitle: String {
         L10n.pick(language: language, english: "Language", norwegian: "Språk", thai: "ภาษา")
-    }
-
-    private var includePlanSummaryTitle: String {
-        L10n.pick(language: language, english: "Include plan summary in family updates", norwegian: "Ta med plansammendrag i familieoppdateringer", thai: "รวมสรุปแผนในอัปเดตครอบครัว")
     }
 
     private var appearanceTitle: String {
@@ -742,9 +736,9 @@ struct OnboardingView: View {
     private var familyBody: String {
         L10n.pick(
             language: language,
-            english: "Save phone numbers, assign leads, and share scenario-specific updates in one tap.",
-            norwegian: "Lagre telefonnumre, fordel ansvar og del scenario-spesifikke oppdateringer med ett trykk.",
-            thai: "บันทึกหมายเลขโทรศัพท์ กำหนดผู้รับผิดชอบ และแชร์อัปเดตตามสถานการณ์ได้ในแตะเดียว"
+            english: "Save phone numbers, assign leads, and prepare scenario-specific SMS updates for review in Messages.",
+            norwegian: "Lagre telefonnumre, fordel ansvar og klargjør scenario-spesifikke SMS-oppdateringer som kontrolleres i Meldinger.",
+            thai: "บันทึกหมายเลขโทรศัพท์ กำหนดผู้รับผิดชอบ และเตรียมอัปเดต SMS ตามสถานการณ์เพื่อตรวจสอบในแอปข้อความ"
         )
     }
 

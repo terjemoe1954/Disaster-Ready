@@ -230,6 +230,32 @@ struct FamilyMessageTemplate: Identifiable {
     let body: String
 }
 
+enum FamilyMessageRecipientResolver {
+    static func isValid(_ phoneNumber: String) -> Bool {
+        let trimmedNumber = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        let comparisonKey = trimmedNumber.filter(\.isNumber)
+        let allowedCharacters = CharacterSet(charactersIn: "+()- ").union(.decimalDigits)
+        let usesOnlyPhoneCharacters = trimmedNumber.unicodeScalars.allSatisfy(allowedCharacters.contains)
+        let hasValidLength = (5...15).contains(comparisonKey.count)
+        let hasValidPlusPlacement = !trimmedNumber.dropFirst().contains("+")
+        return usesOnlyPhoneCharacters && hasValidLength && hasValidPlusPlacement
+    }
+
+    static func recipients(from phoneNumbers: [String]) -> [String] {
+        var seenNumbers: Set<String> = []
+
+        return phoneNumbers.compactMap { phoneNumber in
+            let trimmedNumber = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+            let comparisonKey = trimmedNumber.filter(\.isNumber)
+            guard isValid(trimmedNumber),
+                  seenNumbers.insert(comparisonKey).inserted else {
+                return nil
+            }
+            return trimmedNumber
+        }
+    }
+}
+
 @Model
 final class FamilyContact {
     var id: UUID
