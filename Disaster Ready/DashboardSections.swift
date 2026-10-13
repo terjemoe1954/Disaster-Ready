@@ -613,11 +613,13 @@ struct HouseholdPlanSection: View {
 }
 
 struct ContactsSection: View {
-    let familyContacts: [FamilyContact]
+    let householdMembers: [FamilyContact]
+    let outsideContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
     let countryCode: String
     let language: AppLanguage
-    let addFamily: () -> Void
+    let addHouseholdMember: () -> Void
+    let addOutsideContact: () -> Void
     let addImportant: () -> Void
     let deleteFamily: (FamilyContact) -> Void
     let deleteImportant: (ImportantNumber) -> Void
@@ -650,11 +652,25 @@ struct ContactsSection: View {
                 .accessibilityHeading(.h3)
 
             contactGroup(
-                title: L10n.text("family", language: language),
-                addTitle: L10n.text("add_family", language: language),
-                addAction: addFamily
+                title: householdMembersTitle,
+                addTitle: addHouseholdMemberTitle,
+                addAction: addHouseholdMember
             ) {
-                ForEach(familyContacts) { contact in
+                ForEach(householdMembers) { contact in
+                    FamilyContactEditor(
+                        contact: contact,
+                        language: language,
+                        deleteAction: { deleteFamily(contact) }
+                    )
+                }
+            }
+
+            contactGroup(
+                title: outsideContactsTitle,
+                addTitle: addOutsideContactTitle,
+                addAction: addOutsideContact
+            ) {
+                ForEach(outsideContacts) { contact in
                     FamilyContactEditor(
                         contact: contact,
                         language: language,
@@ -679,6 +695,22 @@ struct ContactsSection: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
+    }
+
+    private var householdMembersTitle: String {
+        L10n.pick(language: language, english: "Household members", norwegian: "Husstandsmedlemmer", thai: "สมาชิกในครัวเรือน")
+    }
+
+    private var outsideContactsTitle: String {
+        L10n.pick(language: language, english: "Contacts outside the household", norwegian: "Kontakter utenfor husstanden", thai: "ผู้ติดต่อนอกครัวเรือน")
+    }
+
+    private var addHouseholdMemberTitle: String {
+        L10n.pick(language: language, english: "Add member", norwegian: "Legg til medlem", thai: "เพิ่มสมาชิก")
+    }
+
+    private var addOutsideContactTitle: String {
+        L10n.pick(language: language, english: "Add contact", norwegian: "Legg til kontakt", thai: "เพิ่มผู้ติดต่อ")
     }
 
     private func contactGroup<Content: View>(
@@ -750,6 +782,7 @@ struct MessageTemplatesSection: View {
 
 struct RolesSection: View {
     let roles: [HouseholdRole]
+    let householdMembers: [FamilyContact]
     let language: AppLanguage
     let addRole: () -> Void
     let deleteRole: (HouseholdRole) -> Void
@@ -768,6 +801,7 @@ struct RolesSection: View {
             ForEach(roles) { role in
                 HouseholdRoleEditor(
                     role: role,
+                    householdMembers: householdMembers,
                     language: language,
                     deleteAction: { deleteRole(role) }
                 )
@@ -1298,6 +1332,8 @@ private struct PreparednessGuideDetail: View {
 }
 
 struct DrillsSection: View {
+    @State private var completionDates: [String: Date] = [:]
+
     let drills: [Drill]
     let language: AppLanguage
 
@@ -1308,24 +1344,87 @@ struct DrillsSection: View {
                 .accessibilityHeading(.h2)
 
             ForEach(drills) { drill in
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(drill.title)
-                            .font(.headline)
-                        Text("\(drill.frequency) • \(drill.duration)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "timer")
-                        .foregroundStyle(.purple)
-                }
-                .padding(14)
-                .background(InsetCardBackground())
+                DrillRow(
+                    drill: drill,
+                    completionDate: completionDates[drill.id],
+                    language: language,
+                    markCompleted: { markCompleted(drill) }
+                )
             }
         }
         .padding(20)
         .background(DashboardCardBackground())
+        .task {
+            completionDates = DrillCompletionStore.load()
+        }
+    }
+
+    private func markCompleted(_ drill: Drill) {
+        completionDates[drill.id] = Date()
+        DrillCompletionStore.save(completionDates)
+    }
+}
+
+private struct DrillRow: View {
+    let drill: Drill
+    let completionDate: Date?
+    let language: AppLanguage
+    let markCompleted: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: completionDate == nil ? "timer" : "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(completionDate == nil ? .purple : .green)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(drill.title)
+                        .font(.headline)
+                    Text("\(drill.frequency) • \(drill.duration)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    if completionDate != nil {
+                        Text(lastCompletedTitle)
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    }
+                }
+                Spacer(minLength: 8)
+            }
+
+            Button(action: markCompleted) {
+                Label(markCompletedTitle, systemImage: "checkmark.circle")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("completeDrill.\(drill.id)")
+        }
+        .padding(14)
+        .background(InsetCardBackground())
+    }
+
+    private var lastCompletedTitle: String {
+        guard let completionDate else { return "" }
+        let date = completionDate.formatted(
+            .dateTime
+                .day()
+                .month(.abbreviated)
+                .year()
+                .locale(AppLanguage.locale(for: language))
+        )
+        return L10n.pick(
+            language: language,
+            english: "Last completed: \(date)",
+            norwegian: "Sist gjennomført: \(date)",
+            thai: "ทำล่าสุด: \(date)"
+        )
+    }
+
+    private var markCompletedTitle: String {
+        completionDate == nil
+            ? L10n.pick(language: language, english: "Mark as completed", norwegian: "Marker som gjennomført", thai: "ทำเครื่องหมายว่าเสร็จแล้ว")
+            : L10n.pick(language: language, english: "Completed again today", norwegian: "Gjennomført på nytt i dag", thai: "ทำเสร็จอีกครั้งวันนี้")
     }
 }
 
@@ -1418,6 +1517,11 @@ private struct FamilyContactEditor: View {
                 .textInputAutocapitalization(.words)
             TextField(L10n.text("role", language: language), text: $contact.role)
                 .textFieldStyle(.roundedBorder)
+            Picker(contactTypeTitle, selection: $contact.isHouseholdMember) {
+                Text(householdMemberTitle).tag(true)
+                Text(outsideContactTitle).tag(false)
+            }
+            .pickerStyle(.segmented)
             TextField(L10n.text("phone_number", language: language), text: $contact.phoneNumber)
                 .textFieldStyle(.roundedBorder)
                 .keyboardType(.phonePad)
@@ -1465,6 +1569,9 @@ private struct FamilyContactEditor: View {
 
     private var deleteButtonTitle: String { L10n.pick(language: language, english: "Delete", norwegian: "Slett", thai: "ลบ") }
     private var cancelButtonTitle: String { L10n.pick(language: language, english: "Cancel", norwegian: "Avbryt", thai: "ยกเลิก") }
+    private var contactTypeTitle: String { L10n.pick(language: language, english: "Contact type", norwegian: "Kontakttype", thai: "ประเภทผู้ติดต่อ") }
+    private var householdMemberTitle: String { L10n.pick(language: language, english: "Household", norwegian: "Husstand", thai: "ครัวเรือน") }
+    private var outsideContactTitle: String { L10n.pick(language: language, english: "External", norwegian: "Ekstern", thai: "ภายนอก") }
 }
 
 private struct ImportantNumberEditor: View {
@@ -1536,6 +1643,7 @@ private struct ImportantNumberEditor: View {
 private struct HouseholdRoleEditor: View {
     @Bindable var role: HouseholdRole
     @State private var showsDeleteConfirmation = false
+    let householdMembers: [FamilyContact]
     let language: AppLanguage
     let deleteAction: () -> Void
 
@@ -1559,10 +1667,26 @@ private struct HouseholdRoleEditor: View {
                 VStack(alignment: .leading, spacing: 10) {
                     TextField(roleTitlePlaceholder, text: $role.title)
                         .textFieldStyle(.roundedBorder)
-                    TextField(rolePersonPlaceholder, text: $role.person)
-                        .textFieldStyle(.roundedBorder)
-                        .textContentType(.name)
-                        .textInputAutocapitalization(.words)
+                    if householdMembers.isEmpty {
+                        TextField(rolePersonPlaceholder, text: $role.person)
+                            .textFieldStyle(.roundedBorder)
+                            .textContentType(.name)
+                            .textInputAutocapitalization(.words)
+                    } else {
+                        Picker(rolePersonPlaceholder, selection: $role.person) {
+                            Text(rolePersonPlaceholder).tag("")
+                            if !role.person.isEmpty,
+                               !householdMembers.contains(where: { $0.name == role.person }) {
+                                Text(role.person).tag(role.person)
+                            }
+                            ForEach(householdMembers) { member in
+                                Text(member.name.isEmpty ? unnamedMemberTitle : member.name)
+                                    .tag(member.name)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                     TextField(roleTaskPlaceholder, text: $role.task, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(2...4)
@@ -1602,6 +1726,15 @@ private struct HouseholdRoleEditor: View {
             english: "Household role",
             norwegian: "Husholdningsrolle",
             thai: "บทบาทในครัวเรือน"
+        )
+    }
+
+    private var unnamedMemberTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Unnamed household member",
+            norwegian: "Husstandsmedlem uten navn",
+            thai: "สมาชิกในครัวเรือนที่ไม่มีชื่อ"
         )
     }
 

@@ -8,7 +8,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DisasterBackupPayload: Codable, Equatable {
-    static let currentSchemaVersion = 1
+    static let currentSchemaVersion = 3
 
     var schemaVersion: Int? = currentSchemaVersion
     var householdMemberCount: Int? = nil
@@ -80,6 +80,7 @@ struct FamilyContactSnapshot: Codable, Equatable {
     var role: String
     var phoneNumber: String
     var notes: String
+    var isHouseholdMember: Bool? = nil
 }
 
 struct ImportantNumberSnapshot: Codable, Equatable {
@@ -103,6 +104,7 @@ struct HouseholdPlanSnapshot: Codable, Equatable {
     var safePlaceNote: String? = nil
     var waterStopcockNote: String? = nil
     var mainElectricalPanelNote: String? = nil
+    var lastReviewedAt: Date? = nil
 
 }
 

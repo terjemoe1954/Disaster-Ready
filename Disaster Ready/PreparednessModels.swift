@@ -200,7 +200,7 @@ final class HouseholdRole {
 }
 
 struct Drill: Identifiable {
-    let id = UUID()
+    let id: String
     let title: String
     let frequency: String
     let duration: String
@@ -226,13 +226,22 @@ final class FamilyContact {
     var role: String
     var phoneNumber: String
     var notes: String
+    var isHouseholdMember: Bool = true
 
-    init(id: UUID = UUID(), name: String, role: String, phoneNumber: String, notes: String) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        role: String,
+        phoneNumber: String,
+        notes: String,
+        isHouseholdMember: Bool = true
+    ) {
         self.id = id
         self.name = name
         self.role = role
         self.phoneNumber = phoneNumber
         self.notes = notes
+        self.isHouseholdMember = isHouseholdMember
     }
 }
 
@@ -305,6 +314,7 @@ final class HouseholdPlan {
     var safePlaceNote: String?
     var waterStopcockNote: String?
     var mainElectricalPanelNote: String?
+    var lastReviewedAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -321,7 +331,8 @@ final class HouseholdPlan {
         secondaryHome: String? = nil,
         safePlaceNote: String? = nil,
         waterStopcockNote: String? = nil,
-        mainElectricalPanelNote: String? = nil
+        mainElectricalPanelNote: String? = nil,
+        lastReviewedAt: Date? = nil
     ) {
         self.id = id
         self.scenarioIdentifier = scenarioIdentifier
@@ -338,5 +349,6 @@ final class HouseholdPlan {
         self.safePlaceNote = safePlaceNote
         self.waterStopcockNote = waterStopcockNote
         self.mainElectricalPanelNote = mainElectricalPanelNote
+        self.lastReviewedAt = lastReviewedAt
     }
 }

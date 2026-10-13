@@ -10,6 +10,7 @@ struct EventAwareMyPlanView: View {
     let importantNumbers: [ImportantNumber]
     let language: AppLanguage
     let openContacts: () -> Void
+    let exportPlan: () -> Void
     let savePlan: () -> Bool
 
     @State private var saveSucceeded: Bool?
@@ -65,6 +66,7 @@ struct EventAwareMyPlanView: View {
                 MyPlanSaveStep(
                     saveSucceeded: saveSucceeded,
                     language: language,
+                    exportPlan: exportPlan,
                     save: {
                         saveSucceeded = savePlan()
                     }
@@ -295,7 +297,6 @@ private struct MyPlanLocationsStep: View {
 
             locationField("myplan.location.evacuation_legacy", text: $plan.evacuationDestination, identifier: "evacuationDestinationField")
             locationField("myplan.location.shelter_legacy", text: $plan.shelterZone, identifier: "shelterZoneField")
-            locationField("myplan.location.personal_note", text: optionalBinding(for: \HouseholdPlan.safePlaceNote), identifier: "personalSafePlaceNoteField", axis: .vertical)
         }
     }
 
@@ -476,6 +477,7 @@ private struct MyPlanContactsStep: View {
 private struct MyPlanSaveStep: View {
     let saveSucceeded: Bool?
     let language: AppLanguage
+    let exportPlan: () -> Void
     let save: () -> Void
 
     var body: some View {
@@ -489,6 +491,15 @@ private struct MyPlanSaveStep: View {
             .controlSize(.large)
             .accessibilityIdentifier("saveMyPlanButton")
 
+            Button(action: exportPlan) {
+                Label(exportTitle, systemImage: "doc.richtext.fill")
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            .accessibilityIdentifier("exportFamilyPlanPDFButton")
+
             if let saveSucceeded {
                 Text(L10n.text(saveSucceeded ? "myplan.save.success" : "myplan.save.failure", language: language))
                     .font(.footnote)
@@ -497,9 +508,19 @@ private struct MyPlanSaveStep: View {
             }
         }
     }
+
+    private var exportTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Share family plan as PDF",
+            norwegian: "Del familieplan som PDF",
+            thai: "แชร์แผนครอบครัวเป็น PDF"
+        )
+    }
 }
 
 private struct MyPlanStepCard<Content: View>: View {
+    @State private var isExpanded: Bool
     let number: Int
     let titleKey: String
     let icon: String
@@ -513,6 +534,7 @@ private struct MyPlanStepCard<Content: View>: View {
         language: AppLanguage,
         @ViewBuilder content: () -> Content
     ) {
+        _isExpanded = State(initialValue: number == 1)
         self.number = number
         self.titleKey = titleKey
         self.icon = icon
@@ -521,7 +543,12 @@ private struct MyPlanStepCard<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 14) {
+                content
+            }
+            .padding(.top, 14)
+        } label: {
             Label {
                 HStack(spacing: 6) {
                     Text(number, format: .number)
@@ -534,8 +561,6 @@ private struct MyPlanStepCard<Content: View>: View {
             }
             .accessibilityHeading(.h2)
             .accessibilityElement(children: .combine)
-
-            content
         }
         .padding(20)
         .background(DashboardCardBackground())

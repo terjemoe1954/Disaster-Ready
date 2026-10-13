@@ -190,6 +190,171 @@ struct HomePreparednessSection: View {
     }
 }
 
+struct PreparednessNextStepSection: View {
+    let summary: HomePreparednessSummary
+    let language: AppLanguage
+    let openHousehold: () -> Void
+    let openPlan: () -> Void
+    let openSupplies: () -> Void
+    let openContacts: () -> Void
+
+    var body: some View {
+        Button(action: nextStep.action) {
+            HStack(spacing: 14) {
+                Image(systemName: nextStep.systemImage)
+                    .font(.title2)
+                    .foregroundStyle(.blue)
+                    .frame(width: 32)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(nextStep.title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: nextStep.isComplete ? "checkmark.circle.fill" : "arrow.right.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(nextStep.isComplete ? .green : .blue)
+                    .accessibilityHidden(true)
+            }
+            .padding(16)
+            .background(DashboardCardBackground())
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(nextStep.isComplete)
+        .accessibilityIdentifier("preparednessNextStep")
+    }
+
+    private var nextStep: PreparednessNextStep {
+        if summary.household != .prepared {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Complete your household profile", norwegian: "Fullfør husstandsprofilen", thai: "กรอกโปรไฟล์ครัวเรือนให้เสร็จ"),
+                systemImage: "house.fill",
+                isComplete: false,
+                action: openHousehold
+            )
+        }
+        if summary.plan != .prepared {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Add meeting and evacuation locations", norwegian: "Legg inn møte- og evakueringssted", thai: "เพิ่มจุดนัดพบและจุดอพยพ"),
+                systemImage: "mappin.and.ellipse",
+                isComplete: false,
+                action: openPlan
+            )
+        }
+        if summary.contacts != .prepared {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Add an important contact", norwegian: "Legg til en viktig kontakt", thai: "เพิ่มผู้ติดต่อสำคัญ"),
+                systemImage: "person.crop.circle.badge.plus",
+                isComplete: false,
+                action: openContacts
+            )
+        }
+        if summary.supplies != .prepared || summary.payment == .needsAttention || summary.payment == .inProgress {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Review your emergency supplies", norwegian: "Se gjennom beredskapslageret", thai: "ตรวจสอบอุปกรณ์ฉุกเฉิน"),
+                systemImage: "shippingbox.fill",
+                isComplete: false,
+                action: openSupplies
+            )
+        }
+        return PreparednessNextStep(
+            title: L10n.pick(language: language, english: "Your essential setup is complete", norwegian: "Det viktigste oppsettet er fullført", thai: "การตั้งค่าที่สำคัญเสร็จสมบูรณ์"),
+            systemImage: "checkmark.seal.fill",
+            isComplete: true,
+            action: {}
+        )
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Next step", norwegian: "Neste steg", thai: "ขั้นตอนถัดไป")
+    }
+}
+
+struct HomePlanReviewSection: View {
+    let lastReviewedAt: Date?
+    let scenarioName: String
+    let language: AppLanguage
+    let openPlan: () -> Void
+
+    var body: some View {
+        Button(action: openPlan) {
+            HStack(spacing: 14) {
+                Image(systemName: needsReview ? "calendar.badge.exclamationmark" : "checkmark.shield.fill")
+                    .font(.title2)
+                    .foregroundStyle(needsReview ? .orange : .green)
+                    .frame(width: 32)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(statusText)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text(scenarioName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
+            }
+            .padding(16)
+            .background(DashboardCardBackground())
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("planReviewStatus")
+    }
+
+    private var needsReview: Bool {
+        guard let lastReviewedAt,
+              let reviewDeadline = Calendar.current.date(byAdding: .month, value: 6, to: lastReviewedAt) else {
+            return true
+        }
+        return reviewDeadline <= Date()
+    }
+
+    private var statusText: String {
+        guard let lastReviewedAt else {
+            return L10n.pick(language: language, english: "The plan has not been reviewed", norwegian: "Planen er ikke gjennomgått", thai: "ยังไม่ได้ตรวจสอบแผน")
+        }
+
+        if needsReview {
+            return L10n.pick(language: language, english: "The plan should be reviewed again", norwegian: "Planen bør gjennomgås på nytt", thai: "ควรตรวจสอบแผนอีกครั้ง")
+        }
+
+        let date = lastReviewedAt.formatted(
+            Date.FormatStyle(date: .abbreviated, time: .omitted)
+                .locale(AppLanguage.locale(for: language))
+        )
+        return L10n.pick(language: language, english: "Last reviewed: \(date)", norwegian: "Sist gjennomgått: \(date)", thai: "ตรวจสอบล่าสุด: \(date)")
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Plan review", norwegian: "Gjennomgang av planen", thai: "การตรวจสอบแผน")
+    }
+}
+
+private struct PreparednessNextStep {
+    let title: String
+    let systemImage: String
+    let isComplete: Bool
+    let action: () -> Void
+}
+
 private struct HomeChecklistRow: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 

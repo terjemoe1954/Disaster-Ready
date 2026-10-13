@@ -29,7 +29,6 @@ struct DisasterDashboardView: View {
     @Query(sort: \HouseholdRole.title) private var householdRoles: [HouseholdRole]
     @Query(sort: \SupplyItem.name) private var supplies: [SupplyItem]
 
-    @State private var selectedScenario: PreparednessScenario = .storm
     @State private var selectedEmergencyType: EmergencyType = .extremeWeather
     @State private var householdProfile = HouseholdProfile.defaultProfile(locale: .current, householdSize: 1)
     @State private var paymentPreparedness = PaymentPreparednessChecklist()
@@ -39,6 +38,8 @@ struct DisasterDashboardView: View {
     @State private var showingHomeHouseholdProfile = false
     @State private var presentedHomeTool: HomeOfficialTool?
     @State private var showingOnboarding = false
+    @State private var showingEmergencyMode = false
+    @State private var showingFamilyPlanExport = false
     @State private var backupDocument = DisasterBackupDocument(payload: .empty)
     @State private var showingBackupExporter = false
     @State private var showingBackupImporter = false
@@ -60,6 +61,23 @@ struct DisasterDashboardView: View {
             TabView(selection: $selectedTab) {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
+                        EmergencyModeLauncherSection(language: selectedLanguage) {
+                            showingEmergencyMode = true
+                        }
+                        PreparednessNextStepSection(
+                            summary: homePreparednessSummary,
+                            language: selectedLanguage,
+                            openHousehold: { showingHomeHouseholdProfile = true },
+                            openPlan: { selectedTab = .plan },
+                            openSupplies: { selectedTab = .supplies },
+                            openContacts: { selectedTab = .contacts }
+                        )
+                        HomePlanReviewSection(
+                            lastReviewedAt: currentEmergencyPlan?.lastReviewedAt,
+                            scenarioName: selectedEmergencyType.localizedName(in: selectedLanguage),
+                            language: selectedLanguage,
+                            openPlan: { selectedTab = .plan }
+                        )
                         OfficialWeatherAlertsSection(
                             language: selectedLanguage,
                             isCompact: true
@@ -107,19 +125,13 @@ struct DisasterDashboardView: View {
                                 importantNumbers: importantNumbers,
                                 language: selectedLanguage,
                                 openContacts: { selectedTab = .contacts },
+                                exportPlan: { showingFamilyPlanExport = true },
                                 savePlan: saveCurrentPlan
                             )
                         }
-                        ScenarioSelectorSection(
-                            selectedScenario: $selectedScenario,
-                            language: selectedLanguage
-                        )
-                        DecisionCardSection(
-                            scenario: selectedScenario,
-                            language: selectedLanguage
-                        )
                         RolesSection(
                             roles: householdRoles,
+                            householdMembers: householdMembers,
                             language: selectedLanguage,
                             addRole: addHouseholdRole,
                             deleteRole: deleteHouseholdRole
@@ -176,11 +188,13 @@ struct DisasterDashboardView: View {
                 Tab(contactsTabTitle, systemImage: "person.2.fill", value: DashboardTab.contacts) {
                     dashboardScrollView {
                         ContactsSection(
-                            familyContacts: familyContacts,
+                            householdMembers: householdMembers,
+                            outsideContacts: outsideHouseholdContacts,
                             importantNumbers: importantNumbers,
                             countryCode: householdProfile.countryCode,
                             language: selectedLanguage,
-                            addFamily: addFamilyContact,
+                            addHouseholdMember: { addFamilyContact(isHouseholdMember: true) },
+                            addOutsideContact: { addFamilyContact(isHouseholdMember: false) },
                             addImportant: addImportantNumber,
                             deleteFamily: deleteFamilyContact,
                             deleteImportant: deleteImportantNumber
@@ -271,6 +285,26 @@ struct DisasterDashboardView: View {
                 presentedHomeTool = nil
                 selectedEmergencyType = emergencyType
                 selectedTab = .plan
+            }
+        }
+        .fullScreenCover(isPresented: $showingEmergencyMode) {
+            EmergencyModeView(
+                selectedEmergencyType: $selectedEmergencyType,
+                plan: currentEmergencyPlan,
+                household: householdProfile,
+                familyContacts: familyContacts,
+                language: selectedLanguage
+            )
+        }
+        .sheet(isPresented: $showingFamilyPlanExport) {
+            if let plan = currentEmergencyPlan {
+                FamilyPlanPDFExportSheet(
+                    emergencyType: selectedEmergencyType,
+                    plan: plan,
+                    roles: householdRoles,
+                    contacts: familyContacts,
+                    language: selectedLanguage
+                )
             }
         }
         .sheet(isPresented: $showingHomeHouseholdProfile) {
@@ -587,6 +621,14 @@ struct DisasterDashboardView: View {
         )
     }
 
+    private var householdMembers: [FamilyContact] {
+        familyContacts.filter(\.isHouseholdMember)
+    }
+
+    private var outsideHouseholdContacts: [FamilyContact] {
+        familyContacts.filter { !$0.isHouseholdMember }
+    }
+
     private var backgroundGradient: some View {
         LinearGradient(
             colors: colorScheme == .dark
@@ -608,10 +650,10 @@ struct DisasterDashboardView: View {
 
     private var drills: [Drill] {
         [
-            Drill(title: L10n.text("drill_bag_race", language: selectedLanguage), frequency: L10n.text("weekly", language: selectedLanguage), duration: "1 min"),
-            Drill(title: L10n.text("drill_gas_breaker", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "5 min"),
-            Drill(title: L10n.text("drill_pet_walkthrough", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "7 min"),
-            Drill(title: L10n.text("drill_reunion", language: selectedLanguage), frequency: L10n.text("quarterly", language: selectedLanguage), duration: "15 min")
+            Drill(id: "grab-bag", title: L10n.text("drill_bag_race", language: selectedLanguage), frequency: L10n.text("weekly", language: selectedLanguage), duration: "1 min"),
+            Drill(id: "utilities", title: L10n.text("drill_gas_breaker", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "5 min"),
+            Drill(id: "pet-evacuation", title: L10n.text("drill_pet_walkthrough", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "7 min"),
+            Drill(id: "meeting-point", title: L10n.text("drill_reunion", language: selectedLanguage), frequency: L10n.text("quarterly", language: selectedLanguage), duration: "15 min")
         ]
     }
 
@@ -745,10 +787,14 @@ struct DisasterDashboardView: View {
     }
 
     private func saveCurrentPlan() -> Bool {
+        let previousReviewDate = currentEmergencyPlan?.lastReviewedAt
+        currentEmergencyPlan?.lastReviewedAt = Date()
+
         do {
             try modelContext.save()
             return true
         } catch {
+            currentEmergencyPlan?.lastReviewedAt = previousReviewDate
             return false
         }
     }
@@ -767,8 +813,16 @@ struct DisasterDashboardView: View {
         return lines.joined(separator: "\n")
     }
 
-    private func addFamilyContact() {
-        modelContext.insert(FamilyContact(name: "", role: "", phoneNumber: "", notes: ""))
+    private func addFamilyContact(isHouseholdMember: Bool) {
+        modelContext.insert(
+            FamilyContact(
+                name: "",
+                role: "",
+                phoneNumber: "",
+                notes: "",
+                isHouseholdMember: isHouseholdMember
+            )
+        )
     }
 
     private func addImportantNumber() {
@@ -918,7 +972,8 @@ struct DisasterDashboardView: View {
                         name: $0.name,
                         role: $0.role,
                         phoneNumber: $0.phoneNumber,
-                        notes: $0.notes
+                        notes: $0.notes,
+                        isHouseholdMember: $0.isHouseholdMember
                     )
                 },
                 importantNumbers: importantNumbers.map {
@@ -943,7 +998,8 @@ struct DisasterDashboardView: View {
                         secondaryHome: $0.secondaryHome,
                         safePlaceNote: $0.safePlaceNote,
                         waterStopcockNote: $0.waterStopcockNote,
-                        mainElectricalPanelNote: $0.mainElectricalPanelNote
+                        mainElectricalPanelNote: $0.mainElectricalPanelNote,
+                        lastReviewedAt: $0.lastReviewedAt
                     )
                 },
                 householdRoles: householdRoles.map {
@@ -1138,7 +1194,15 @@ struct DisasterDashboardView: View {
             carSupplies.forEach(modelContext.delete)
 
             payload.familyContacts
-                .map { FamilyContact(name: $0.name, role: $0.role, phoneNumber: $0.phoneNumber, notes: $0.notes) }
+                .map {
+                    FamilyContact(
+                        name: $0.name,
+                        role: $0.role,
+                        phoneNumber: $0.phoneNumber,
+                        notes: $0.notes,
+                        isHouseholdMember: $0.isHouseholdMember ?? true
+                    )
+                }
                 .forEach(modelContext.insert)
             payload.importantNumbers
                 .map { ImportantNumber(label: $0.label, phoneNumber: $0.phoneNumber, notes: $0.notes) }
@@ -1159,7 +1223,8 @@ struct DisasterDashboardView: View {
                         secondaryHome: $0.secondaryHome,
                         safePlaceNote: $0.safePlaceNote,
                         waterStopcockNote: $0.waterStopcockNote,
-                        mainElectricalPanelNote: $0.mainElectricalPanelNote
+                        mainElectricalPanelNote: $0.mainElectricalPanelNote,
+                        lastReviewedAt: $0.lastReviewedAt
                     )
                 }
                 .forEach(modelContext.insert)

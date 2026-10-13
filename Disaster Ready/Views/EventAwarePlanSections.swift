@@ -12,11 +12,19 @@ struct EmergencyTypePickerSection: View {
 
             Picker(title, selection: $selection) {
                 ForEach(EmergencyType.allCases) { emergencyType in
-                    Text(emergencyType.localizedName(in: language))
+                    Label(emergencyType.localizedName(in: language), systemImage: emergencyType.systemImage)
                         .tag(emergencyType)
                 }
             }
             .pickerStyle(.menu)
+            .tint(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(.secondary.opacity(0.10))
+            )
             .accessibilityIdentifier("emergencyTypePicker")
         }
         .padding(20)
@@ -26,10 +34,27 @@ struct EmergencyTypePickerSection: View {
     private var title: String {
         L10n.pick(
             language: language,
-            english: "Select emergency",
-            norwegian: "Velg hendelse",
-            thai: "เลือกเหตุฉุกเฉิน"
+            english: "Scenario",
+            norwegian: "Scenario",
+            thai: "สถานการณ์"
         )
+    }
+}
+
+private extension EmergencyType {
+    var systemImage: String {
+        switch self {
+        case .powerOutage: "bolt.slash.fill"
+        case .flood: "water.waves"
+        case .extremeWeather: "cloud.bolt.rain.fill"
+        case .landslide: "exclamationmark.triangle.fill"
+        case .wildfire: "flame.fill"
+        case .houseFire: "house.lodge.fill"
+        case .waterOutage: "drop.triangle.fill"
+        case .evacuation: "figure.walk.departure"
+        case .hazardousRelease: "aqi.medium"
+        case .warOrSecurityIncident: "shield.lefthalf.filled"
+        }
     }
 }
 
