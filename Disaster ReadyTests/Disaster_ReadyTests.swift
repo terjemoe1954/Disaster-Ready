@@ -38,6 +38,40 @@ struct Disaster_ReadyTests {
         )
     }
 
+    @Test func preparednessSummaryReflectsDrillAttention() {
+        let profile = HouseholdProfile.defaultProfile(locale: .current, householdSize: 1)
+        let needsExercise = HomePreparednessSummary(
+            household: profile,
+            completedPlanItems: 0,
+            totalPlanItems: 1,
+            packedSupplies: 0,
+            totalSupplies: 0,
+            suppliesNeedingReview: 0,
+            paymentCompleted: 0,
+            paymentTotal: 0,
+            householdMemberCount: 0,
+            drillsNeedAttention: true
+        )
+        let exercisesCurrent = HomePreparednessSummary(
+            household: profile,
+            completedPlanItems: 0,
+            totalPlanItems: 1,
+            packedSupplies: 0,
+            totalSupplies: 0,
+            suppliesNeedingReview: 0,
+            paymentCompleted: 0,
+            paymentTotal: 0,
+            householdMemberCount: 0,
+            drillsNeedAttention: false
+        )
+
+        #expect(needsExercise.drills == .needsAttention)
+        #expect(exercisesCurrent.drills == .prepared)
+        #expect(needsExercise.totalAreaCount == 5)
+        #expect(needsExercise.preparedAreaCount == 0)
+        #expect(exercisesCurrent.preparedAreaCount == 1)
+    }
+
     @Test func supplyReviewStatusUsesThirtyDayWindow() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
@@ -172,6 +206,9 @@ struct Disaster_ReadyTests {
         let exportDate = try #require(ISO8601DateFormatter().date(from: "2026-09-27T12:00:00Z"))
         let reviewDate = try #require(ISO8601DateFormatter().date(from: "2027-03-01T09:00:00Z"))
         let drillCompletionDate = try #require(ISO8601DateFormatter().date(from: "2026-08-15T18:00:00Z"))
+        var paymentPreparedness = PaymentPreparednessChecklist(countryCode: "NO")
+        paymentPreparedness.setComplete(true, for: .cashAvailable)
+        paymentPreparedness.setComplete(true, for: .physicalCard)
         let payload = DisasterBackupPayload(
             householdMemberCount: 4,
             householdProfile: HouseholdProfile(
@@ -220,7 +257,8 @@ struct Disaster_ReadyTests {
                     reviewDate: reviewDate
                 )
             ],
-            drillCompletionDates: ["grab-bag": drillCompletionDate]
+            drillCompletionDates: ["grab-bag": drillCompletionDate],
+            paymentPreparedness: paymentPreparedness
         )
 
         let restoredPayload = try DisasterBackupPayload.decode(from: payload.encodedData())
@@ -231,6 +269,30 @@ struct Disaster_ReadyTests {
     @Test func backupValidationRejectsEmptyBackup() {
         #expect(throws: DisasterBackupValidationError.emptyBackup) {
             try DisasterBackupPayload.empty.validateForImport()
+        }
+    }
+
+    @Test func backupValidationAcceptsHouseholdSettingsWithoutOtherData() {
+        let payload = DisasterBackupPayload(
+            householdMemberCount: 4,
+            householdProfile: HouseholdProfile(
+                countryCode: "NO",
+                municipality: "Oslo",
+                householdSize: 4,
+                hasChildren: true,
+                knowsWaterStopcock: true,
+                knowsMainElectricalPanel: true
+            ),
+            exportDate: .now,
+            familyContacts: [],
+            importantNumbers: [],
+            householdPlans: [],
+            householdRoles: [],
+            supplies: []
+        )
+
+        #expect(throws: Never.self) {
+            try payload.validateForImport()
         }
     }
 
@@ -259,8 +321,9 @@ struct Disaster_ReadyTests {
     }
 
     @Test func backupValidationRejectsNewerSchemaVersion() {
+        let unsupportedVersion = DisasterBackupPayload.currentSchemaVersion + 1
         let payload = DisasterBackupPayload(
-            schemaVersion: DisasterBackupPayload.currentSchemaVersion + 1,
+            schemaVersion: unsupportedVersion,
             exportDate: .now,
             familyContacts: [
                 FamilyContactSnapshot(name: "Alex", role: "Medical", phoneNumber: "110", notes: "")
@@ -271,7 +334,7 @@ struct Disaster_ReadyTests {
             supplies: []
         )
 
-        #expect(throws: DisasterBackupValidationError.unsupportedSchemaVersion(2)) {
+        #expect(throws: DisasterBackupValidationError.unsupportedSchemaVersion(unsupportedVersion)) {
             try payload.validateForImport()
         }
     }
@@ -283,6 +346,47 @@ struct Disaster_ReadyTests {
             familyContacts: [
                 FamilyContactSnapshot(name: "Alex", role: "Medical", phoneNumber: "110", notes: "")
             ],
+            importantNumbers: [],
+            householdPlans: [],
+            householdRoles: [],
+            supplies: []
+        )
+
+        #expect(throws: DisasterBackupValidationError.invalidHouseholdMemberCount) {
+            try payload.validateForImport()
+        }
+    }
+
+    @Test func backupValidationRejectsInvalidHouseholdProfileSize() {
+        let payload = DisasterBackupPayload(
+            householdProfile: HouseholdProfile(
+                countryCode: "NO",
+                municipality: "Oslo",
+                householdSize: 13
+            ),
+            exportDate: .now,
+            familyContacts: [],
+            importantNumbers: [],
+            householdPlans: [],
+            householdRoles: [],
+            supplies: []
+        )
+
+        #expect(throws: DisasterBackupValidationError.invalidHouseholdMemberCount) {
+            try payload.validateForImport()
+        }
+    }
+
+    @Test func backupValidationRejectsConflictingHouseholdSizes() {
+        let payload = DisasterBackupPayload(
+            householdMemberCount: 4,
+            householdProfile: HouseholdProfile(
+                countryCode: "NO",
+                municipality: "Oslo",
+                householdSize: 3
+            ),
+            exportDate: .now,
+            familyContacts: [],
             importantNumbers: [],
             householdPlans: [],
             householdRoles: [],
@@ -311,6 +415,7 @@ struct Disaster_ReadyTests {
         legacyObject.removeValue(forKey: "schemaVersion")
         legacyObject.removeValue(forKey: "householdMemberCount")
         legacyObject.removeValue(forKey: "drillCompletionDates")
+        legacyObject.removeValue(forKey: "paymentPreparedness")
         let legacyData = try JSONSerialization.data(withJSONObject: legacyObject)
 
         let decodedPayload = try DisasterBackupPayload.decode(from: legacyData)
@@ -318,9 +423,51 @@ struct Disaster_ReadyTests {
         #expect(decodedPayload.schemaVersion == nil)
         #expect(decodedPayload.householdMemberCount == nil)
         #expect(decodedPayload.drillCompletionDates == nil)
+        #expect(decodedPayload.paymentPreparedness == nil)
         #expect(throws: Never.self) {
             try decodedPayload.validateForImport()
         }
+    }
+
+    @Test func versionFourBackupWithoutPaymentPreparednessStillImports() throws {
+        let currentPayload = DisasterBackupPayload(
+            exportDate: .now,
+            familyContacts: [
+                FamilyContactSnapshot(name: "Household member", role: "", phoneNumber: "", notes: "")
+            ],
+            importantNumbers: [],
+            householdPlans: [],
+            householdRoles: [],
+            supplies: []
+        )
+        var legacyObject = try #require(
+            JSONSerialization.jsonObject(with: currentPayload.encodedData()) as? [String: Any]
+        )
+        legacyObject["schemaVersion"] = 4
+        legacyObject.removeValue(forKey: "paymentPreparedness")
+        let legacyData = try JSONSerialization.data(withJSONObject: legacyObject)
+
+        let decodedPayload = try DisasterBackupPayload.decode(from: legacyData)
+
+        #expect(decodedPayload.schemaVersion == 4)
+        #expect(decodedPayload.paymentPreparedness == nil)
+        #expect(throws: Never.self) {
+            try decodedPayload.validateForImport()
+        }
+    }
+
+    @Test func paymentPreparednessNormalizesForRestoredCountry() {
+        var norwegianChecklist = PaymentPreparednessChecklist(countryCode: "NO")
+        norwegianChecklist.setComplete(true, for: .cashAvailable)
+        norwegianChecklist.setComplete(true, for: .physicalCard)
+
+        let restoredInNorway = norwegianChecklist.normalized(for: "NO")
+        let restoredOutsideNorway = norwegianChecklist.normalized(for: "SE")
+
+        #expect(restoredInNorway.countryCode == "NO")
+        #expect(restoredInNorway.completedCount == 2)
+        #expect(restoredOutsideNorway.countryCode == "SE")
+        #expect(restoredOutsideNorway.completedCount == 0)
     }
 
     @Test func version101BackupWithoutLaterOptionalFieldsPreservesUserData() throws {
@@ -1346,14 +1493,17 @@ struct Disaster_ReadyTests {
         }
     }
 
-    @Test func userBackupExcludesReferenceCachesAndPreservesVersion101Compatibility() throws {
+    @Test func userBackupExcludesReferenceCachesAndUsesCurrentSchema() throws {
         let payload = DisasterBackupPayload(exportDate: .now, familyContacts: [], importantNumbers: [], householdPlans: [], householdRoles: [], supplies: [])
         let encoded = try payload.encodedData()
         let text = try #require(String(data: encoded, encoding: .utf8)).lowercased()
         #expect(!text.contains("sheltercache"))
         #expect(!text.contains("weatheralertcache"))
         #expect(!text.contains("met-alerts-cache"))
-        #expect(try DisasterBackupPayload.decode(from: encoded).schemaVersion == 1)
+        #expect(
+            try DisasterBackupPayload.decode(from: encoded).schemaVersion
+                == DisasterBackupPayload.currentSchemaVersion
+        )
     }
 
     @Test func bundledSourceMetadataSurvivesExternalLinkFailureIndependently() throws {
@@ -1730,7 +1880,7 @@ struct Disaster_ReadyTests {
             suppliesNeedingReview: 0,
             paymentCompleted: 0,
             paymentTotal: 5,
-            contactCount: 0
+            householdMemberCount: 0
         )
 
         #expect(!HomePreparednessSummary.measuresSafety)
@@ -1758,7 +1908,7 @@ struct Disaster_ReadyTests {
             suppliesNeedingReview: 0,
             paymentCompleted: 5,
             paymentTotal: 5,
-            contactCount: 1
+            householdMemberCount: 1
         )
 
         #expect(complete.household == .prepared)
@@ -1778,7 +1928,7 @@ struct Disaster_ReadyTests {
             suppliesNeedingReview: 0,
             paymentCompleted: 0,
             paymentTotal: 0,
-            contactCount: 1
+            householdMemberCount: 1
         )
 
         #expect(summary.payment == nil)

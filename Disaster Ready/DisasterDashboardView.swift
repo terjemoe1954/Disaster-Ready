@@ -10,8 +10,15 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-private enum PlanScrollTarget: Hashable {
+enum PlanScrollTarget: Hashable {
+    case locations
+    case review
     case drills
+}
+
+private enum SuppliesScrollTarget: Hashable {
+    case payment
+    case inventory
 }
 
 struct DisasterDashboardView: View {
@@ -24,7 +31,6 @@ struct DisasterDashboardView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("includePlanSummaryInMessages") private var includePlanSummaryInMessages = true
     @AppStorage("showOnlyMissingSupplies") private var showOnlyMissingSupplies = false
-    @AppStorage("offlineFirstMode") private var offlineFirstMode = true
     @AppStorage("householdMemberCount") private var householdMemberCount = 1
     @AppStorage("supplyReviewRemindersEnabled") private var supplyReviewRemindersEnabled = false
     @Query(sort: \FamilyContact.name) private var familyContacts: [FamilyContact]
@@ -46,6 +52,10 @@ struct DisasterDashboardView: View {
     @State private var householdSafetySnapshot = HouseholdSafetySnapshot.empty
     @State private var drillCompletionDates: [String: Date] = [:]
     @State private var drillScrollRequest = 0
+    @State private var locationScrollRequest = 0
+    @State private var reviewScrollRequest = 0
+    @State private var inventoryScrollRequest = 0
+    @State private var paymentScrollRequest = 0
     @State private var showingFamilyPlanExport = false
     @State private var backupDocument = DisasterBackupDocument(payload: .empty)
     @State private var showingBackupExporter = false
@@ -74,9 +84,9 @@ struct DisasterDashboardView: View {
                         if householdSafetySnapshot.updatedAt != nil {
                             HomeHouseholdSafetyStatusSection(
                                 snapshot: householdSafetySnapshot,
-                                memberIDs: familyContacts
-                                    .filter(\.isHouseholdMember)
-                                    .map { $0.id.uuidString },
+                                members: householdMembers,
+                                scenarioName: selectedEmergencyType.localizedName(in: selectedLanguage),
+                                meetingPoint: currentEmergencyPlan?.reunionPoint ?? "",
                                 language: selectedLanguage,
                                 openEmergencyMode: { showingEmergencyMode = true },
                                 endIncident: {
@@ -89,8 +99,27 @@ struct DisasterDashboardView: View {
                             summary: homePreparednessSummary,
                             language: selectedLanguage,
                             openHousehold: { showingHomeHouseholdProfile = true },
-                            openPlan: { selectedTab = .plan },
-                            openSupplies: { selectedTab = .supplies },
+                            openPlan: {
+                                selectedTab = .plan
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    locationScrollRequest += 1
+                                }
+                            },
+                            openSupplies: {
+                                selectedTab = .supplies
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    inventoryScrollRequest += 1
+                                }
+                            },
+                            openPayment: {
+                                selectedTab = .supplies
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    paymentScrollRequest += 1
+                                }
+                            },
                             openContacts: { selectedTab = .contacts },
                             openDrills: {
                                 selectedTab = .plan
@@ -104,7 +133,13 @@ struct DisasterDashboardView: View {
                             lastReviewedAt: currentEmergencyPlan?.lastReviewedAt,
                             scenarioName: selectedEmergencyType.localizedName(in: selectedLanguage),
                             language: selectedLanguage,
-                            openPlan: { selectedTab = .plan }
+                            openPlan: {
+                                selectedTab = .plan
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    reviewScrollRequest += 1
+                                }
+                            }
                         )
                         OfficialWeatherAlertsSection(
                             language: selectedLanguage,
@@ -115,20 +150,31 @@ struct DisasterDashboardView: View {
                         }
                         HomePreparednessSection(
                             summary: homePreparednessSummary,
-                            language: selectedLanguage
-                        )
-                        HomeEmergencyPlanSection(
-                            selectedEmergencyTitle: selectedEmergencyType.localizedName(in: selectedLanguage),
                             language: selectedLanguage,
-                            openPlan: { selectedTab = .plan }
-                        )
-                        HomeQuickAccessSection(
-                            showsPayment: householdProfile.countryCode == "NO",
-                            language: selectedLanguage,
-                            openSupplies: { selectedTab = .supplies },
-                            openContacts: { selectedTab = .contacts },
                             openHousehold: { showingHomeHouseholdProfile = true },
-                            openPayment: { selectedTab = .supplies }
+                            openSupplies: {
+                                selectedTab = .supplies
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    inventoryScrollRequest += 1
+                                }
+                            },
+                            openPayment: {
+                                selectedTab = .supplies
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    paymentScrollRequest += 1
+                                }
+                            },
+                            openPlan: { selectedTab = .plan },
+                            openContacts: { selectedTab = .contacts },
+                            openDrills: {
+                                selectedTab = .plan
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    drillScrollRequest += 1
+                                }
+                            }
                         )
                         HomeOfficialToolsSection(
                             showsShelters: householdProfile.countryCode == "NO",
@@ -153,6 +199,8 @@ struct DisasterDashboardView: View {
                                     familyContacts: familyContacts,
                                     importantNumbers: importantNumbers,
                                     language: selectedLanguage,
+                                    locationExpansionRequest: locationScrollRequest,
+                                    reviewExpansionRequest: reviewScrollRequest,
                                     openContacts: { selectedTab = .contacts },
                                     exportPlan: { showingFamilyPlanExport = true },
                                     savePlan: saveCurrentPlan
@@ -181,47 +229,77 @@ struct DisasterDashboardView: View {
                                 }
                             }
                         }
+                        .onChange(of: locationScrollRequest) {
+                            Task { @MainActor in
+                                await Task.yield()
+                                await Task.yield()
+                                withAnimation {
+                                    proxy.scrollTo(PlanScrollTarget.locations, anchor: .top)
+                                }
+                            }
+                        }
+                        .onChange(of: reviewScrollRequest) {
+                            Task { @MainActor in
+                                await Task.yield()
+                                await Task.yield()
+                                withAnimation {
+                                    proxy.scrollTo(PlanScrollTarget.review, anchor: .top)
+                                }
+                            }
+                        }
                     }
                 }
 
                 Tab(suppliesTabTitle, systemImage: "shippingbox.fill", value: DashboardTab.supplies) {
-                    dashboardScrollView {
-                        SmartSupplyRecommendationsSection(
-                            homeCount: homeSupplyRecommendations.count,
-                            evacuationCount: evacuationSupplyRecommendations.count,
-                            language: selectedLanguage,
-                            addHome: addSmartHomeSupplies,
-                            addEvacuation: addSmartEvacuationSupplies
-                        )
-                        if householdProfile.countryCode == "NO" {
-                            PaymentPreparednessSection(
-                                checklist: $paymentPreparedness,
+                    ScrollViewReader { proxy in
+                        dashboardScrollView {
+                            SmartSupplyRecommendationsSection(
+                                homeCount: homeSupplyRecommendations.count,
+                                evacuationCount: evacuationSupplyRecommendations.count,
+                                language: selectedLanguage,
+                                addHome: addSmartHomeSupplies,
+                                addEvacuation: addSmartEvacuationSupplies
+                            )
+                            if householdProfile.countryCode == "NO" {
+                                PaymentPreparednessSection(
+                                    checklist: $paymentPreparedness,
+                                    language: selectedLanguage
+                                )
+                                .id(SuppliesScrollTarget.payment)
+                            }
+                            HomePreparednessGuideSection(
+                                householdMemberCount: $householdMemberCount,
                                 language: selectedLanguage
                             )
+                            SuppliesSection(
+                                homeSupplies: homeSupplies,
+                                carSupplies: carSupplies,
+                                completionCount: supplyCompletionCount,
+                                totalCount: totalSupplyCount,
+                                showOnlyMissing: $showOnlyMissingSupplies,
+                                language: selectedLanguage,
+                                deleteItem: deleteSupplyItem
+                            )
+                            .id(SuppliesScrollTarget.inventory)
                         }
-                        HomePreparednessGuideSection(
-                            householdMemberCount: $householdMemberCount,
-                            language: selectedLanguage
-                        )
-                        SuppliesSection(
-                            homeSupplies: homeSupplies,
-                            carSupplies: carSupplies,
-                            completionCount: supplyCompletionCount,
-                            totalCount: totalSupplyCount,
-                            showOnlyMissing: $showOnlyMissingSupplies,
-                            language: selectedLanguage,
-                            deleteItem: deleteSupplyItem
-                        )
-                        OfflineResourcesSection(resources: offlineResources, language: selectedLanguage)
-                        OfficialSourcesSection(
-                            sources: GuidanceSourceRegistry.norway,
-                            language: selectedLanguage
-                        )
-                        if householdProfile.countryCode == "NO" {
-                            PublicSheltersSection(language: selectedLanguage)
+                        .accessibilityIdentifier("suppliesScrollView")
+                        .onChange(of: inventoryScrollRequest) {
+                            Task { @MainActor in
+                                await Task.yield()
+                                withAnimation {
+                                    proxy.scrollTo(SuppliesScrollTarget.inventory, anchor: .top)
+                                }
+                            }
+                        }
+                        .onChange(of: paymentScrollRequest) {
+                            Task { @MainActor in
+                                await Task.yield()
+                                withAnimation {
+                                    proxy.scrollTo(SuppliesScrollTarget.payment, anchor: .top)
+                                }
+                            }
                         }
                     }
-                    .accessibilityIdentifier("suppliesScrollView")
                 }
 
                 Tab(contactsTabTitle, systemImage: "person.2.fill", value: DashboardTab.contacts) {
@@ -304,7 +382,6 @@ struct DisasterDashboardView: View {
                 selectedAppearance: $preferredAppearance,
                 includePlanSummaryInMessages: $includePlanSummaryInMessages,
                 showOnlyMissingSupplies: $showOnlyMissingSupplies,
-                offlineFirstMode: $offlineFirstMode,
                 supplyReviewRemindersEnabled: $supplyReviewRemindersEnabled,
                 householdProfile: $householdProfile,
                 sendTestReminder: sendTestSupplyReminder,
@@ -686,7 +763,7 @@ struct DisasterDashboardView: View {
             paymentTotal: PaymentPreparednessCatalog.checklist(
                 for: householdProfile.countryCode
             ).count,
-            contactCount: familyContacts.count + importantNumbers.count,
+            householdMemberCount: householdMembers.count,
             drillsNeedAttention: drillsNeedAttention
         )
     }
@@ -729,32 +806,26 @@ struct DisasterDashboardView: View {
     }
 
     private var drills: [Drill] {
-        [
+        var relevantDrills = [
             Drill(id: "grab-bag", title: L10n.text("drill_bag_race", language: selectedLanguage), frequency: L10n.text("weekly", language: selectedLanguage), recurrence: .weekly, duration: "1 min"),
             Drill(id: "utilities", title: L10n.text("drill_gas_breaker", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), recurrence: .monthly, duration: "5 min"),
-            Drill(id: "pet-evacuation", title: L10n.text("drill_pet_walkthrough", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), recurrence: .monthly, duration: "7 min"),
             Drill(id: "meeting-point", title: L10n.text("drill_reunion", language: selectedLanguage), frequency: L10n.text("quarterly", language: selectedLanguage), recurrence: .quarterly, duration: "15 min")
         ]
-    }
 
-    private var offlineResources: [OfflineResource] {
-        [
-            OfflineResource(
-                title: L10n.text("offline_home_map", language: selectedLanguage),
-                detail: L10n.text("offline_home_map_detail", language: selectedLanguage),
-                systemImage: "map.fill"
-            ),
-            OfflineResource(
-                title: L10n.text("offline_field_guides", language: selectedLanguage),
-                detail: L10n.text("offline_field_guides_detail", language: selectedLanguage),
-                systemImage: "books.vertical.fill"
-            ),
-            OfflineResource(
-                title: L10n.text("offline_first_24", language: selectedLanguage),
-                detail: L10n.text("offline_first_24_detail", language: selectedLanguage),
-                systemImage: "point.topleft.down.curvedto.point.bottomright.up.fill"
+        if householdProfile.hasPets {
+            relevantDrills.insert(
+                Drill(
+                    id: "pet-evacuation",
+                    title: L10n.text("drill_pet_walkthrough", language: selectedLanguage),
+                    frequency: L10n.text("monthly", language: selectedLanguage),
+                    recurrence: .monthly,
+                    duration: "7 min"
+                ),
+                at: 2
             )
-        ]
+        }
+
+        return relevantDrills
     }
 
     private var messageTemplates: [FamilyMessageTemplate] {
@@ -1092,7 +1163,8 @@ struct DisasterDashboardView: View {
                         reviewDate: $0.reviewDate
                     )
                 },
-                drillCompletionDates: DrillCompletionStore.load()
+                drillCompletionDates: DrillCompletionStore.load(),
+                paymentPreparedness: paymentPreparedness
             )
         )
         showingBackupExporter = true
@@ -1119,6 +1191,9 @@ struct DisasterDashboardView: View {
     }
 
     private func handleBackupImport(_ result: Result<URL, Error>) {
+        pendingBackupPayload = nil
+        showingBackupImportConfirmation = false
+
         switch result {
         case .success(let url):
             do {
@@ -1145,12 +1220,15 @@ struct DisasterDashboardView: View {
                     thai: "การนำเข้าข้อมูลสำรองล้มเหลว ไม่สามารถอ่านไฟล์ได้"
                 )
             }
-        case .failure:
+        case .failure(let error):
+            if (error as? CocoaError)?.code == .userCancelled {
+                return
+            }
             transferMessage = L10n.pick(
                 language: selectedLanguage,
-                english: "Backup import was cancelled.",
-                norwegian: "Import av sikkerhetskopi ble avbrutt.",
-                thai: "ยกเลิกการนำเข้าข้อมูลสำรองแล้ว"
+                english: "Backup import could not be started. Try again.",
+                norwegian: "Import av sikkerhetskopi kunne ikke startes. Prøv igjen.",
+                thai: "ไม่สามารถเริ่มนำเข้าข้อมูลสำรองได้ โปรดลองอีกครั้ง"
             )
         }
 
@@ -1229,9 +1307,15 @@ struct DisasterDashboardView: View {
             }
 
             householdMemberCount = 1
+            householdProfile = HouseholdProfile.defaultProfile(locale: .current, householdSize: 1)
+            HouseholdProfileStore.save(householdProfile)
+            paymentPreparedness = PaymentPreparednessChecklist(countryCode: householdProfile.countryCode)
+            PaymentPreparednessStore.save(paymentPreparedness)
             showOnlyMissingSupplies = false
             supplyReviewRemindersEnabled = false
             DrillCompletionStore.clear()
+            HouseholdSafetyStatusStore.clear()
+            householdSafetySnapshot = .empty
 
             Task { @MainActor in
                 await SupplyReminderScheduler.removePendingReminders()
@@ -1336,6 +1420,12 @@ struct DisasterDashboardView: View {
             HouseholdProfileStore.save(householdProfile)
         }
         DrillCompletionStore.save(payload.drillCompletionDates ?? [:])
+        paymentPreparedness = payload.paymentPreparedness?
+            .normalized(for: householdProfile.countryCode)
+            ?? PaymentPreparednessChecklist(countryCode: householdProfile.countryCode)
+        PaymentPreparednessStore.save(paymentPreparedness)
+        HouseholdSafetyStatusStore.clear()
+        householdSafetySnapshot = .empty
     }
 
     private func seedDataIfNeeded() {
@@ -1343,100 +1433,9 @@ struct DisasterDashboardView: View {
             return
         }
 
-        defaultFamilyContacts.forEach(modelContext.insert)
-        defaultImportantNumbers.forEach(modelContext.insert)
         defaultHouseholdPlans.forEach(modelContext.insert)
-        defaultHouseholdRoles.forEach(modelContext.insert)
         defaultHomeSupplies.forEach(modelContext.insert)
         defaultCarSupplies.forEach(modelContext.insert)
-    }
-
-    private var defaultFamilyContacts: [FamilyContact] {
-        [
-            FamilyContact(
-                name: "Alex",
-                role: L10n.text("medical", language: selectedLanguage),
-                phoneNumber: "+47 900 00 111",
-                notes: L10n.text("seed_family_alex", language: selectedLanguage)
-            ),
-            FamilyContact(
-                name: "Jordan",
-                role: L10n.text("utilities", language: selectedLanguage),
-                phoneNumber: "+47 900 00 222",
-                notes: L10n.text("seed_family_jordan", language: selectedLanguage)
-            ),
-            FamilyContact(
-                name: "Sam",
-                role: L10n.text("pets", language: selectedLanguage),
-                phoneNumber: "+47 900 00 333",
-                notes: L10n.text("seed_family_sam", language: selectedLanguage)
-            )
-        ]
-    }
-
-    private var defaultImportantNumbers: [ImportantNumber] {
-        [
-            ImportantNumber(
-                label: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Ambulance",
-                    norwegian: "Ambulanse",
-                    thai: "รถพยาบาล"
-                ),
-                phoneNumber: "113",
-                notes: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Medical emergency dispatch.",
-                    norwegian: "Medisinsk nødtelefon.",
-                    thai: "สายด่วนเหตุฉุกเฉินทางการแพทย์"
-                )
-            ),
-            ImportantNumber(
-                label: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Fire",
-                    norwegian: "Brann",
-                    thai: "ดับเพลิง"
-                ),
-                phoneNumber: "110",
-                notes: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Fire and rescue emergency dispatch.",
-                    norwegian: "Nødtelefon for brann og redning.",
-                    thai: "สายด่วนเหตุฉุกเฉินด้านเพลิงไหม้และกู้ภัย"
-                )
-            ),
-            ImportantNumber(
-                label: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Police",
-                    norwegian: "Politi",
-                    thai: "ตำรวจ"
-                ),
-                phoneNumber: "112",
-                notes: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Police emergency dispatch.",
-                    norwegian: "Politiets nødtelefon.",
-                    thai: "สายด่วนเหตุตำรวจ"
-                )
-            ),
-            ImportantNumber(
-                label: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Poison information",
-                    norwegian: "Giftinformasjon",
-                    thai: "ข้อมูลพิษวิทยา"
-                ),
-                phoneNumber: "22 59 13 00",
-                notes: L10n.pick(
-                    language: selectedLanguage,
-                    english: "Poison information hotline.",
-                    norwegian: "Giftinformasjonens døgnåpne telefon.",
-                    thai: "สายด่วนข้อมูลพิษวิทยา"
-                )
-            )
-        ]
     }
 
     private var currentEmergencyPlan: HouseholdPlan? {
@@ -1480,35 +1479,6 @@ struct DisasterDashboardView: View {
                 )
             )
         }
-    }
-
-    private var defaultHouseholdRoles: [HouseholdRole] {
-        [
-            HouseholdRole(
-                title: L10n.text("medical", language: selectedLanguage),
-                person: "Alex",
-                task: L10n.text("role_medical_task", language: selectedLanguage),
-                systemImage: "cross.case.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("utilities", language: selectedLanguage),
-                person: "Jordan",
-                task: L10n.text("role_utilities_task", language: selectedLanguage),
-                systemImage: "wrench.adjustable.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("pets", language: selectedLanguage),
-                person: "Sam",
-                task: L10n.text("role_pets_task", language: selectedLanguage),
-                systemImage: "pawprint.fill"
-            ),
-            HouseholdRole(
-                title: L10n.text("communications", language: selectedLanguage),
-                person: "Taylor",
-                task: L10n.text("role_comms_task", language: selectedLanguage),
-                systemImage: "message.fill"
-            )
-        ]
     }
 
     private var defaultHomeSupplies: [SupplyItem] {
@@ -1722,12 +1692,55 @@ struct DisasterDashboardView: View {
         let contactCount = payload.familyContacts.count + payload.importantNumbers.count
         let roleCount = payload.householdRoles.count
         let supplyCount = payload.supplies.count
+        let drillCount = payload.drillCompletionDates?.count ?? 0
+        let paymentCount = payload.paymentPreparedness?.completedCount ?? 0
+
+        var summaryLines: [String] = []
+        if payload.householdMemberCount != nil || payload.householdProfile != nil {
+            summaryLines.append(
+                L10n.pick(
+                    language: selectedLanguage,
+                    english: "Household settings",
+                    norwegian: "Husstandsinnstillinger",
+                    thai: "การตั้งค่าครัวเรือน"
+                )
+            )
+        }
+        if planCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Plans: \(planCount)", norwegian: "Planer: \(planCount)", thai: "แผน: \(planCount)"))
+        }
+        if contactCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Contacts: \(contactCount)", norwegian: "Kontakter: \(contactCount)", thai: "รายชื่อติดต่อ: \(contactCount)"))
+        }
+        if roleCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Roles: \(roleCount)", norwegian: "Roller: \(roleCount)", thai: "บทบาท: \(roleCount)"))
+        }
+        if supplyCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Supplies: \(supplyCount)", norwegian: "Utstyrselementer: \(supplyCount)", thai: "อุปกรณ์: \(supplyCount)"))
+        }
+        if drillCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Exercise records: \(drillCount)", norwegian: "Registrerte øvelser: \(drillCount)", thai: "ประวัติการฝึก: \(drillCount)"))
+        }
+        if paymentCount > 0 {
+            summaryLines.append(L10n.pick(language: selectedLanguage, english: "Payment-preparedness items: \(paymentCount)", norwegian: "Punkter for betalingsberedskap: \(paymentCount)", thai: "รายการความพร้อมด้านการชำระเงิน: \(paymentCount)"))
+        }
+
+        guard !summaryLines.isEmpty else {
+            return L10n.pick(
+                language: selectedLanguage,
+                english: "Importing replaces the current local data on this device. This cannot be undone.",
+                norwegian: "Import erstatter de lokale dataene på enheten. Dette kan ikke angres.",
+                thai: "การนำเข้าจะแทนที่ข้อมูลในเครื่องปัจจุบัน และไม่สามารถย้อนกลับได้"
+            )
+        }
+
+        let summary = summaryLines.map { "• \($0)" }.joined(separator: "\n")
 
         return L10n.pick(
             language: selectedLanguage,
-            english: "The backup contains \(planCount) plans, \(contactCount) contacts, \(roleCount) roles, and \(supplyCount) supplies. Importing replaces all current local data and cannot be undone.",
-            norwegian: "Sikkerhetskopien inneholder \(planCount) planer, \(contactCount) kontakter, \(roleCount) roller og \(supplyCount) utstyrselementer. Import erstatter alle lokale data og kan ikke angres.",
-            thai: "ข้อมูลสำรองมีแผน \(planCount) รายการ รายชื่อติดต่อ \(contactCount) รายการ บทบาท \(roleCount) รายการ และอุปกรณ์ \(supplyCount) รายการ การนำเข้าจะแทนที่ข้อมูลในเครื่องทั้งหมดและไม่สามารถย้อนกลับได้"
+            english: "The backup contains:\n\(summary)\n\nImporting replaces all current local data and cannot be undone.",
+            norwegian: "Sikkerhetskopien inneholder:\n\(summary)\n\nImport erstatter alle lokale data og kan ikke angres.",
+            thai: "ข้อมูลสำรองประกอบด้วย:\n\(summary)\n\nการนำเข้าจะแทนที่ข้อมูลในเครื่องทั้งหมดและไม่สามารถย้อนกลับได้"
         )
     }
 

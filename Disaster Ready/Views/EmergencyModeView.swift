@@ -52,7 +52,9 @@ struct HomeHouseholdSafetyStatusSection: View {
     @State private var showingEndConfirmation = false
 
     let snapshot: HouseholdSafetySnapshot
-    let memberIDs: [String]
+    let members: [FamilyContact]
+    let scenarioName: String
+    let meetingPoint: String
     let language: AppLanguage
     let openEmergencyMode: () -> Void
     let endIncident: () -> Void
@@ -98,6 +100,19 @@ struct HomeHouseholdSafetyStatusSection: View {
             Divider()
                 .padding(.horizontal, 16)
 
+            if !members.isEmpty {
+                ShareLink(item: reportText) {
+                    Label(shareTitle, systemImage: "square.and.arrow.up")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                }
+                .accessibilityIdentifier("shareActiveHouseholdStatus")
+
+                Divider()
+                    .padding(.horizontal, 16)
+            }
+
             Button(role: .destructive) {
                 showingEndConfirmation = true
             } label: {
@@ -122,7 +137,7 @@ struct HomeHouseholdSafetyStatusSection: View {
     }
 
     private var currentStatuses: [HouseholdSafetyStatus] {
-        memberIDs.map { snapshot.statuses[$0] ?? .notChecked }
+        members.map { snapshot.statuses[$0.id.uuidString] ?? .notChecked }
     }
 
     private var needsHelpCount: Int {
@@ -140,7 +155,7 @@ struct HomeHouseholdSafetyStatusSection: View {
     private var statusColor: Color {
         if needsHelpCount > 0 { return .red }
         if unreachableCount > 0 { return .orange }
-        return resolvedCount == memberIDs.count && !memberIDs.isEmpty ? .green : .blue
+        return resolvedCount == members.count && !members.isEmpty ? .green : .blue
     }
 
     private var systemImage: String {
@@ -158,10 +173,40 @@ struct HomeHouseholdSafetyStatusSection: View {
         }
         return L10n.pick(
             language: language,
-            english: "\(resolvedCount) of \(memberIDs.count) accounted for",
-            norwegian: "\(resolvedCount) av \(memberIDs.count) er avklart",
-            thai: "ตรวจสอบแล้ว \(resolvedCount) จาก \(memberIDs.count) คน"
+            english: "\(resolvedCount) of \(members.count) accounted for",
+            norwegian: "\(resolvedCount) av \(members.count) er avklart",
+            thai: "ตรวจสอบแล้ว \(resolvedCount) จาก \(members.count) คน"
         )
+    }
+
+    private var reportText: String {
+        let reportDate = (snapshot.updatedAt ?? Date()).formatted(
+            Date.FormatStyle(date: .abbreviated, time: .shortened)
+                .locale(AppLanguage.locale(for: language))
+        )
+        var lines = [
+            L10n.pick(language: language, english: "Household status", norwegian: "Status i husstanden", thai: "สถานะสมาชิกในบ้าน"),
+            "\(L10n.text("scenario", language: language)): \(scenarioName)",
+            L10n.pick(language: language, english: "Updated: \(reportDate)", norwegian: "Oppdatert: \(reportDate)", thai: "อัปเดต: \(reportDate)")
+        ]
+
+        if !meetingPoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.append(
+                L10n.pick(
+                    language: language,
+                    english: "Meeting point: \(meetingPoint)",
+                    norwegian: "Møtepunkt: \(meetingPoint)",
+                    thai: "จุดนัดพบ: \(meetingPoint)"
+                )
+            )
+        }
+
+        lines.append("")
+        lines.append(contentsOf: members.map { member in
+            let status = snapshot.statuses[member.id.uuidString] ?? .notChecked
+            return "• \(member.name): \(label(for: status))"
+        })
+        return lines.joined(separator: "\n")
     }
 
     private var title: String {
@@ -170,6 +215,23 @@ struct HomeHouseholdSafetyStatusSection: View {
 
     private var endTitle: String {
         L10n.pick(language: language, english: "End incident", norwegian: "Avslutt hendelse", thai: "สิ้นสุดเหตุการณ์")
+    }
+
+    private var shareTitle: String {
+        L10n.pick(language: language, english: "Share status", norwegian: "Del status", thai: "แชร์สถานะ")
+    }
+
+    private func label(for status: HouseholdSafetyStatus) -> String {
+        switch status {
+        case .notChecked:
+            L10n.pick(language: language, english: "Not checked", norwegian: "Ikke sjekket", thai: "ยังไม่ได้ตรวจสอบ")
+        case .safe:
+            L10n.pick(language: language, english: "Safe", norwegian: "Trygg", thai: "ปลอดภัย")
+        case .needsHelp:
+            L10n.pick(language: language, english: "Needs help", norwegian: "Trenger hjelp", thai: "ต้องการความช่วยเหลือ")
+        case .unreachable:
+            L10n.pick(language: language, english: "No contact", norwegian: "Ikke fått kontakt", thai: "ติดต่อไม่ได้")
+        }
     }
 
     private var cancelTitle: String {

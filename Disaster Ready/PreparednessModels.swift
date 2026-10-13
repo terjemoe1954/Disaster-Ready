@@ -224,13 +224,6 @@ struct Drill: Identifiable {
     let duration: String
 }
 
-struct OfflineResource: Identifiable {
-    let id = UUID()
-    let title: String
-    let detail: String
-    let systemImage: String
-}
-
 struct FamilyMessageTemplate: Identifiable {
     let id = UUID()
     let title: String

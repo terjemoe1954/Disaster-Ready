@@ -9,6 +9,8 @@ struct EventAwareMyPlanView: View {
     let familyContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
     let language: AppLanguage
+    let locationExpansionRequest: Int
+    let reviewExpansionRequest: Int
     let openContacts: () -> Void
     let exportPlan: () -> Void
     let savePlan: () -> Bool
@@ -34,8 +36,10 @@ struct EventAwareMyPlanView: View {
                 MyPlanLocationsStep(
                     plan: plan,
                     emergencyType: selectedEmergencyType,
-                    language: language
+                    language: language,
+                    expansionRequest: locationExpansionRequest
                 )
+                .id(PlanScrollTarget.locations)
                 MyPlanSmartSuppliesStep(
                     emergencyType: selectedEmergencyType,
                     household: household,
@@ -66,11 +70,13 @@ struct EventAwareMyPlanView: View {
                 MyPlanSaveStep(
                     saveSucceeded: saveSucceeded,
                     language: language,
+                    expansionRequest: reviewExpansionRequest,
                     exportPlan: exportPlan,
                     save: {
                         saveSucceeded = savePlan()
                     }
                 )
+                .id(PlanScrollTarget.review)
             } else {
                 ContentUnavailableView(
                     L10n.text("myplan.country_template_unavailable.title", language: language),
@@ -127,32 +133,40 @@ private struct MyPlanPublicShelterReference: View {
 }
 
 private struct SafetyContextSection: View {
+    @State private var showsDetails = false
+
     let language: AppLanguage
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.text("myplan.safety_context.title", language: language))
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
-
-            contextRow(
-                icon: "mappin.and.ellipse",
-                titleKey: "myplan.context.personal.title",
-                detailKey: "myplan.context.personal.detail",
-                color: .blue
+        DisclosureGroup(isExpanded: $showsDetails) {
+            VStack(alignment: .leading, spacing: 12) {
+                contextRow(
+                    icon: "mappin.and.ellipse",
+                    titleKey: "myplan.context.personal.title",
+                    detailKey: "myplan.context.personal.detail",
+                    color: .blue
+                )
+                contextRow(
+                    icon: "book.closed.fill",
+                    titleKey: "myplan.context.preparedness.title",
+                    detailKey: "myplan.context.preparedness.detail",
+                    color: .green
+                )
+                contextRow(
+                    icon: "antenna.radiowaves.left.and.right",
+                    titleKey: "myplan.context.official.title",
+                    detailKey: "myplan.context.official.detail",
+                    color: .orange
+                )
+            }
+            .padding(.top, 12)
+        } label: {
+            Label(
+                L10n.text("myplan.safety_context.title", language: language),
+                systemImage: "info.circle.fill"
             )
-            contextRow(
-                icon: "book.closed.fill",
-                titleKey: "myplan.context.preparedness.title",
-                detailKey: "myplan.context.preparedness.detail",
-                color: .green
-            )
-            contextRow(
-                icon: "antenna.radiowaves.left.and.right",
-                titleKey: "myplan.context.official.title",
-                detailKey: "myplan.context.official.detail",
-                color: .orange
-            )
+            .font(.title3.weight(.bold))
+            .accessibilityHeading(.h2)
         }
         .padding(20)
         .background(DashboardCardBackground())
@@ -280,9 +294,16 @@ private struct MyPlanLocationsStep: View {
     @Bindable var plan: HouseholdPlan
     let emergencyType: EmergencyType
     let language: AppLanguage
+    let expansionRequest: Int
 
     var body: some View {
-        MyPlanStepCard(number: 3, titleKey: "myplan.locations.title", icon: "mappin.and.ellipse", language: language) {
+        MyPlanStepCard(
+            number: 3,
+            titleKey: "myplan.locations.title",
+            icon: "mappin.and.ellipse",
+            language: language,
+            expansionRequest: expansionRequest
+        ) {
             Text(L10n.text("myplan.locations.personal_notice", language: language))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -477,11 +498,18 @@ private struct MyPlanContactsStep: View {
 private struct MyPlanSaveStep: View {
     let saveSucceeded: Bool?
     let language: AppLanguage
+    let expansionRequest: Int
     let exportPlan: () -> Void
     let save: () -> Void
 
     var body: some View {
-        MyPlanStepCard(number: 6, titleKey: "myplan.save.title", icon: "checkmark.circle.fill", language: language) {
+        MyPlanStepCard(
+            number: 6,
+            titleKey: "myplan.save.title",
+            icon: "checkmark.circle.fill",
+            language: language,
+            expansionRequest: expansionRequest
+        ) {
             Button(action: save) {
                 Label(L10n.text("myplan.save.button", language: language), systemImage: "square.and.arrow.down.fill")
                     .frame(maxWidth: .infinity)
@@ -525,6 +553,7 @@ private struct MyPlanStepCard<Content: View>: View {
     let titleKey: String
     let icon: String
     let language: AppLanguage
+    let expansionRequest: Int
     @ViewBuilder let content: Content
 
     init(
@@ -532,13 +561,15 @@ private struct MyPlanStepCard<Content: View>: View {
         titleKey: String,
         icon: String,
         language: AppLanguage,
+        expansionRequest: Int = 0,
         @ViewBuilder content: () -> Content
     ) {
-        _isExpanded = State(initialValue: number == 1)
+        _isExpanded = State(initialValue: number == 1 || expansionRequest > 0)
         self.number = number
         self.titleKey = titleKey
         self.icon = icon
         self.language = language
+        self.expansionRequest = expansionRequest
         self.content = content()
     }
 
@@ -564,5 +595,9 @@ private struct MyPlanStepCard<Content: View>: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
+        .onChange(of: expansionRequest) { oldValue, newValue in
+            guard newValue > oldValue else { return }
+            isExpanded = true
+        }
     }
 }

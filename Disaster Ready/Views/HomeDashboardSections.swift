@@ -27,6 +27,22 @@ struct HomePreparednessSummary: Equatable, Sendable {
     let contacts: HomeChecklistStatus
     let drillsNeedAttention: Bool
 
+    var drills: HomeChecklistStatus {
+        drillsNeedAttention ? .needsAttention : .prepared
+    }
+
+    var preparedAreaCount: Int {
+        checklistStatuses.filter { $0 == .prepared }.count
+    }
+
+    var totalAreaCount: Int {
+        checklistStatuses.count
+    }
+
+    private var checklistStatuses: [HomeChecklistStatus] {
+        [household, supplies, plan, contacts, drills] + (payment.map { [$0] } ?? [])
+    }
+
     static let measuresSafety = false
 
     init(
@@ -38,7 +54,7 @@ struct HomePreparednessSummary: Equatable, Sendable {
         suppliesNeedingReview: Int,
         paymentCompleted: Int,
         paymentTotal: Int,
-        contactCount: Int,
+        householdMemberCount: Int,
         drillsNeedAttention: Bool = false
     ) {
         let municipalityRecorded = !(household.municipality ?? "")
@@ -89,65 +105,136 @@ struct HomePreparednessSummary: Equatable, Sendable {
             payment = .inProgress
         }
 
-        contacts = contactCount > 0 ? .prepared : .needsAttention
+        contacts = householdMemberCount > 0 ? .prepared : .needsAttention
         self.drillsNeedAttention = drillsNeedAttention
     }
 }
 
 struct HomePreparednessSection: View {
+    @State private var showsDetails = false
+
     let summary: HomePreparednessSummary
     let language: AppLanguage
+    let openHousehold: () -> Void
+    let openSupplies: () -> Void
+    let openPayment: () -> Void
+    let openPlan: () -> Void
+    let openContacts: () -> Void
+    let openDrills: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title)
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
+            HStack(alignment: .firstTextBaseline) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .accessibilityHeading(.h2)
+
+                Spacer(minLength: 12)
+
+                Text(progressCountText)
+                    .font(.subheadline.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
 
             Text(explanation)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            HomeChecklistRow(
-                title: householdTitle,
-                status: summary.household,
-                language: language,
-                systemImage: "house.fill"
+            ProgressView(
+                value: Double(summary.preparedAreaCount),
+                total: Double(summary.totalAreaCount)
             )
-            HomeChecklistRow(
-                title: suppliesTitle,
-                status: summary.supplies,
-                language: language,
-                systemImage: "shippingbox.fill"
-            )
-            HomeChecklistRow(
-                title: planTitle,
-                status: summary.plan,
-                language: language,
-                systemImage: "checklist"
-            )
-            if let payment = summary.payment {
-                HomeChecklistRow(
-                    title: paymentTitle,
-                    status: payment,
-                    language: language,
-                    systemImage: "creditcard.fill"
-                )
-            }
-            HomeChecklistRow(
-                title: contactsTitle,
-                status: summary.contacts,
-                language: language,
-                systemImage: "person.2.fill"
-            )
+            .tint(summary.preparedAreaCount == summary.totalAreaCount ? .green : .blue)
 
-            Text(safetyClarification)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            DisclosureGroup(isExpanded: $showsDetails) {
+                VStack(alignment: .leading, spacing: 10) {
+                    checklistButton(
+                        title: householdTitle,
+                        status: summary.household,
+                        systemImage: "house.fill",
+                        identifier: "preparednessOpenHousehold",
+                        action: openHousehold
+                    )
+                    checklistButton(
+                        title: suppliesTitle,
+                        status: summary.supplies,
+                        systemImage: "shippingbox.fill",
+                        identifier: "preparednessOpenSupplies",
+                        action: openSupplies
+                    )
+                    checklistButton(
+                        title: planTitle,
+                        status: summary.plan,
+                        systemImage: "checklist",
+                        identifier: "preparednessOpenPlan",
+                        action: openPlan
+                    )
+                    if let payment = summary.payment {
+                        checklistButton(
+                            title: paymentTitle,
+                            status: payment,
+                            systemImage: "creditcard.fill",
+                            identifier: "preparednessOpenPayment",
+                            action: openPayment
+                        )
+                    }
+                    checklistButton(
+                        title: contactsTitle,
+                        status: summary.contacts,
+                        systemImage: "person.2.fill",
+                        identifier: "preparednessOpenContacts",
+                        action: openContacts
+                    )
+                    checklistButton(
+                        title: drillsTitle,
+                        status: summary.drills,
+                        systemImage: "timer",
+                        identifier: "preparednessOpenDrills",
+                        action: openDrills
+                    )
+
+                    Text(safetyClarification)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                }
+                .padding(.top, 10)
+            } label: {
+                Text(detailsTitle)
+                    .font(.subheadline.weight(.semibold))
+            }
         }
         .padding(20)
         .background(DashboardCardBackground())
         .accessibilityIdentifier("homePreparednessOverview")
+    }
+
+    private func checklistButton(
+        title: String,
+        status: HomeChecklistStatus,
+        systemImage: String,
+        identifier: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                HomeChecklistRow(
+                    title: title,
+                    status: status,
+                    language: language,
+                    systemImage: systemImage
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier)
     }
 
     private var title: String {
@@ -160,6 +247,19 @@ struct HomePreparednessSection: View {
             english: "Preparedness checklist progress based only on the information you have completed.",
             norwegian: "Fremdrift i beredskapssjekklisten, basert bare på det du har fylt ut.",
             thai: "ความคืบหน้าของรายการตรวจสอบความพร้อม อ้างอิงเฉพาะข้อมูลที่คุณกรอกแล้ว"
+        )
+    }
+
+    private var progressCountText: String {
+        "\(summary.preparedAreaCount)/\(summary.totalAreaCount)"
+    }
+
+    private var detailsTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Status and shortcuts",
+            norwegian: "Status og snarveier",
+            thai: "สถานะและทางลัด"
         )
     }
 
@@ -189,7 +289,21 @@ struct HomePreparednessSection: View {
     }
 
     private var contactsTitle: String {
-        L10n.text("contacts", language: language)
+        L10n.pick(
+            language: language,
+            english: "Household members",
+            norwegian: "Husstandsmedlemmer",
+            thai: "สมาชิกในครัวเรือน"
+        )
+    }
+
+    private var drillsTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Preparedness exercises",
+            norwegian: "Beredskapsøvelser",
+            thai: "แบบฝึกความพร้อมรับมือเหตุฉุกเฉิน"
+        )
     }
 }
 
@@ -199,6 +313,7 @@ struct PreparednessNextStepSection: View {
     let openHousehold: () -> Void
     let openPlan: () -> Void
     let openSupplies: () -> Void
+    let openPayment: () -> Void
     let openContacts: () -> Void
     let openDrills: () -> Void
 
@@ -254,18 +369,26 @@ struct PreparednessNextStepSection: View {
         }
         if summary.contacts != .prepared {
             return PreparednessNextStep(
-                title: L10n.pick(language: language, english: "Add an important contact", norwegian: "Legg til en viktig kontakt", thai: "เพิ่มผู้ติดต่อสำคัญ"),
+                title: L10n.pick(language: language, english: "Add a household member", norwegian: "Legg til et husstandsmedlem", thai: "เพิ่มสมาชิกในครัวเรือน"),
                 systemImage: "person.crop.circle.badge.plus",
                 isComplete: false,
                 action: openContacts
             )
         }
-        if summary.supplies != .prepared || summary.payment == .needsAttention || summary.payment == .inProgress {
+        if summary.supplies != .prepared {
             return PreparednessNextStep(
                 title: L10n.pick(language: language, english: "Review your emergency supplies", norwegian: "Se gjennom beredskapslageret", thai: "ตรวจสอบอุปกรณ์ฉุกเฉิน"),
                 systemImage: "shippingbox.fill",
                 isComplete: false,
                 action: openSupplies
+            )
+        }
+        if summary.payment == .needsAttention || summary.payment == .inProgress {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Complete payment preparedness", norwegian: "Fullfør betalingsberedskapen", thai: "เตรียมความพร้อมด้านการชำระเงินให้เสร็จ"),
+                systemImage: "creditcard.fill",
+                isComplete: false,
+                action: openPayment
             )
         }
         if summary.drillsNeedAttention {
@@ -427,139 +550,6 @@ private struct HomeChecklistRow: View {
             L10n.pick(language: language, english: "Prepared", norwegian: "Forberedt", thai: "เตรียมพร้อม")
         }
     }
-}
-
-struct HomeEmergencyPlanSection: View {
-    let selectedEmergencyTitle: String
-    let language: AppLanguage
-    let openPlan: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
-
-            Text(selectedText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            Button(action: openPlan) {
-                Label(actionTitle, systemImage: "checklist")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-            }
-            .buttonStyle(.borderedProminent)
-            .accessibilityIdentifier("homeOpenMyPlan")
-        }
-        .padding(20)
-        .background(DashboardCardBackground())
-    }
-
-    private var title: String {
-        L10n.pick(language: language, english: "My emergency plan", norwegian: "Min beredskapsplan", thai: "แผนฉุกเฉินของฉัน")
-    }
-
-    private var selectedText: String {
-        L10n.pick(
-            language: language,
-            english: "Selected emergency: \(selectedEmergencyTitle)",
-            norwegian: "Valgt hendelse: \(selectedEmergencyTitle)",
-            thai: "เหตุฉุกเฉินที่เลือก: \(selectedEmergencyTitle)"
-        )
-    }
-
-    private var actionTitle: String {
-        L10n.pick(language: language, english: "Build / View My Emergency Plan", norwegian: "Lag / vis beredskapsplanen min", thai: "สร้าง / ดูแผนฉุกเฉินของฉัน")
-    }
-}
-
-struct HomeQuickAccessSection: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    let showsPayment: Bool
-    let language: AppLanguage
-    let openSupplies: () -> Void
-    let openContacts: () -> Void
-    let openHousehold: () -> Void
-    let openPayment: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
-
-            Text(offlineNote)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: 10) {
-                    accessButtons
-                }
-            } else {
-                Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                    GridRow {
-                        accessButton(suppliesTitle, systemImage: "shippingbox.fill", identifier: "homeOpenSupplies", action: openSupplies)
-                        accessButton(contactsTitle, systemImage: "person.2.fill", identifier: "homeOpenContacts", action: openContacts)
-                    }
-                    GridRow {
-                        accessButton(householdTitle, systemImage: "house.fill", identifier: "homeOpenHousehold", action: openHousehold)
-                        if showsPayment {
-                            accessButton(paymentTitle, systemImage: "creditcard.fill", identifier: "homeOpenPayment", action: openPayment)
-                        } else {
-                            Color.clear.accessibilityHidden(true)
-                        }
-                    }
-                }
-            }
-        }
-        .padding(20)
-        .background(DashboardCardBackground())
-    }
-
-    @ViewBuilder
-    private var accessButtons: some View {
-        accessButton(suppliesTitle, systemImage: "shippingbox.fill", identifier: "homeOpenSupplies", action: openSupplies)
-        accessButton(contactsTitle, systemImage: "person.2.fill", identifier: "homeOpenContacts", action: openContacts)
-        accessButton(householdTitle, systemImage: "house.fill", identifier: "homeOpenHousehold", action: openHousehold)
-        if showsPayment {
-            accessButton(paymentTitle, systemImage: "creditcard.fill", identifier: "homeOpenPayment", action: openPayment)
-        }
-    }
-
-    private func accessButton(
-        _ title: String,
-        systemImage: String,
-        identifier: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-        }
-        .buttonStyle(.bordered)
-        .accessibilityIdentifier(identifier)
-    }
-
-    private var title: String {
-        L10n.pick(language: language, english: "Quick preparedness access", norwegian: "Snarveier til beredskap", thai: "ทางลัดการเตรียมพร้อม")
-    }
-
-    private var offlineNote: String {
-        L10n.pick(
-            language: language,
-            english: "Your core preparedness information is available offline.",
-            norwegian: "Den viktigste beredskapsinformasjonen din er tilgjengelig uten nett.",
-            thai: "ข้อมูลการเตรียมพร้อมหลักของคุณใช้งานได้แบบออฟไลน์"
-        )
-    }
-
-    private var suppliesTitle: String { L10n.pick(language: language, english: "Supplies", norwegian: "Utstyr", thai: "อุปกรณ์") }
-    private var contactsTitle: String { L10n.text("contacts", language: language) }
-    private var householdTitle: String { L10n.pick(language: language, english: "Household", norwegian: "Husstand", thai: "ครัวเรือน") }
-    private var paymentTitle: String { L10n.text("payment.title", language: language) }
 }
 
 struct HomeOfficialToolSheet: View {

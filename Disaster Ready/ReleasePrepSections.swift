@@ -5,110 +5,6 @@
 
 import SwiftUI
 
-struct ReleaseReadinessSection: View {
-    let isOfflineFirst: Bool
-    let supportsLocalization: Bool
-    let hasOnboarding: Bool
-    let hasLocalPlanStorage: Bool
-    let language: AppLanguage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(title)
-                .font(.title3.weight(.bold))
-
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            readinessRow(label: offlineLabel, isReady: isOfflineFirst)
-            readinessRow(label: localizationLabel, isReady: supportsLocalization)
-            readinessRow(label: onboardingLabel, isReady: hasOnboarding)
-            readinessRow(label: localPlanLabel, isReady: hasLocalPlanStorage)
-        }
-        .padding(20)
-        .background(DashboardCardBackground())
-    }
-
-    private func readinessRow(label: String, isReady: Bool) -> some View {
-        HStack {
-            Image(systemName: isReady ? "checkmark.seal.fill" : "clock.badge.exclamationmark.fill")
-                .foregroundStyle(.primary)
-            Text(label)
-                .font(.subheadline)
-            Spacer()
-            Text(isReady ? readyText : pendingText)
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background((isReady ? Color.green : Color.orange).opacity(0.12), in: Capsule())
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var title: String {
-        return L10n.pick(
-            language: language,
-            english: "App Store Readiness",
-            norwegian: "App Store-beredskap",
-            thai: "ความพร้อมสำหรับ App Store"
-        )
-    }
-
-    private var subtitle: String {
-        L10n.pick(
-            language: language,
-            english: "This release is being shaped as a local-first product that can be polished for App Store launch next.",
-            norwegian: "Denne utgaven formes som et lokal-først-produkt som kan finpusses for App Store-lansering som neste steg.",
-            thai: "รุ่นนี้กำลังถูกออกแบบให้เป็นผลิตภัณฑ์แบบ local-first ซึ่งสามารถขัดเกลาเพื่อเปิดตัวบน App Store ได้เป็นขั้นถัดไป"
-        )
-    }
-
-    private var offlineLabel: String {
-        L10n.pick(
-            language: language,
-            english: "Offline-first storage and planning are active.",
-            norwegian: "Offline-først lagring og planlegging er aktiv.",
-            thai: "มีการจัดเก็บและการวางแผนแบบออฟไลน์เป็นหลัก"
-        )
-    }
-
-    private var localizationLabel: String {
-        L10n.pick(
-            language: language,
-            english: "English, Norwegian, and Thai are available.",
-            norwegian: "Engelsk, norsk og thai er tilgjengelig.",
-            thai: "รองรับภาษาอังกฤษ นอร์เวย์ และไทย"
-        )
-    }
-
-    private var onboardingLabel: String {
-        L10n.pick(
-            language: language,
-            english: "First-launch onboarding is in place.",
-            norwegian: "Onboarding ved første oppstart er på plass.",
-            thai: "มีการแนะนำการใช้งานครั้งแรกแล้ว"
-        )
-    }
-
-    private var localPlanLabel: String {
-        L10n.pick(
-            language: language,
-            english: "Household plans are stored on-device.",
-            norwegian: "Husstandsplaner lagres på enheten.",
-            thai: "แผนครัวเรือนถูกเก็บไว้ในอุปกรณ์"
-        )
-    }
-
-    private var readyText: String {
-        L10n.pick(language: language, english: "Ready", norwegian: "Klar", thai: "พร้อม")
-    }
-
-    private var pendingText: String {
-        L10n.pick(language: language, english: "Pending", norwegian: "Venter", thai: "รอดำเนินการ")
-    }
-}
-
 struct SettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -118,7 +14,6 @@ struct SettingsSheet: View {
     @Binding var selectedAppearance: String
     @Binding var includePlanSummaryInMessages: Bool
     @Binding var showOnlyMissingSupplies: Bool
-    @Binding var offlineFirstMode: Bool
     @Binding var supplyReviewRemindersEnabled: Bool
     @Binding var householdProfile: HouseholdProfile
     let sendTestReminder: () -> Void
@@ -165,7 +60,6 @@ struct SettingsSheet: View {
                 Section(preferencesTitle) {
                     Toggle(includePlanSummaryTitle, isOn: $includePlanSummaryInMessages)
                     Toggle(showMissingOnlyTitle, isOn: $showOnlyMissingSupplies)
-                    Toggle(offlineFirstModeTitle, isOn: $offlineFirstMode)
                     Toggle(supplyReviewRemindersTitle, isOn: $supplyReviewRemindersEnabled)
 
                     if supplyReviewRemindersEnabled {
@@ -233,11 +127,6 @@ struct SettingsSheet: View {
                         .accessibilityIdentifier("safetyDisclaimer")
                 }
 
-                Section(releaseNotesTitle) {
-                    Text(releaseNotesBody)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
             }
             .navigationTitle(settingsTitle)
             .alert(resetConfirmationTitle, isPresented: $showingResetConfirmation) {
@@ -319,10 +208,6 @@ struct SettingsSheet: View {
         L10n.pick(language: language, english: "Show only missing supplies", norwegian: "Vis bare manglende utstyr", thai: "แสดงเฉพาะเสบียงที่ขาด")
     }
 
-    private var offlineFirstModeTitle: String {
-        L10n.pick(language: language, english: "Keep local-only offline mode as primary", norwegian: "Behold lokal offline-modus som primær", thai: "ใช้โหมดออฟไลน์แบบในเครื่องเป็นหลัก")
-    }
-
     private var supplyReviewRemindersTitle: String {
         L10n.pick(
             language: language,
@@ -345,10 +230,6 @@ struct SettingsSheet: View {
         L10n.pick(language: language, english: "Help", norwegian: "Hjelp", thai: "วิธีใช้")
     }
 
-    private var releaseNotesTitle: String {
-        L10n.pick(language: language, english: "Release Notes", norwegian: "Utgivelsesnotater", thai: "บันทึกการเปิดตัว")
-    }
-
     private var aboutTitle: String {
         L10n.pick(language: language, english: "About", norwegian: "Om appen", thai: "เกี่ยวกับแอป")
     }
@@ -365,9 +246,9 @@ struct SettingsSheet: View {
     private var privacyBody: String {
         L10n.pick(
             language: language,
-            english: "Your plans, contacts, and supplies stay on this device unless you choose to export a backup.",
-            norwegian: "Planer, kontakter og utstyr blir på denne enheten med mindre du velger å eksportere en sikkerhetskopi.",
-            thai: "แผน รายชื่อติดต่อ และอุปกรณ์ของคุณจะอยู่ในอุปกรณ์นี้ เว้นแต่คุณเลือกส่งออกข้อมูลสำรอง"
+            english: "Your plans, contacts, roles, supplies, and exercise history stay on this device unless you choose to export a backup.",
+            norwegian: "Planer, kontakter, roller, utstyr og øvelseshistorikk blir på denne enheten med mindre du velger å eksportere en sikkerhetskopi.",
+            thai: "แผน รายชื่อติดต่อ บทบาท อุปกรณ์ และประวัติการฝึกของคุณจะอยู่ในอุปกรณ์นี้ เว้นแต่คุณเลือกส่งออกข้อมูลสำรอง"
         )
     }
 
@@ -408,9 +289,9 @@ struct SettingsSheet: View {
     private var resetConfirmationMessage: String {
         L10n.pick(
             language: language,
-            english: "Your contacts, plans, roles, and supplies will be replaced with the app defaults. Export a backup first if you may need them later.",
-            norwegian: "Kontakter, planer, roller og utstyr erstattes med appens standardinnhold. Eksporter en sikkerhetskopi først hvis du kan få bruk for dem senere.",
-            thai: "รายชื่อติดต่อ แผน บทบาท และอุปกรณ์จะถูกแทนที่ด้วยข้อมูลเริ่มต้นของแอป โปรดส่งออกข้อมูลสำรองก่อนหากอาจต้องใช้ข้อมูลเหล่านี้ภายหลัง"
+            english: "Household profile, payment preparedness, contacts, plans, roles, supplies, exercise history, and any active household status will be reset. Export a backup first if you may need the supported backup data later.",
+            norwegian: "Husstandsprofil, betalingsberedskap, kontakter, planer, roller, utstyr, øvelseshistorikk og eventuell aktiv husstandsstatus nullstilles. Eksporter en sikkerhetskopi først hvis du kan få bruk for dataene som støttes i sikkerhetskopien.",
+            thai: "โปรไฟล์ครัวเรือน ความพร้อมด้านการชำระเงิน รายชื่อติดต่อ แผน บทบาท อุปกรณ์ ประวัติการฝึก และสถานะครัวเรือนที่กำลังใช้งานจะถูกรีเซ็ต โปรดส่งออกข้อมูลสำรองก่อนหากอาจต้องใช้ข้อมูลที่รองรับในภายหลัง"
         )
     }
 
@@ -421,18 +302,9 @@ struct SettingsSheet: View {
     private var backupBody: String {
         L10n.pick(
             language: language,
-            english: "Export your local contacts, plans, and supplies to a JSON file, or restore them later without needing internet.",
-            norwegian: "Eksporter lokale kontakter, planer og utstyr til en JSON-fil, eller gjenopprett dem senere uten behov for internett.",
-            thai: "ส่งออกรายชื่อติดต่อ แผน และเสบียงในเครื่องเป็นไฟล์ JSON หรือกู้คืนภายหลังได้โดยไม่ต้องใช้อินเทอร์เน็ต"
-        )
-    }
-
-    private var releaseNotesBody: String {
-        L10n.pick(
-            language: language,
-            english: "This version is designed to work fully offline on one device. Future iCloud sharing should remain optional, not required.",
-            norwegian: "Denne versjonen er laget for å fungere fullt offline på én enhet. Fremtidig iCloud-deling bør være valgfri, ikke påkrevd.",
-            thai: "เวอร์ชันนี้ออกแบบให้ทำงานแบบออฟไลน์เต็มรูปแบบบนอุปกรณ์เดียว การแชร์ผ่าน iCloud ในอนาคตควรเป็นทางเลือก ไม่ใช่ข้อบังคับ"
+            english: "Export contacts, plans, roles, supplies, household profile, payment preparedness, and exercise history to a JSON file, or restore them later without internet. Active incident status is not included. The file is not encrypted, so store and share it securely.",
+            norwegian: "Eksporter kontakter, planer, roller, utstyr, husstandsprofil, betalingsberedskap og øvelseshistorikk til en JSON-fil, eller gjenopprett dem senere uten internett. Aktiv hendelsesstatus tas ikke med. Filen er ikke kryptert og må oppbevares og deles sikkert.",
+            thai: "ส่งออกรายชื่อติดต่อ แผน บทบาท อุปกรณ์ โปรไฟล์ครัวเรือน ความพร้อมด้านการชำระเงิน และประวัติการฝึกเป็นไฟล์ JSON หรือกู้คืนภายหลังโดยไม่ใช้อินเทอร์เน็ต โดยไม่รวมสถานะเหตุการณ์ที่กำลังดำเนินอยู่ ไฟล์นี้ไม่ได้เข้ารหัส โปรดจัดเก็บและแชร์อย่างปลอดภัย"
         )
     }
 
@@ -511,18 +383,18 @@ private struct PrivacyDetailsView: View {
     private var localStorageBody: String {
         L10n.pick(
             language: language,
-            english: "Plans, contacts, roles, supplies, and preferences are stored locally on this device.",
-            norwegian: "Planer, kontakter, roller, utstyr og innstillinger lagres lokalt på denne enheten.",
-            thai: "แผน รายชื่อติดต่อ บทบาท อุปกรณ์ และการตั้งค่าจะจัดเก็บไว้ในอุปกรณ์นี้"
+            english: "Plans, contacts, roles, supplies, exercise history, active household status, and preferences are stored locally on this device.",
+            norwegian: "Planer, kontakter, roller, utstyr, øvelseshistorikk, aktiv husstandsstatus og innstillinger lagres lokalt på denne enheten.",
+            thai: "แผน รายชื่อติดต่อ บทบาท อุปกรณ์ ประวัติการฝึก สถานะครัวเรือนที่กำลังใช้งาน และการตั้งค่าจะจัดเก็บไว้ในอุปกรณ์นี้"
         )
     }
 
     private var backupBody: String {
         L10n.pick(
             language: language,
-            english: "A JSON backup is created and shared only when you choose Export backup.",
-            norwegian: "En JSON-sikkerhetskopi opprettes og deles bare når du velger Eksporter sikkerhetskopi.",
-            thai: "ระบบจะสร้างและแชร์ข้อมูลสำรอง JSON เมื่อคุณเลือกส่งออกข้อมูลสำรองเท่านั้น"
+            english: "A JSON backup with supported local data, including exercise history, is created and shared only when you choose Export backup. Active incident status is excluded. The exported file is not encrypted; anyone with access to it may read its contents.",
+            norwegian: "En JSON-sikkerhetskopi med støttede lokale data, inkludert øvelseshistorikk, opprettes og deles bare når du velger Eksporter sikkerhetskopi. Aktiv hendelsesstatus tas ikke med. Den eksporterte filen er ikke kryptert, og alle med tilgang kan lese innholdet.",
+            thai: "ระบบจะสร้างและแชร์ข้อมูลสำรอง JSON ที่มีข้อมูลในเครื่องที่รองรับ รวมถึงประวัติการฝึก เมื่อคุณเลือกส่งออกข้อมูลสำรองเท่านั้น โดยไม่รวมสถานะเหตุการณ์ที่กำลังดำเนินอยู่ ไฟล์ที่ส่งออกไม่ได้เข้ารหัส ผู้ที่เข้าถึงไฟล์ได้อาจอ่านเนื้อหาได้"
         )
     }
 
@@ -747,11 +619,11 @@ struct UserManualView: View {
     private var backupBody: String {
         switch language {
         case .english:
-            return "Use Settings to export a JSON backup of your contacts, plans, roles, and supplies. Import the file on the same or another device to restore your local data."
+            return "Use Settings to export a JSON backup of your household profile, contacts, plans, roles, supplies, payment preparedness, and exercise history. Import it on the same or another device without internet. Active incident status is not included. The file is not encrypted, so store and share it securely."
         case .norwegian:
-            return "Bruk Innstillinger for å eksportere en JSON-sikkerhetskopi av kontakter, planer, roller og utstyr. Importer filen på samme eller en annen enhet for å gjenopprette lokale data."
+            return "Bruk Innstillinger for å eksportere en JSON-sikkerhetskopi av husstandsprofil, kontakter, planer, roller, utstyr, betalingsberedskap og øvelseshistorikk. Importer den på samme eller en annen enhet uten internett. Aktiv hendelsesstatus tas ikke med. Filen er ikke kryptert og må oppbevares og deles sikkert."
         case .thai:
-            return "ใช้หน้าการตั้งค่าเพื่อส่งออกข้อมูลสำรองแบบ JSON ของรายชื่อติดต่อ แผน บทบาท และเสบียง จากนั้นนำเข้าไฟล์บนอุปกรณ์เดิมหรือเครื่องอื่นเพื่อกู้คืนข้อมูลในเครื่อง"
+            return "ใช้หน้าการตั้งค่าเพื่อส่งออกข้อมูลสำรอง JSON ของโปรไฟล์ครัวเรือน รายชื่อติดต่อ แผน บทบาท อุปกรณ์ ความพร้อมด้านการชำระเงิน และประวัติการฝึก จากนั้นนำเข้าในอุปกรณ์เดิมหรือเครื่องอื่นได้โดยไม่ใช้อินเทอร์เน็ต โดยไม่รวมสถานะเหตุการณ์ที่กำลังดำเนินอยู่ ไฟล์นี้ไม่ได้เข้ารหัส โปรดจัดเก็บและแชร์อย่างปลอดภัย"
         }
     }
 }

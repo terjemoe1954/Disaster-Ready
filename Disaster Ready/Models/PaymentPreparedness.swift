@@ -33,6 +33,14 @@ struct PaymentPreparednessChecklist: Codable, Equatable {
             completedItemIDs.remove(item.id)
         }
     }
+
+    func normalized(for countryCode: String) -> PaymentPreparednessChecklist {
+        var normalizedChecklist = PaymentPreparednessChecklist(countryCode: countryCode)
+        for item in PaymentPreparednessCatalog.checklist(for: countryCode) where isComplete(item) {
+            normalizedChecklist.setComplete(true, for: item)
+        }
+        return normalizedChecklist
+    }
 }
 
 enum PaymentPreparednessCatalog {

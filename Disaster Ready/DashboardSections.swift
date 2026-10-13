@@ -613,6 +613,10 @@ struct HouseholdPlanSection: View {
 }
 
 struct ContactsSection: View {
+    @State private var showsHouseholdMembers = true
+    @State private var showsOutsideContacts = false
+    @State private var showsImportantNumbers = false
+
     let householdMembers: [FamilyContact]
     let outsideContacts: [FamilyContact]
     let importantNumbers: [ImportantNumber]
@@ -653,6 +657,8 @@ struct ContactsSection: View {
 
             contactGroup(
                 title: householdMembersTitle,
+                count: householdMembers.count,
+                isExpanded: $showsHouseholdMembers,
                 addTitle: addHouseholdMemberTitle,
                 addAction: addHouseholdMember
             ) {
@@ -667,6 +673,8 @@ struct ContactsSection: View {
 
             contactGroup(
                 title: outsideContactsTitle,
+                count: outsideContacts.count,
+                isExpanded: $showsOutsideContacts,
                 addTitle: addOutsideContactTitle,
                 addAction: addOutsideContact
             ) {
@@ -681,6 +689,8 @@ struct ContactsSection: View {
 
             contactGroup(
                 title: L10n.text("important_numbers", language: language),
+                count: importantNumbers.count,
+                isExpanded: $showsImportantNumbers,
                 addTitle: L10n.text("add_number", language: language),
                 addAction: addImportant
             ) {
@@ -715,64 +725,90 @@ struct ContactsSection: View {
 
     private func contactGroup<Content: View>(
         title: String,
+        count: Int,
+        isExpanded: Binding<Bool>,
         addTitle: String,
         addAction: @escaping () -> Void,
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        DisclosureGroup(isExpanded: isExpanded) {
+            VStack(alignment: .leading, spacing: 14) {
+                Button(action: addAction) {
+                    Label(addTitle, systemImage: "plus.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                content()
+            }
+            .padding(.top, 10)
+        } label: {
             HStack {
                 Text(title)
                     .font(.headline)
-                Spacer()
-                Button(addTitle, action: addAction)
-                    .font(.caption.weight(.semibold))
+                Spacer(minLength: 8)
+                Text("\(count)")
+                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.secondary)
             }
-            content()
         }
     }
 }
 
 struct MessageTemplatesSection: View {
+    @State private var showsTemplates = false
+
     let templates: [FamilyMessageTemplate]
     let shareText: (FamilyMessageTemplate) -> String
     let language: AppLanguage
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.text("one_tap_family_updates", language: language))
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
+            DisclosureGroup(isExpanded: $showsTemplates) {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(L10n.text("message_templates_subtitle", language: language))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-            Text(L10n.text("message_templates_subtitle", language: language))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            ForEach(templates) { template in
-                HStack(alignment: .top, spacing: 14) {
-                    Image(systemName: "paperplane.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.blue)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(template.title)
-                            .font(.headline)
-                        Text(shareText(template))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    ShareLink(
-                        item: shareText(template),
-                        preview: SharePreview(template.title, image: Image(systemName: "paperplane.circle.fill"))
-                    ) {
-                        Text(L10n.text("share", language: language))
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(.blue.opacity(0.12), in: Capsule())
+                    ForEach(templates) { template in
+                        HStack(alignment: .top, spacing: 14) {
+                            Image(systemName: "paperplane.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(template.title)
+                                    .font(.headline)
+                                Text(shareText(template))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            ShareLink(
+                                item: shareText(template),
+                                preview: SharePreview(template.title, image: Image(systemName: "paperplane.circle.fill"))
+                            ) {
+                                Text(L10n.text("share", language: language))
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(.blue.opacity(0.12), in: Capsule())
+                            }
+                        }
+                        .padding(14)
+                        .background(InsetCardBackground())
                     }
                 }
-                .padding(14)
-                .background(InsetCardBackground())
+                .padding(.top, 12)
+            } label: {
+                HStack {
+                    Text(L10n.text("one_tap_family_updates", language: language))
+                        .font(.title3.weight(.bold))
+                        .accessibilityHeading(.h2)
+                    Spacer(minLength: 8)
+                    Text("\(templates.count)")
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(20)
@@ -781,6 +817,8 @@ struct MessageTemplatesSection: View {
 }
 
 struct RolesSection: View {
+    @State private var showsRoles = false
+
     let roles: [HouseholdRole]
     let householdMembers: [FamilyContact]
     let language: AppLanguage
@@ -789,22 +827,34 @@ struct RolesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text(L10n.text("household_roles", language: language))
-                    .font(.title3.weight(.bold))
-                    .accessibilityHeading(.h2)
-                Spacer()
-                Button(roleAddTitle, action: addRole)
-                    .font(.caption.weight(.semibold))
-            }
+            DisclosureGroup(isExpanded: $showsRoles) {
+                VStack(alignment: .leading, spacing: 14) {
+                    Button(action: addRole) {
+                        Label(roleAddTitle, systemImage: "plus.circle.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
 
-            ForEach(roles) { role in
-                HouseholdRoleEditor(
-                    role: role,
-                    householdMembers: householdMembers,
-                    language: language,
-                    deleteAction: { deleteRole(role) }
-                )
+                    ForEach(roles) { role in
+                        HouseholdRoleEditor(
+                            role: role,
+                            householdMembers: householdMembers,
+                            language: language,
+                            deleteAction: { deleteRole(role) }
+                        )
+                    }
+                }
+                .padding(.top, 12)
+            } label: {
+                HStack {
+                    Text(L10n.text("household_roles", language: language))
+                        .font(.title3.weight(.bold))
+                        .accessibilityHeading(.h2)
+                    Spacer(minLength: 8)
+                    Text("\(roles.count)")
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(20)
@@ -1640,74 +1690,6 @@ private struct DrillRow: View {
             return L10n.pick(language: language, english: "Due since: \(date)", norwegian: "Forfalt: \(date)", thai: "ครบกำหนดตั้งแต่: \(date)")
         }
         return L10n.pick(language: language, english: "Next exercise: \(date)", norwegian: "Neste øvelse: \(date)", thai: "การฝึกครั้งถัดไป: \(date)")
-    }
-}
-
-struct OfflineResourcesSection: View {
-    let resources: [OfflineResource]
-    let language: AppLanguage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.text("offline_kit", language: language))
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
-
-            ForEach(resources) { resource in
-                HStack(alignment: .top, spacing: 14) {
-                    Image(systemName: resource.systemImage)
-                        .font(.title3)
-                        .foregroundStyle(.green)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(resource.title)
-                            .font(.headline)
-                        Text(resource.detail)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .padding(20)
-        .background(DashboardCardBackground())
-    }
-}
-
-struct PricingSection: View {
-    let language: AppLanguage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.text("business_model", language: language))
-                .font(.title3.weight(.bold))
-                .accessibilityHeading(.h2)
-
-            Text(L10n.text("business_model_body", language: language))
-                .font(.body)
-
-            VStack(alignment: .leading, spacing: 10) {
-                Label(L10n.text("business_bullet_1", language: language), systemImage: "wifi.slash")
-                Label(L10n.text("business_bullet_2", language: language), systemImage: "point.topleft.down.curvedto.point.bottomright.up")
-                Label(L10n.text("business_bullet_3", language: language), systemImage: "person.2.fill")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.16, green: 0.23, blue: 0.28),
-                            Color(red: 0.32, green: 0.23, blue: 0.14)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-        )
-        .foregroundStyle(.white)
     }
 }
 

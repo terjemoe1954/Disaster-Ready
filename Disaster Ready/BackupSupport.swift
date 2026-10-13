@@ -8,7 +8,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DisasterBackupPayload: Codable, Equatable {
-    static let currentSchemaVersion = 4
+    static let currentSchemaVersion = 5
 
     var schemaVersion: Int? = currentSchemaVersion
     var householdMemberCount: Int? = nil
@@ -20,6 +20,7 @@ struct DisasterBackupPayload: Codable, Equatable {
     var householdRoles: [HouseholdRoleSnapshot]
     var supplies: [SupplyItemSnapshot]
     var drillCompletionDates: [String: Date]? = nil
+    var paymentPreparedness: PaymentPreparednessChecklist? = nil
 
     static let empty = DisasterBackupPayload(
         exportDate: .distantPast,
@@ -28,7 +29,8 @@ struct DisasterBackupPayload: Codable, Equatable {
         householdPlans: [],
         householdRoles: [],
         supplies: [],
-        drillCompletionDates: [:]
+        drillCompletionDates: [:],
+        paymentPreparedness: nil
     )
 
     func encodedData() throws -> Data {
@@ -54,12 +56,25 @@ struct DisasterBackupPayload: Codable, Equatable {
             throw DisasterBackupValidationError.invalidHouseholdMemberCount
         }
 
-        let containsData = !familyContacts.isEmpty
+        if let householdProfile, !(1...12).contains(householdProfile.householdSize) {
+            throw DisasterBackupValidationError.invalidHouseholdMemberCount
+        }
+
+        if let householdMemberCount,
+           let householdProfile,
+           householdMemberCount != householdProfile.householdSize {
+            throw DisasterBackupValidationError.invalidHouseholdMemberCount
+        }
+
+        let containsData = householdMemberCount != nil
+            || householdProfile != nil
+            || !familyContacts.isEmpty
             || !importantNumbers.isEmpty
             || !householdPlans.isEmpty
             || !householdRoles.isEmpty
             || !supplies.isEmpty
             || !(drillCompletionDates?.isEmpty ?? true)
+            || (paymentPreparedness?.completedCount ?? 0) > 0
         guard containsData else {
             throw DisasterBackupValidationError.emptyBackup
         }
