@@ -8,7 +8,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DisasterBackupPayload: Codable, Equatable {
-    static let currentSchemaVersion = 3
+    static let currentSchemaVersion = 4
 
     var schemaVersion: Int? = currentSchemaVersion
     var householdMemberCount: Int? = nil
@@ -19,6 +19,7 @@ struct DisasterBackupPayload: Codable, Equatable {
     var householdPlans: [HouseholdPlanSnapshot]
     var householdRoles: [HouseholdRoleSnapshot]
     var supplies: [SupplyItemSnapshot]
+    var drillCompletionDates: [String: Date]? = nil
 
     static let empty = DisasterBackupPayload(
         exportDate: .distantPast,
@@ -26,7 +27,8 @@ struct DisasterBackupPayload: Codable, Equatable {
         importantNumbers: [],
         householdPlans: [],
         householdRoles: [],
-        supplies: []
+        supplies: [],
+        drillCompletionDates: [:]
     )
 
     func encodedData() throws -> Data {
@@ -57,6 +59,7 @@ struct DisasterBackupPayload: Codable, Equatable {
             || !householdPlans.isEmpty
             || !householdRoles.isEmpty
             || !supplies.isEmpty
+            || !(drillCompletionDates?.isEmpty ?? true)
         guard containsData else {
             throw DisasterBackupValidationError.emptyBackup
         }

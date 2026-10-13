@@ -822,7 +822,11 @@ struct RolesSection: View {
 }
 
 struct SuppliesSection: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var searchText = ""
+    @State private var showOnlyNeedingReview = false
+    @State private var showsMarkAllReviewedConfirmation = false
+    @State private var previousReviewDates: [UUID: Date] = [:]
 
     let homeSupplies: [SupplyItem]
     let carSupplies: [SupplyItem]
@@ -882,38 +886,92 @@ struct SuppliesSection: View {
             .padding(12)
             .background(InsetCardBackground())
 
-            Button {
-                showOnlyMissing.toggle()
+            Menu {
+                Button {
+                    showOnlyMissing = false
+                    showOnlyNeedingReview = false
+                } label: {
+                    Label(showAllTitle, systemImage: !showOnlyMissing && !showOnlyNeedingReview ? "checkmark" : "shippingbox")
+                }
+
+                Button {
+                    showOnlyMissing = true
+                    showOnlyNeedingReview = false
+                } label: {
+                    Label(missingFilterTitle, systemImage: showOnlyMissing ? "checkmark" : "circle.dashed")
+                }
+
+                Button {
+                    showOnlyMissing = false
+                    showOnlyNeedingReview = true
+                } label: {
+                    Label(reviewFilterTitle, systemImage: showOnlyNeedingReview ? "checkmark" : "calendar.badge.exclamationmark")
+                }
             } label: {
                 HStack(spacing: 10) {
-                    Label(missingFilterTitle, systemImage: "line.3.horizontal.decrease.circle")
+                    Label(activeFilterTitle, systemImage: "line.3.horizontal.decrease.circle")
                         .font(.subheadline.weight(.semibold))
                     Spacer()
-                    Image(systemName: showOnlyMissing ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(showOnlyMissing ? Color.indigo : Color.secondary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .padding(14)
             .background(InsetCardBackground())
-            .accessibilityLabel(missingFilterTitle)
-            .accessibilityValue(showOnlyMissing ? filterOnTitle : filterOffTitle)
+            .accessibilityLabel(filterTitle)
+            .accessibilityValue(activeFilterTitle)
             .accessibilityIdentifier("missingSuppliesFilter")
+
+            if !previousReviewDates.isEmpty {
+                let undoLayout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+                    : AnyLayout(HStackLayout(spacing: 12))
+
+                undoLayout {
+                    Label(reviewUpdateCompletedText, systemImage: "checkmark.circle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Spacer(minLength: 8)
+                    }
+
+                    Button(undoTitle, action: undoMarkAllReviewed)
+                        .font(.subheadline.weight(.semibold))
+                }
+                .padding(14)
+                .background(Color.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .accessibilityIdentifier("undoMarkAllSuppliesReviewed")
+            }
+
+            if showOnlyNeedingReview && !suppliesNeedingReview.isEmpty {
+                Button {
+                    showsMarkAllReviewedConfirmation = true
+                } label: {
+                    Label(markAllReviewedTitle, systemImage: "checkmark.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("markAllSuppliesReviewed")
+            }
 
             if !searchText.isEmpty && filteredHomeSupplies.isEmpty && filteredCarSupplies.isEmpty {
                 ContentUnavailableView.search(text: searchText)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .accessibilityIdentifier("noSupplySearchResults")
-            } else if showOnlyMissing && homeSupplies.isEmpty && carSupplies.isEmpty {
+            } else if hasActiveFilter && filteredHomeSupplies.isEmpty && filteredCarSupplies.isEmpty {
                 ContentUnavailableView {
-                    Label(allReadyTitle, systemImage: "checkmark.seal.fill")
+                    Label(emptyFilterTitle, systemImage: "checkmark.seal.fill")
                 } description: {
-                    Text(allReadyDescription)
+                    Text(emptyFilterDescription)
                 } actions: {
                     Button(showAllTitle) {
                         showOnlyMissing = false
+                        showOnlyNeedingReview = false
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -946,6 +1004,14 @@ struct SuppliesSection: View {
         }
         .padding(20)
         .background(DashboardCardBackground())
+        .alert(markAllReviewedConfirmationTitle, isPresented: $showsMarkAllReviewedConfirmation) {
+            Button(markAllReviewedConfirmButtonTitle) {
+                markAllReviewed()
+            }
+            Button(cancelTitle, role: .cancel) {}
+        } message: {
+            Text(markAllReviewedConfirmationMessage)
+        }
     }
 
     private var filteredHomeSupplies: [SupplyItem] {
@@ -966,10 +1032,22 @@ struct SuppliesSection: View {
     }
 
     private func filtered(_ items: [SupplyItem]) -> [SupplyItem] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return items }
+        let filteredByStatus: [SupplyItem]
+        if showOnlyMissing {
+            filteredByStatus = items.filter { !$0.isPacked }
+        } else if showOnlyNeedingReview {
+            filteredByStatus = items.filter {
+                let status = $0.reviewStatus()
+                return status == .overdue || status == .dueSoon
+            }
+        } else {
+            filteredByStatus = items
+        }
 
-        return items.filter { item in
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return filteredByStatus }
+
+        return filteredByStatus.filter { item in
             item.name.localizedStandardContains(query)
                 || item.quantity.localizedStandardContains(query)
                 || item.detail.localizedStandardContains(query)
@@ -993,12 +1071,96 @@ struct SuppliesSection: View {
         )
     }
 
-    private var filterOnTitle: String {
-        L10n.pick(language: language, english: "On", norwegian: "På", thai: "เปิด")
+    private var reviewFilterTitle: String {
+        L10n.pick(language: language, english: "Needs review", norwegian: "Må kontrolleres", thai: "ต้องตรวจสอบ")
     }
 
-    private var filterOffTitle: String {
-        L10n.pick(language: language, english: "Off", norwegian: "Av", thai: "ปิด")
+    private var filterTitle: String {
+        L10n.pick(language: language, english: "Filter supplies", norwegian: "Filtrer utstyr", thai: "กรองอุปกรณ์")
+    }
+
+    private var activeFilterTitle: String {
+        if showOnlyMissing { return missingFilterTitle }
+        if showOnlyNeedingReview { return reviewFilterTitle }
+        return showAllTitle
+    }
+
+    private var hasActiveFilter: Bool {
+        showOnlyMissing || showOnlyNeedingReview
+    }
+
+    private var suppliesNeedingReview: [SupplyItem] {
+        filteredHomeSupplies + filteredCarSupplies
+    }
+
+    private func markAllReviewed() {
+        let nextReviewDate = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
+        let reviewedSupplies = suppliesNeedingReview
+        previousReviewDates = Dictionary(
+            uniqueKeysWithValues: reviewedSupplies.compactMap { item in
+                item.reviewDate.map { (item.id, $0) }
+            }
+        )
+        reviewedSupplies.forEach { $0.reviewDate = nextReviewDate }
+    }
+
+    private func undoMarkAllReviewed() {
+        for item in homeSupplies + carSupplies {
+            if let previousDate = previousReviewDates[item.id] {
+                item.reviewDate = previousDate
+            }
+        }
+        previousReviewDates = [:]
+    }
+
+    private var markAllReviewedTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Mark all as reviewed",
+            norwegian: "Marker alle som kontrollert",
+            thai: "ทำเครื่องหมายว่าตรวจสอบทั้งหมดแล้ว"
+        )
+    }
+
+    private var markAllReviewedConfirmationTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Have you reviewed all supplies?",
+            norwegian: "Har du kontrollert alt utstyret?",
+            thai: "คุณตรวจสอบอุปกรณ์ทั้งหมดแล้วหรือไม่"
+        )
+    }
+
+    private var markAllReviewedConfirmationMessage: String {
+        let count = suppliesNeedingReview.count
+        return L10n.pick(
+            language: language,
+            english: "The next review date for \(count) supplies will be set to one year from today.",
+            norwegian: "Neste kontrolldato for \(count) varer settes til ett år fra i dag.",
+            thai: "วันตรวจสอบครั้งถัดไปสำหรับอุปกรณ์ \(count) รายการจะถูกตั้งเป็นหนึ่งปีนับจากวันนี้"
+        )
+    }
+
+    private var markAllReviewedConfirmButtonTitle: String {
+        L10n.pick(language: language, english: "Yes, reviewed", norwegian: "Ja, kontrollert", thai: "ใช่ ตรวจสอบแล้ว")
+    }
+
+    private var cancelTitle: String {
+        L10n.pick(language: language, english: "Cancel", norwegian: "Avbryt", thai: "ยกเลิก")
+    }
+
+    private var reviewUpdateCompletedText: String {
+        let count = previousReviewDates.count
+        return L10n.pick(
+            language: language,
+            english: "Updated \(count) supplies",
+            norwegian: "Oppdaterte \(count) varer",
+            thai: "อัปเดตอุปกรณ์ \(count) รายการแล้ว"
+        )
+    }
+
+    private var undoTitle: String {
+        L10n.pick(language: language, english: "Undo", norwegian: "Angre", thai: "เลิกทำ")
     }
 
     private var allReadyTitle: String {
@@ -1017,6 +1179,18 @@ struct SuppliesSection: View {
             norwegian: "Det er ingen manglende varer i sjekklisten.",
             thai: "ไม่มีอุปกรณ์ที่ขาดในรายการตรวจสอบ"
         )
+    }
+
+    private var emptyFilterTitle: String {
+        showOnlyNeedingReview
+            ? L10n.pick(language: language, english: "Nothing needs review", norwegian: "Ingenting må kontrolleres", thai: "ไม่มีสิ่งที่ต้องตรวจสอบ")
+            : allReadyTitle
+    }
+
+    private var emptyFilterDescription: String {
+        showOnlyNeedingReview
+            ? L10n.pick(language: language, english: "No supplies have an upcoming or overdue review date.", norwegian: "Ingen varer har en kommende eller utløpt kontrolldato.", thai: "ไม่มีอุปกรณ์ที่ใกล้หรือเลยกำหนดตรวจสอบ")
+            : allReadyDescription
     }
 
     private var showAllTitle: String {
@@ -1356,6 +1530,9 @@ struct DrillsSection: View {
         .background(DashboardCardBackground())
         .task {
             completionDates = DrillCompletionStore.load()
+            for await _ in NotificationCenter.default.notifications(named: DrillCompletionStore.didChangeNotification) {
+                completionDates = DrillCompletionStore.load()
+            }
         }
     }
 
@@ -1374,9 +1551,9 @@ private struct DrillRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: completionDate == nil ? "timer" : "checkmark.circle.fill")
+                Image(systemName: statusSystemImage)
                     .font(.title3)
-                    .foregroundStyle(completionDate == nil ? .purple : .green)
+                    .foregroundStyle(statusColor)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(drill.title)
@@ -1388,6 +1565,9 @@ private struct DrillRow: View {
                         Text(lastCompletedTitle)
                             .font(.caption)
                             .foregroundStyle(.green)
+                        Text(nextDueTitle)
+                            .font(.caption.weight(isOverdue ? .semibold : .regular))
+                            .foregroundStyle(isOverdue ? .orange : .secondary)
                     }
                 }
                 Spacer(minLength: 8)
@@ -1425,6 +1605,41 @@ private struct DrillRow: View {
         completionDate == nil
             ? L10n.pick(language: language, english: "Mark as completed", norwegian: "Marker som gjennomført", thai: "ทำเครื่องหมายว่าเสร็จแล้ว")
             : L10n.pick(language: language, english: "Completed again today", norwegian: "Gjennomført på nytt i dag", thai: "ทำเสร็จอีกครั้งวันนี้")
+    }
+
+    private var nextDueDate: Date? {
+        guard let completionDate else { return nil }
+        return drill.recurrence.nextDueDate(after: completionDate)
+    }
+
+    private var isOverdue: Bool {
+        guard let nextDueDate else { return false }
+        return nextDueDate <= Date()
+    }
+
+    private var statusSystemImage: String {
+        if completionDate == nil { return "timer" }
+        return isOverdue ? "calendar.badge.exclamationmark" : "checkmark.circle.fill"
+    }
+
+    private var statusColor: Color {
+        if completionDate == nil { return .purple }
+        return isOverdue ? .orange : .green
+    }
+
+    private var nextDueTitle: String {
+        guard let nextDueDate else { return "" }
+        let date = nextDueDate.formatted(
+            .dateTime
+                .day()
+                .month(.abbreviated)
+                .year()
+                .locale(AppLanguage.locale(for: language))
+        )
+        if isOverdue {
+            return L10n.pick(language: language, english: "Due since: \(date)", norwegian: "Forfalt: \(date)", thai: "ครบกำหนดตั้งแต่: \(date)")
+        }
+        return L10n.pick(language: language, english: "Next exercise: \(date)", norwegian: "Neste øvelse: \(date)", thai: "การฝึกครั้งถัดไป: \(date)")
     }
 }
 

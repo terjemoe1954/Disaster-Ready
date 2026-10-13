@@ -199,10 +199,28 @@ final class HouseholdRole {
     }
 }
 
+enum DrillRecurrence: Equatable, Sendable {
+    case weekly
+    case monthly
+    case quarterly
+
+    func nextDueDate(after completionDate: Date, calendar: Calendar = .current) -> Date? {
+        switch self {
+        case .weekly:
+            calendar.date(byAdding: .day, value: 7, to: completionDate)
+        case .monthly:
+            calendar.date(byAdding: .month, value: 1, to: completionDate)
+        case .quarterly:
+            calendar.date(byAdding: .month, value: 3, to: completionDate)
+        }
+    }
+}
+
 struct Drill: Identifiable {
     let id: String
     let title: String
     let frequency: String
+    let recurrence: DrillRecurrence
     let duration: String
 }
 

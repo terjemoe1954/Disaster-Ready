@@ -25,6 +25,7 @@ struct HomePreparednessSummary: Equatable, Sendable {
     let plan: HomeChecklistStatus
     let payment: HomeChecklistStatus?
     let contacts: HomeChecklistStatus
+    let drillsNeedAttention: Bool
 
     static let measuresSafety = false
 
@@ -37,7 +38,8 @@ struct HomePreparednessSummary: Equatable, Sendable {
         suppliesNeedingReview: Int,
         paymentCompleted: Int,
         paymentTotal: Int,
-        contactCount: Int
+        contactCount: Int,
+        drillsNeedAttention: Bool = false
     ) {
         let municipalityRecorded = !(household.municipality ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -88,6 +90,7 @@ struct HomePreparednessSummary: Equatable, Sendable {
         }
 
         contacts = contactCount > 0 ? .prepared : .needsAttention
+        self.drillsNeedAttention = drillsNeedAttention
     }
 }
 
@@ -197,6 +200,7 @@ struct PreparednessNextStepSection: View {
     let openPlan: () -> Void
     let openSupplies: () -> Void
     let openContacts: () -> Void
+    let openDrills: () -> Void
 
     var body: some View {
         Button(action: nextStep.action) {
@@ -264,6 +268,14 @@ struct PreparednessNextStepSection: View {
                 action: openSupplies
             )
         }
+        if summary.drillsNeedAttention {
+            return PreparednessNextStep(
+                title: L10n.pick(language: language, english: "Complete a preparedness exercise", norwegian: "Gjennomfør en beredskapsøvelse", thai: "ทำแบบฝึกความพร้อมรับมือเหตุฉุกเฉิน"),
+                systemImage: "timer",
+                isComplete: false,
+                action: openDrills
+            )
+        }
         return PreparednessNextStep(
             title: L10n.pick(language: language, english: "Your essential setup is complete", norwegian: "Det viktigste oppsettet er fullført", thai: "การตั้งค่าที่สำคัญเสร็จสมบูรณ์"),
             systemImage: "checkmark.seal.fill",
@@ -299,6 +311,11 @@ struct HomePlanReviewSection: View {
                     Text(statusText)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                    if let reviewTimingText {
+                        Text(reviewTimingText)
+                            .font(.caption)
+                            .foregroundStyle(needsReview ? .orange : .secondary)
+                    }
                     Text(scenarioName)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -320,15 +337,17 @@ struct HomePlanReviewSection: View {
     }
 
     private var needsReview: Bool {
-        guard let lastReviewedAt,
-              let reviewDeadline = Calendar.current.date(byAdding: .month, value: 6, to: lastReviewedAt) else {
-            return true
-        }
+        guard let reviewDeadline else { return true }
         return reviewDeadline <= Date()
     }
 
+    private var reviewDeadline: Date? {
+        guard let lastReviewedAt else { return nil }
+        return Calendar.current.date(byAdding: .month, value: 6, to: lastReviewedAt)
+    }
+
     private var statusText: String {
-        guard let lastReviewedAt else {
+        guard lastReviewedAt != nil else {
             return L10n.pick(language: language, english: "The plan has not been reviewed", norwegian: "Planen er ikke gjennomgått", thai: "ยังไม่ได้ตรวจสอบแผน")
         }
 
@@ -336,11 +355,20 @@ struct HomePlanReviewSection: View {
             return L10n.pick(language: language, english: "The plan should be reviewed again", norwegian: "Planen bør gjennomgås på nytt", thai: "ควรตรวจสอบแผนอีกครั้ง")
         }
 
-        let date = lastReviewedAt.formatted(
+        return L10n.pick(language: language, english: "The plan is up to date", norwegian: "Planen er oppdatert", thai: "แผนเป็นปัจจุบัน")
+    }
+
+    private var reviewTimingText: String? {
+        guard let reviewDeadline else { return nil }
+        let date = reviewDeadline.formatted(
             Date.FormatStyle(date: .abbreviated, time: .omitted)
                 .locale(AppLanguage.locale(for: language))
         )
-        return L10n.pick(language: language, english: "Last reviewed: \(date)", norwegian: "Sist gjennomgått: \(date)", thai: "ตรวจสอบล่าสุด: \(date)")
+
+        if needsReview {
+            return L10n.pick(language: language, english: "Due since \(date)", norwegian: "Forfalt \(date)", thai: "ครบกำหนดตั้งแต่ \(date)")
+        }
+        return L10n.pick(language: language, english: "Next review: \(date)", norwegian: "Neste gjennomgang: \(date)", thai: "ตรวจสอบครั้งถัดไป: \(date)")
     }
 
     private var title: String {

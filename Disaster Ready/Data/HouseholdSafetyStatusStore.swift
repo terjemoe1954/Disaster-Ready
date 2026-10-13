@@ -9,9 +9,11 @@ enum HouseholdSafetyStatus: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-struct HouseholdSafetySnapshot: Codable {
+struct HouseholdSafetySnapshot: Codable, Equatable {
     var statuses: [String: HouseholdSafetyStatus]
     var updatedAt: Date?
+
+    static let empty = HouseholdSafetySnapshot(statuses: [:], updatedAt: nil)
 }
 
 enum HouseholdSafetyStatusStore {
@@ -20,7 +22,7 @@ enum HouseholdSafetyStatusStore {
     static func load() -> HouseholdSafetySnapshot {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
               let snapshot = try? JSONDecoder().decode(HouseholdSafetySnapshot.self, from: data) else {
-            return HouseholdSafetySnapshot(statuses: [:], updatedAt: nil)
+            return .empty
         }
         return snapshot
     }
@@ -28,5 +30,9 @@ enum HouseholdSafetyStatusStore {
     static func save(_ snapshot: HouseholdSafetySnapshot) {
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)
+    }
+
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: storageKey)
     }
 }

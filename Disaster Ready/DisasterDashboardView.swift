@@ -10,6 +10,10 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
+private enum PlanScrollTarget: Hashable {
+    case drills
+}
+
 struct DisasterDashboardView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -39,6 +43,9 @@ struct DisasterDashboardView: View {
     @State private var presentedHomeTool: HomeOfficialTool?
     @State private var showingOnboarding = false
     @State private var showingEmergencyMode = false
+    @State private var householdSafetySnapshot = HouseholdSafetySnapshot.empty
+    @State private var drillCompletionDates: [String: Date] = [:]
+    @State private var drillScrollRequest = 0
     @State private var showingFamilyPlanExport = false
     @State private var backupDocument = DisasterBackupDocument(payload: .empty)
     @State private var showingBackupExporter = false
@@ -64,13 +71,34 @@ struct DisasterDashboardView: View {
                         EmergencyModeLauncherSection(language: selectedLanguage) {
                             showingEmergencyMode = true
                         }
+                        if householdSafetySnapshot.updatedAt != nil {
+                            HomeHouseholdSafetyStatusSection(
+                                snapshot: householdSafetySnapshot,
+                                memberIDs: familyContacts
+                                    .filter(\.isHouseholdMember)
+                                    .map { $0.id.uuidString },
+                                language: selectedLanguage,
+                                openEmergencyMode: { showingEmergencyMode = true },
+                                endIncident: {
+                                    HouseholdSafetyStatusStore.clear()
+                                    householdSafetySnapshot = .empty
+                                }
+                            )
+                        }
                         PreparednessNextStepSection(
                             summary: homePreparednessSummary,
                             language: selectedLanguage,
                             openHousehold: { showingHomeHouseholdProfile = true },
                             openPlan: { selectedTab = .plan },
                             openSupplies: { selectedTab = .supplies },
-                            openContacts: { selectedTab = .contacts }
+                            openContacts: { selectedTab = .contacts },
+                            openDrills: {
+                                selectedTab = .plan
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    drillScrollRequest += 1
+                                }
+                            }
                         )
                         HomePlanReviewSection(
                             lastReviewedAt: currentEmergencyPlan?.lastReviewedAt,
@@ -113,35 +141,46 @@ struct DisasterDashboardView: View {
                 }
 
                 Tab(planTabTitle, systemImage: "checklist", value: DashboardTab.plan) {
-                    dashboardScrollView {
-                        if let plan = currentEmergencyPlan {
-                            EventAwareMyPlanView(
-                                selectedEmergencyType: $selectedEmergencyType,
-                                plan: plan,
-                                household: householdProfile,
-                                savedSupplies: supplies,
-                                paymentPreparedness: paymentPreparedness,
-                                familyContacts: familyContacts,
-                                importantNumbers: importantNumbers,
+                    ScrollViewReader { proxy in
+                        dashboardScrollView {
+                            if let plan = currentEmergencyPlan {
+                                EventAwareMyPlanView(
+                                    selectedEmergencyType: $selectedEmergencyType,
+                                    plan: plan,
+                                    household: householdProfile,
+                                    savedSupplies: supplies,
+                                    paymentPreparedness: paymentPreparedness,
+                                    familyContacts: familyContacts,
+                                    importantNumbers: importantNumbers,
+                                    language: selectedLanguage,
+                                    openContacts: { selectedTab = .contacts },
+                                    exportPlan: { showingFamilyPlanExport = true },
+                                    savePlan: saveCurrentPlan
+                                )
+                            }
+                            RolesSection(
+                                roles: householdRoles,
+                                householdMembers: householdMembers,
                                 language: selectedLanguage,
-                                openContacts: { selectedTab = .contacts },
-                                exportPlan: { showingFamilyPlanExport = true },
-                                savePlan: saveCurrentPlan
+                                addRole: addHouseholdRole,
+                                deleteRole: deleteHouseholdRole
                             )
+                            MessageTemplatesSection(
+                                templates: messageTemplates,
+                                shareText: messageBody(for:),
+                                language: selectedLanguage
+                            )
+                            DrillsSection(drills: drills, language: selectedLanguage)
+                                .id(PlanScrollTarget.drills)
                         }
-                        RolesSection(
-                            roles: householdRoles,
-                            householdMembers: householdMembers,
-                            language: selectedLanguage,
-                            addRole: addHouseholdRole,
-                            deleteRole: deleteHouseholdRole
-                        )
-                        MessageTemplatesSection(
-                            templates: messageTemplates,
-                            shareText: messageBody(for:),
-                            language: selectedLanguage
-                        )
-                        DrillsSection(drills: drills, language: selectedLanguage)
+                        .onChange(of: drillScrollRequest) {
+                            Task { @MainActor in
+                                await Task.yield()
+                                withAnimation {
+                                    proxy.scrollTo(PlanScrollTarget.drills, anchor: .top)
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -165,8 +204,8 @@ struct DisasterDashboardView: View {
                             language: selectedLanguage
                         )
                         SuppliesSection(
-                            homeSupplies: visibleHomeSupplies,
-                            carSupplies: visibleCarSupplies,
+                            homeSupplies: homeSupplies,
+                            carSupplies: carSupplies,
                             completionCount: supplyCompletionCount,
                             totalCount: totalSupplyCount,
                             showOnlyMissing: $showOnlyMissingSupplies,
@@ -287,7 +326,10 @@ struct DisasterDashboardView: View {
                 selectedTab = .plan
             }
         }
-        .fullScreenCover(isPresented: $showingEmergencyMode) {
+        .fullScreenCover(isPresented: $showingEmergencyMode, onDismiss: {
+            householdSafetySnapshot = HouseholdSafetyStatusStore.load()
+            drillCompletionDates = DrillCompletionStore.load()
+        }) {
             EmergencyModeView(
                 selectedEmergencyType: $selectedEmergencyType,
                 plan: currentEmergencyPlan,
@@ -338,6 +380,7 @@ struct DisasterDashboardView: View {
                 countryCode: householdProfile.countryCode
             )
             householdMemberCount = householdProfile.householdSize
+            householdSafetySnapshot = HouseholdSafetyStatusStore.load()
             selectedLanguage = AppLanguage(rawValue: preferredLanguageCode) ?? .current
             relocalizeDefaultSupplies(to: selectedLanguage)
             if !hasSeenOnboarding {
@@ -345,6 +388,9 @@ struct DisasterDashboardView: View {
             }
             if supplyReviewRemindersEnabled {
                 await synchronizeSupplyReminders(requestAuthorization: false)
+            }
+            for await _ in NotificationCenter.default.notifications(named: DrillCompletionStore.didChangeNotification) {
+                drillCompletionDates = DrillCompletionStore.load()
             }
         }
         .fileExporter(
@@ -429,7 +475,7 @@ struct DisasterDashboardView: View {
                 }
             }
         }
-        .onChange(of: supplyReminderFingerprint) { _, _ in
+        .onChange(of: reminderFingerprint) { _, _ in
             guard supplyReviewRemindersEnabled else { return }
             Task { await synchronizeSupplyReminders(requestAuthorization: false) }
         }
@@ -521,6 +567,28 @@ struct DisasterDashboardView: View {
             .joined(separator: ";")
     }
 
+    private var planReviewReminders: [PlanReviewReminder] {
+        householdPlans.compactMap { plan in
+            guard let lastReviewedAt = plan.lastReviewedAt,
+                  let emergencyType = EmergencyType.migrated(fromLegacyIdentifier: plan.scenarioIdentifier) else {
+                return nil
+            }
+            return PlanReviewReminder(
+                id: plan.id,
+                scenarioName: emergencyType.localizedName(in: selectedLanguage),
+                lastReviewedAt: lastReviewedAt
+            )
+        }
+    }
+
+    private var reminderFingerprint: String {
+        let planFingerprint = planReviewReminders
+            .map { "\($0.id.uuidString)|\($0.scenarioName)|\($0.lastReviewedAt.timeIntervalSinceReferenceDate)" }
+            .sorted()
+            .joined(separator: ";")
+        return supplyReminderFingerprint + "#" + planFingerprint
+    }
+
     private var reminderAlertTitle: String {
         L10n.pick(language: selectedLanguage, english: "Reminders", norwegian: "Påminnelser", thai: "การแจ้งเตือน")
     }
@@ -575,6 +643,7 @@ struct DisasterDashboardView: View {
         do {
             let wasEnabled = try await SupplyReminderScheduler.requestAuthorizationAndSchedule(
                 reminders: supplyReviewReminders,
+                planReminders: planReviewReminders,
                 language: selectedLanguage
             )
             guard wasEnabled else {
@@ -617,8 +686,19 @@ struct DisasterDashboardView: View {
             paymentTotal: PaymentPreparednessCatalog.checklist(
                 for: householdProfile.countryCode
             ).count,
-            contactCount: familyContacts.count + importantNumbers.count
+            contactCount: familyContacts.count + importantNumbers.count,
+            drillsNeedAttention: drillsNeedAttention
         )
+    }
+
+    private var drillsNeedAttention: Bool {
+        drills.contains { drill in
+            guard let completionDate = drillCompletionDates[drill.id],
+                  let nextDueDate = drill.recurrence.nextDueDate(after: completionDate) else {
+                return true
+            }
+            return nextDueDate <= Date()
+        }
     }
 
     private var householdMembers: [FamilyContact] {
@@ -650,10 +730,10 @@ struct DisasterDashboardView: View {
 
     private var drills: [Drill] {
         [
-            Drill(id: "grab-bag", title: L10n.text("drill_bag_race", language: selectedLanguage), frequency: L10n.text("weekly", language: selectedLanguage), duration: "1 min"),
-            Drill(id: "utilities", title: L10n.text("drill_gas_breaker", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "5 min"),
-            Drill(id: "pet-evacuation", title: L10n.text("drill_pet_walkthrough", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), duration: "7 min"),
-            Drill(id: "meeting-point", title: L10n.text("drill_reunion", language: selectedLanguage), frequency: L10n.text("quarterly", language: selectedLanguage), duration: "15 min")
+            Drill(id: "grab-bag", title: L10n.text("drill_bag_race", language: selectedLanguage), frequency: L10n.text("weekly", language: selectedLanguage), recurrence: .weekly, duration: "1 min"),
+            Drill(id: "utilities", title: L10n.text("drill_gas_breaker", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), recurrence: .monthly, duration: "5 min"),
+            Drill(id: "pet-evacuation", title: L10n.text("drill_pet_walkthrough", language: selectedLanguage), frequency: L10n.text("monthly", language: selectedLanguage), recurrence: .monthly, duration: "7 min"),
+            Drill(id: "meeting-point", title: L10n.text("drill_reunion", language: selectedLanguage), frequency: L10n.text("quarterly", language: selectedLanguage), recurrence: .quarterly, duration: "15 min")
         ]
     }
 
@@ -761,14 +841,6 @@ struct DisasterDashboardView: View {
             let status = $0.reviewStatus()
             return status == .overdue || status == .dueSoon
         }.count
-    }
-
-    private var visibleHomeSupplies: [SupplyItem] {
-        showOnlyMissingSupplies ? homeSupplies.filter { !$0.isPacked } : homeSupplies
-    }
-
-    private var visibleCarSupplies: [SupplyItem] {
-        showOnlyMissingSupplies ? carSupplies.filter { !$0.isPacked } : carSupplies
     }
 
     private func planSummary(for plan: HouseholdPlan) -> String {
@@ -1019,7 +1091,8 @@ struct DisasterDashboardView: View {
                         quantity: $0.quantity,
                         reviewDate: $0.reviewDate
                     )
-                }
+                },
+                drillCompletionDates: DrillCompletionStore.load()
             )
         )
         showingBackupExporter = true
@@ -1158,6 +1231,7 @@ struct DisasterDashboardView: View {
             householdMemberCount = 1
             showOnlyMissingSupplies = false
             supplyReviewRemindersEnabled = false
+            DrillCompletionStore.clear()
 
             Task { @MainActor in
                 await SupplyReminderScheduler.removePendingReminders()
@@ -1261,6 +1335,7 @@ struct DisasterDashboardView: View {
             householdProfile.householdSize = restoredHouseholdMemberCount
             HouseholdProfileStore.save(householdProfile)
         }
+        DrillCompletionStore.save(payload.drillCompletionDates ?? [:])
     }
 
     private func seedDataIfNeeded() {

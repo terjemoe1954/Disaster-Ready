@@ -326,9 +326,9 @@ struct SettingsSheet: View {
     private var supplyReviewRemindersTitle: String {
         L10n.pick(
             language: language,
-            english: "Remind me to review supplies",
-            norwegian: "Minn meg på å kontrollere utstyr",
-            thai: "เตือนให้ตรวจสอบอุปกรณ์"
+            english: "Remind me to review plans and supplies",
+            norwegian: "Minn meg på å gjennomgå planer og utstyr",
+            thai: "เตือนให้ตรวจสอบแผนและอุปกรณ์"
         )
     }
 
@@ -533,9 +533,9 @@ private struct PrivacyDetailsView: View {
     private var notificationsBody: String {
         L10n.pick(
             language: language,
-            english: "Supply reminders use notification permission only when you enable them. Reminder content is created on this device.",
-            norwegian: "Utstyrspåminnelser bruker varslingstillatelse bare når du aktiverer dem. Innholdet opprettes på denne enheten.",
-            thai: "การเตือนตรวจสอบอุปกรณ์จะใช้สิทธิ์การแจ้งเตือนเมื่อคุณเปิดใช้เท่านั้น และเนื้อหาการเตือนจะสร้างขึ้นในอุปกรณ์นี้"
+            english: "Plan and supply reminders use notification permission only when you enable them. Reminder content is created on this device.",
+            norwegian: "Plan- og utstyrspåminnelser bruker varslingstillatelse bare når du aktiverer dem. Innholdet opprettes på denne enheten.",
+            thai: "การเตือนแผนและอุปกรณ์จะใช้สิทธิ์การแจ้งเตือนเมื่อคุณเปิดใช้เท่านั้น และเนื้อหาการเตือนจะสร้างขึ้นในอุปกรณ์นี้"
         )
     }
 

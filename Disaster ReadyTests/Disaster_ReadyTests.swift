@@ -17,6 +17,27 @@ struct Disaster_ReadyTests {
         #expect(PreparednessScenario.storm.goRule(in: .english).contains("road closures"))
     }
 
+    @Test func drillRecurrenceCalculatesNextDueDate() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
+        let completionDate = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 1, day: 15, hour: 12))
+        )
+
+        #expect(
+            DrillRecurrence.weekly.nextDueDate(after: completionDate, calendar: calendar)
+                == calendar.date(from: DateComponents(year: 2026, month: 1, day: 22, hour: 12))
+        )
+        #expect(
+            DrillRecurrence.monthly.nextDueDate(after: completionDate, calendar: calendar)
+                == calendar.date(from: DateComponents(year: 2026, month: 2, day: 15, hour: 12))
+        )
+        #expect(
+            DrillRecurrence.quarterly.nextDueDate(after: completionDate, calendar: calendar)
+                == calendar.date(from: DateComponents(year: 2026, month: 4, day: 15, hour: 12))
+        )
+    }
+
     @Test func supplyReviewStatusUsesThirtyDayWindow() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
@@ -106,9 +127,51 @@ struct Disaster_ReadyTests {
         #expect(SupplyReminderScheduler.reminderIdentifier(for: firstID) != SupplyReminderScheduler.reminderIdentifier(for: secondID))
     }
 
+    @Test func planReminderUsesSixMonthReviewInterval() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
+        let lastReviewedAt = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 1, day: 15, hour: 14))
+        )
+        let referenceDate = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 2, day: 1, hour: 12))
+        )
+        let expectedDelivery = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 7, day: 15, hour: 9))
+        )
+
+        #expect(
+            SupplyReminderScheduler.planDeliveryDate(
+                lastReviewedAt: lastReviewedAt,
+                referenceDate: referenceDate,
+                calendar: calendar
+            ) == expectedDelivery
+        )
+    }
+
+    @Test func overduePlanReminderSchedulesOneMinuteAhead() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
+        let lastReviewedAt = try #require(
+            calendar.date(from: DateComponents(year: 2025, month: 12, day: 1, hour: 14))
+        )
+        let referenceDate = try #require(
+            calendar.date(from: DateComponents(year: 2026, month: 7, day: 1, hour: 12))
+        )
+
+        #expect(
+            SupplyReminderScheduler.planDeliveryDate(
+                lastReviewedAt: lastReviewedAt,
+                referenceDate: referenceDate,
+                calendar: calendar
+            ) == referenceDate.addingTimeInterval(60)
+        )
+    }
+
     @Test func backupPayloadRoundTripPreservesAllFields() throws {
         let exportDate = try #require(ISO8601DateFormatter().date(from: "2026-09-27T12:00:00Z"))
         let reviewDate = try #require(ISO8601DateFormatter().date(from: "2027-03-01T09:00:00Z"))
+        let drillCompletionDate = try #require(ISO8601DateFormatter().date(from: "2026-08-15T18:00:00Z"))
         let payload = DisasterBackupPayload(
             householdMemberCount: 4,
             householdProfile: HouseholdProfile(
@@ -156,7 +219,8 @@ struct Disaster_ReadyTests {
                     quantity: "20 liters",
                     reviewDate: reviewDate
                 )
-            ]
+            ],
+            drillCompletionDates: ["grab-bag": drillCompletionDate]
         )
 
         let restoredPayload = try DisasterBackupPayload.decode(from: payload.encodedData())
@@ -246,12 +310,14 @@ struct Disaster_ReadyTests {
         var legacyObject = try #require(JSONSerialization.jsonObject(with: encodedData) as? [String: Any])
         legacyObject.removeValue(forKey: "schemaVersion")
         legacyObject.removeValue(forKey: "householdMemberCount")
+        legacyObject.removeValue(forKey: "drillCompletionDates")
         let legacyData = try JSONSerialization.data(withJSONObject: legacyObject)
 
         let decodedPayload = try DisasterBackupPayload.decode(from: legacyData)
 
         #expect(decodedPayload.schemaVersion == nil)
         #expect(decodedPayload.householdMemberCount == nil)
+        #expect(decodedPayload.drillCompletionDates == nil)
         #expect(throws: Never.self) {
             try decodedPayload.validateForImport()
         }

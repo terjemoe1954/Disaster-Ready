@@ -48,6 +48,148 @@ struct EmergencyModeLauncherSection: View {
     }
 }
 
+struct HomeHouseholdSafetyStatusSection: View {
+    @State private var showingEndConfirmation = false
+
+    let snapshot: HouseholdSafetySnapshot
+    let memberIDs: [String]
+    let language: AppLanguage
+    let openEmergencyMode: () -> Void
+    let endIncident: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: openEmergencyMode) {
+                HStack(spacing: 14) {
+                    Image(systemName: systemImage)
+                        .font(.title2)
+                        .foregroundStyle(statusColor)
+                        .frame(width: 32)
+                        .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(title)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        Text(detail)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        if let updatedAt = snapshot.updatedAt {
+                            Text(updatedAt, format: .dateTime.hour().minute())
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .environment(\.locale, AppLanguage.locale(for: language))
+                        }
+                    }
+
+                    Spacer(minLength: 8)
+
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.red)
+                        .accessibilityHidden(true)
+                }
+                .padding(16)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("activeHouseholdStatus")
+
+            Divider()
+                .padding(.horizontal, 16)
+
+            Button(role: .destructive) {
+                showingEndConfirmation = true
+            } label: {
+                Label(endTitle, systemImage: "xmark.circle")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .accessibilityIdentifier("endActiveIncident")
+        }
+        .background(DashboardCardBackground())
+        .confirmationDialog(
+            endConfirmationTitle,
+            isPresented: $showingEndConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(endTitle, role: .destructive, action: endIncident)
+            Button(cancelTitle, role: .cancel) {}
+        } message: {
+            Text(endConfirmationMessage)
+        }
+    }
+
+    private var currentStatuses: [HouseholdSafetyStatus] {
+        memberIDs.map { snapshot.statuses[$0] ?? .notChecked }
+    }
+
+    private var needsHelpCount: Int {
+        currentStatuses.filter { $0 == .needsHelp }.count
+    }
+
+    private var unreachableCount: Int {
+        currentStatuses.filter { $0 == .unreachable }.count
+    }
+
+    private var resolvedCount: Int {
+        currentStatuses.filter { $0 != .notChecked }.count
+    }
+
+    private var statusColor: Color {
+        if needsHelpCount > 0 { return .red }
+        if unreachableCount > 0 { return .orange }
+        return resolvedCount == memberIDs.count && !memberIDs.isEmpty ? .green : .blue
+    }
+
+    private var systemImage: String {
+        if needsHelpCount > 0 { return "exclamationmark.triangle.fill" }
+        if unreachableCount > 0 { return "phone.down.circle.fill" }
+        return "person.3.fill"
+    }
+
+    private var detail: String {
+        if needsHelpCount > 0 {
+            return L10n.pick(language: language, english: "\(needsHelpCount) need help", norwegian: "\(needsHelpCount) trenger hjelp", thai: "\(needsHelpCount) คนต้องการความช่วยเหลือ")
+        }
+        if unreachableCount > 0 {
+            return L10n.pick(language: language, english: "No contact with \(unreachableCount)", norwegian: "Ikke kontakt med \(unreachableCount)", thai: "ติดต่อไม่ได้ \(unreachableCount) คน")
+        }
+        return L10n.pick(
+            language: language,
+            english: "\(resolvedCount) of \(memberIDs.count) accounted for",
+            norwegian: "\(resolvedCount) av \(memberIDs.count) er avklart",
+            thai: "ตรวจสอบแล้ว \(resolvedCount) จาก \(memberIDs.count) คน"
+        )
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Active household status", norwegian: "Aktiv husstandsstatus", thai: "สถานะสมาชิกในบ้านที่ใช้งานอยู่")
+    }
+
+    private var endTitle: String {
+        L10n.pick(language: language, english: "End incident", norwegian: "Avslutt hendelse", thai: "สิ้นสุดเหตุการณ์")
+    }
+
+    private var cancelTitle: String {
+        L10n.pick(language: language, english: "Cancel", norwegian: "Avbryt", thai: "ยกเลิก")
+    }
+
+    private var endConfirmationTitle: String {
+        L10n.pick(language: language, english: "End the active incident?", norwegian: "Avslutt den aktive hendelsen?", thai: "สิ้นสุดเหตุการณ์ที่กำลังดำเนินอยู่หรือไม่")
+    }
+
+    private var endConfirmationMessage: String {
+        L10n.pick(
+            language: language,
+            english: "The household statuses will be cleared. Your plan and contacts will not be changed.",
+            norwegian: "Statusene i husstanden nullstilles. Planen og kontaktene dine blir ikke endret.",
+            thai: "สถานะสมาชิกในบ้านจะถูกล้าง แต่แผนและรายชื่อผู้ติดต่อจะไม่เปลี่ยนแปลง"
+        )
+    }
+}
+
 struct EmergencyModeView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedEmergencyType: EmergencyType
@@ -155,6 +297,7 @@ private struct EmergencyModeHouseholdStatusSection: View {
                 ForEach(members) { member in
                     HouseholdSafetyStatusRow(
                         name: member.name,
+                        phoneNumber: member.phoneNumber,
                         status: status(for: member),
                         language: language,
                         setStatus: { update($0, for: member) }
@@ -398,6 +541,7 @@ private struct HouseholdSafetySummaryView: View {
 
 private struct HouseholdSafetyStatusRow: View {
     let name: String
+    let phoneNumber: String
     let status: HouseholdSafetyStatus
     let language: AppLanguage
     let setStatus: (HouseholdSafetyStatus) -> Void
@@ -412,6 +556,7 @@ private struct HouseholdSafetyStatusRow: View {
 
             Text(name)
                 .font(.headline)
+                .lineLimit(1)
 
             Spacer(minLength: 8)
 
@@ -431,11 +576,35 @@ private struct HouseholdSafetyStatusRow: View {
                     .padding(.vertical, 7)
                     .background(color.opacity(0.12), in: Capsule())
             }
+
+            if let telephoneURL {
+                Link(destination: telephoneURL) {
+                    Image(systemName: "phone.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.green)
+                        .frame(minWidth: 44, minHeight: 44)
+                }
+                .accessibilityLabel(callAccessibilityLabel)
+            }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var systemImage: String { systemImage(for: status) }
+
+    private var telephoneURL: URL? {
+        let allowed = phoneNumber.filter { $0.isNumber || $0 == "+" }
+        guard !allowed.isEmpty else { return nil }
+        return URL(string: "tel:\(allowed)")
+    }
+
+    private var callAccessibilityLabel: String {
+        L10n.pick(
+            language: language,
+            english: "Call \(name)",
+            norwegian: "Ring \(name)",
+            thai: "โทรหา \(name)"
+        )
+    }
 
     private var color: Color {
         switch status {
