@@ -573,6 +573,8 @@ struct DisasterDashboardView: View {
             VStack(alignment: .leading, spacing: 24) {
                 content()
             }
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
             .padding(20)
             .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 220 : 160)
         }
