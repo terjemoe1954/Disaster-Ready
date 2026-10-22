@@ -1,6 +1,6 @@
 import Foundation
 
-enum SupplyRecommendationPriority: Int, Codable, CaseIterable, Comparable {
+enum SupplyRecommendationPriority: Int, Codable, CaseIterable, Comparable, Sendable {
     case critical
     case high
     case normal
@@ -17,12 +17,12 @@ enum SupplyRecommendationPriority: Int, Codable, CaseIterable, Comparable {
     }
 }
 
-enum SmartSupplyListKind: String, Codable {
+enum SmartSupplyListKind: String, Codable, Sendable {
     case homePreparedness
     case grabEvacuation
 }
 
-struct SupplyRecommendation: Codable, Equatable, Identifiable {
+struct SupplyRecommendation: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let nameKey: String
     let categoryKey: String
@@ -30,7 +30,7 @@ struct SupplyRecommendation: Codable, Equatable, Identifiable {
     let listKind: SmartSupplyListKind
 }
 
-struct SmartSupplyPlan: Equatable {
+struct SmartSupplyPlan: Equatable, Sendable {
     let emergencyType: EmergencyType
     let home: [SupplyRecommendation]
     let grab: [SupplyRecommendation]

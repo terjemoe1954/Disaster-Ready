@@ -15,6 +15,10 @@ struct HouseholdProfile: Codable, Equatable {
     var hasSpecialAssistanceNeeds: Bool
     var knowsWaterStopcock: Bool
     var knowsMainElectricalPanel: Bool
+    var preparednessBuddy: String?
+    var municipalInformationPoint: String?
+    var offlineDirections: String?
+    var individualNeedsNote: String?
 
     init(
         countryCode: String,
@@ -30,7 +34,11 @@ struct HouseholdProfile: Codable, Equatable {
         hasEV: Bool = false,
         hasSpecialAssistanceNeeds: Bool = false,
         knowsWaterStopcock: Bool = false,
-        knowsMainElectricalPanel: Bool = false
+        knowsMainElectricalPanel: Bool = false,
+        preparednessBuddy: String? = nil,
+        municipalInformationPoint: String? = nil,
+        offlineDirections: String? = nil,
+        individualNeedsNote: String? = nil
     ) {
         self.countryCode = countryCode.uppercased()
         self.municipality = municipality
@@ -46,6 +54,10 @@ struct HouseholdProfile: Codable, Equatable {
         self.hasSpecialAssistanceNeeds = hasSpecialAssistanceNeeds
         self.knowsWaterStopcock = knowsWaterStopcock
         self.knowsMainElectricalPanel = knowsMainElectricalPanel
+        self.preparednessBuddy = preparednessBuddy
+        self.municipalInformationPoint = municipalInformationPoint
+        self.offlineDirections = offlineDirections
+        self.individualNeedsNote = individualNeedsNote
     }
 
     init(from decoder: Decoder) throws {
@@ -64,6 +76,10 @@ struct HouseholdProfile: Codable, Equatable {
         hasSpecialAssistanceNeeds = try container.decodeIfPresent(Bool.self, forKey: .hasSpecialAssistanceNeeds) ?? false
         knowsWaterStopcock = try container.decodeIfPresent(Bool.self, forKey: .knowsWaterStopcock) ?? false
         knowsMainElectricalPanel = try container.decodeIfPresent(Bool.self, forKey: .knowsMainElectricalPanel) ?? false
+        preparednessBuddy = try container.decodeIfPresent(String.self, forKey: .preparednessBuddy)
+        municipalInformationPoint = try container.decodeIfPresent(String.self, forKey: .municipalInformationPoint)
+        offlineDirections = try container.decodeIfPresent(String.self, forKey: .offlineDirections)
+        individualNeedsNote = try container.decodeIfPresent(String.self, forKey: .individualNeedsNote)
     }
 
     var allowsGasSpecificGuidance: Bool {

@@ -49,7 +49,16 @@ enum NorwayEmergencyTemplates {
     }
 
     private static func actions(for type: EmergencyType) -> [PreparednessAction] {
-        [
+        if type == .powerAndCommunicationsOutage {
+            return [
+                PreparednessAction(id: "powerAndCommunicationsOutage.checkSafety", titleKey: "action.powerAndCommunicationsOutage.check_safety.title", detailKey: "action.powerAndCommunicationsOutage.check_safety.detail"),
+                PreparednessAction(id: "powerAndCommunicationsOutage.openPlan", titleKey: "action.powerAndCommunicationsOutage.open_plan.title", detailKey: "action.powerAndCommunicationsOutage.open_plan.detail"),
+                PreparednessAction(id: "powerAndCommunicationsOutage.saveBattery", titleKey: "action.powerAndCommunicationsOutage.save_battery.title", detailKey: "action.powerAndCommunicationsOutage.save_battery.detail"),
+                PreparednessAction(id: "powerAndCommunicationsOutage.tryDAB", titleKey: "action.powerAndCommunicationsOutage.try_dab.title", detailKey: "action.powerAndCommunicationsOutage.try_dab.detail"),
+                PreparednessAction(id: "powerAndCommunicationsOutage.localInformation", titleKey: "action.powerAndCommunicationsOutage.local_information.title", detailKey: "action.powerAndCommunicationsOutage.local_information.detail")
+            ]
+        }
+        return [
             PreparednessAction(
                 id: "\(type.rawValue).followOfficialInformation",
                 titleKey: "action.follow_official_information.title",
@@ -91,7 +100,7 @@ enum NorwayEmergencyTemplates {
             guidanceKey = "planned_alternative_accommodation"
         case .warOrSecurityIncident:
             guidanceKey = "follow_shelter_instructions"
-        case .powerOutage, .waterOutage:
+        case .powerOutage, .powerAndCommunicationsOutage, .waterOutage:
             guidanceKey = "home_or_alternative_accommodation"
         }
 
@@ -109,7 +118,7 @@ enum NorwayEmergencyTemplates {
         var items = baseHomeItems
 
         switch type {
-        case .powerOutage:
+        case .powerOutage, .powerAndCommunicationsOutage:
             items.append(contentsOf: [batteryLighting, powerBank, radio])
         case .flood, .landslide, .wildfire, .evacuation:
             items.append(contentsOf: [documentCopies, warmClothing])
@@ -136,6 +145,8 @@ enum NorwayEmergencyTemplates {
             return ["dsb-self-preparedness", "dsb-crisis-locations", "dsb-civil-defence-shelters"]
         case .evacuation:
             return ["dsb-self-preparedness", "dsb-crisis-locations", "dsb-evacuation"]
+        case .powerAndCommunicationsOutage:
+            return ["dsb-self-preparedness", "dsb-information-communication", "nkom-emergency-calls", "kartverket-space-weather", "norwegian-space-agency-space-weather"]
         default:
             return ["dsb-self-preparedness", "dsb-crisis-locations"]
         }

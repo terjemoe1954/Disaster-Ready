@@ -16,7 +16,7 @@ enum PlanScrollTarget: Hashable {
     case drills
 }
 
-private enum SuppliesScrollTarget: Hashable {
+enum SuppliesScrollTarget: Hashable {
     case payment
     case inventory
 }
@@ -78,9 +78,18 @@ struct DisasterDashboardView: View {
             TabView(selection: $selectedTab) {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
-                        EmergencyModeLauncherSection(language: selectedLanguage) {
-                            showingEmergencyMode = true
-                        }
+                        PrimaryNavigationSection(
+                            language: selectedLanguage,
+                            showsWelcomeGuide: !hasSeenOnboarding,
+                            openHelpNow: { showingEmergencyMode = true },
+                            openPreparedness: { selectedTab = .supplies },
+                            openEmergencyPlan: { selectedTab = .plan },
+                            openWelcomeGuide: { showingOnboarding = true }
+                        )
+                        OfficialEmergencyContactsSection(
+                            countryCode: householdProfile.countryCode,
+                            language: selectedLanguage
+                        )
                         if householdSafetySnapshot.updatedAt != nil {
                             HomeHouseholdSafetyStatusSection(
                                 snapshot: householdSafetySnapshot,
@@ -256,55 +265,15 @@ struct DisasterDashboardView: View {
                 }
 
                 Tab(suppliesTabTitle, systemImage: "shippingbox.fill", value: DashboardTab.supplies) {
-                    ScrollViewReader { proxy in
-                        dashboardScrollView {
-                            SmartSupplyRecommendationsSection(
-                                homeCount: homeSupplyRecommendations.count,
-                                evacuationCount: evacuationSupplyRecommendations.count,
-                                language: selectedLanguage,
-                                addHome: addSmartHomeSupplies,
-                                addEvacuation: addSmartEvacuationSupplies
-                            )
-                            if householdProfile.countryCode == "NO" {
-                                PaymentPreparednessSection(
-                                    checklist: $paymentPreparedness,
-                                    language: selectedLanguage
-                                )
-                                .id(SuppliesScrollTarget.payment)
-                            }
-                            HomePreparednessGuideSection(
-                                householdMemberCount: $householdMemberCount,
-                                language: selectedLanguage
-                            )
-                            SuppliesSection(
-                                homeSupplies: homeSupplies,
-                                carSupplies: carSupplies,
-                                completionCount: supplyCompletionCount,
-                                totalCount: totalSupplyCount,
-                                showOnlyMissing: $showOnlyMissingSupplies,
-                                language: selectedLanguage,
-                                deleteItem: deleteSupplyItem
-                            )
-                            .id(SuppliesScrollTarget.inventory)
-                        }
-                        .accessibilityIdentifier("suppliesScrollView")
-                        .onChange(of: inventoryScrollRequest) {
-                            Task { @MainActor in
-                                await Task.yield()
-                                withAnimation {
-                                    proxy.scrollTo(SuppliesScrollTarget.inventory, anchor: .top)
-                                }
-                            }
-                        }
-                        .onChange(of: paymentScrollRequest) {
-                            Task { @MainActor in
-                                await Task.yield()
-                                withAnimation {
-                                    proxy.scrollTo(SuppliesScrollTarget.payment, anchor: .top)
-                                }
-                            }
-                        }
-                    }
+                    SuppliesDashboardTab(
+                        data: suppliesDashboardData,
+                        paymentPreparedness: $paymentPreparedness,
+                        householdMemberCount: $householdMemberCount,
+                        showOnlyMissing: $showOnlyMissingSupplies,
+                        addHome: addSmartHomeSupplies,
+                        addEvacuation: addSmartEvacuationSupplies,
+                        deleteItem: deleteSupplyItem
+                    )
                 }
 
                 Tab(contactsTabTitle, systemImage: "person.2.fill", value: DashboardTab.contacts) {
@@ -416,7 +385,11 @@ struct DisasterDashboardView: View {
                 plan: currentEmergencyPlan,
                 household: householdProfile,
                 familyContacts: familyContacts,
-                language: selectedLanguage
+                language: selectedLanguage,
+                openEmergencyPlan: {
+                    showingEmergencyMode = false
+                    selectedTab = .plan
+                }
             )
         }
         .sheet(isPresented: $showingFamilyPlanExport) {
@@ -424,6 +397,7 @@ struct DisasterDashboardView: View {
                 FamilyPlanPDFExportSheet(
                     emergencyType: selectedEmergencyType,
                     plan: plan,
+                    household: householdProfile,
                     roles: householdRoles,
                     contacts: familyContacts,
                     language: selectedLanguage
@@ -464,9 +438,6 @@ struct DisasterDashboardView: View {
             householdSafetySnapshot = HouseholdSafetyStatusStore.load()
             selectedLanguage = AppLanguage(rawValue: preferredLanguageCode) ?? .current
             relocalizeDefaultSupplies(to: selectedLanguage)
-            if !hasSeenOnboarding {
-                showingOnboarding = true
-            }
             if supplyReviewRemindersEnabled {
                 await synchronizeSupplyReminders(requestAuthorization: false)
             }
@@ -564,6 +535,25 @@ struct DisasterDashboardView: View {
 
     private var selectedAppearance: AppAppearance {
         AppAppearance(rawValue: preferredAppearance) ?? .system
+    }
+
+    private var suppliesDashboardData: SuppliesDashboardData {
+        SuppliesDashboardData(
+            recommendations: SupplyPrioritizer.recommendations(
+                for: selectedEmergencyType,
+                household: householdProfile
+            ).home,
+            evacuationRecommendationCount: evacuationSupplyRecommendations.count,
+            homeSupplies: homeSupplies,
+            carSupplies: carSupplies,
+            householdSize: householdProfile.householdSize,
+            countryCode: householdProfile.countryCode,
+            completionCount: supplyCompletionCount,
+            totalCount: totalSupplyCount,
+            inventoryScrollRequest: inventoryScrollRequest,
+            paymentScrollRequest: paymentScrollRequest,
+            language: selectedLanguage
+        )
     }
 
     private func dashboardScrollView<Content: View>(

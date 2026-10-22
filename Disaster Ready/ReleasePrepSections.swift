@@ -430,6 +430,12 @@ struct UserManualView: View {
                     .foregroundStyle(.secondary)
 
                 manualSection(
+                    title: emergencyTitle,
+                    body: emergencyBody,
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+
+                manualSection(
                     title: planTitle,
                     body: planBody,
                     systemImage: "house.fill"
@@ -511,6 +517,19 @@ struct UserManualView: View {
         }
     }
 
+    private var emergencyTitle: String {
+        L10n.pick(language: language, english: "Emergency guidance without internet", norwegian: "Hendelsesråd uten internett", thai: "คำแนะนำฉุกเฉินแบบออฟไลน์")
+    }
+
+    private var emergencyBody: String {
+        L10n.pick(
+            language: language,
+            english: "Choose the situation yourself and start with the first action. Bundled guidance and your saved plan remain available without internet. The app does not know the live state of power, mobile networks, satellites, radio, or your location; follow current authority instructions whenever available.",
+            norwegian: "Velg situasjonen selv og start med første handling. Lagrede råd og nødplanen din er tilgjengelige uten internett. Appen kjenner ikke sanntidstilstanden for strøm, mobilnett, satellitter, radio eller posisjonen din; følg alltid aktuelle råd fra myndighetene når de er tilgjengelige.",
+            thai: "เลือกสถานการณ์ด้วยตนเองและเริ่มจากการดำเนินการแรก คำแนะนำที่บันทึกไว้และแผนฉุกเฉินใช้งานได้โดยไม่ต้องมีอินเทอร์เน็ต แอปไม่ทราบสถานะปัจจุบันของไฟฟ้า เครือข่ายมือถือ ดาวเทียม วิทยุ หรือตำแหน่งของคุณ โปรดปฏิบัติตามคำแนะนำล่าสุดของหน่วยงานเมื่อมีข้อมูล"
+        )
+    }
+
     private var planTitle: String {
         switch language {
         case .english:
@@ -525,11 +544,11 @@ struct UserManualView: View {
     private var planBody: String {
         switch language {
         case .english:
-            return "Fill in reunion point, evacuation destination, shelter zone, and family password. Keep these fields short so they can be reviewed quickly during an incident."
+            return "Keep meeting places, contacts, local information points, directions, and personal needs together. You can create an offline PDF; personal places, contacts, roles, and passwords are excluded until you explicitly include them."
         case .norwegian:
-            return "Fyll inn møtested, evakueringsmål, tilfluktssone og familiepassord. Hold feltene korte slik at de kan gjennomgås raskt under en hendelse."
+            return "Samle møteplasser, kontakter, lokale informasjonspunkter, veibeskrivelser og personlige behov. Du kan lage PDF uten nett; personlige steder, kontakter, roller og passord utelates til du uttrykkelig velger å ta dem med."
         case .thai:
-            return "กรอกจุดนัดพบ จุดหมายอพยพ พื้นที่หลบภัย และรหัสผ่านครอบครัว โดยควรเขียนให้สั้นเพื่อให้ตรวจทานได้เร็วเมื่อเกิดเหตุ"
+            return "รวมจุดนัดพบ รายชื่อติดต่อ จุดข้อมูลในพื้นที่ เส้นทาง และความต้องการส่วนบุคคลไว้ด้วยกัน คุณสร้าง PDF แบบออฟไลน์ได้ โดยสถานที่ รายชื่อติดต่อ บทบาท และรหัสผ่านส่วนบุคคลจะไม่รวมจนกว่าคุณจะเลือกอย่างชัดเจน"
         }
     }
 
@@ -591,11 +610,11 @@ struct UserManualView: View {
     private var suppliesBody: String {
         switch language {
         case .english:
-            return "Track items stored at home and in the car. Mark stocked items and use the missing-only filter in Settings when you need a quick restocking view."
+            return "The one-week overview shows recorded items before missing recommendations and up to three next tasks. Select only the missing items you want in the shopping list, then share, save a PDF, or print it. Your full inventory, custom items, quantities, and review dates remain below."
         case .norwegian:
-            return "Følg med på utstyr som er lagret hjemme og i bilen. Marker det som finnes, og bruk filteret for kun manglende utstyr i Innstillinger når du trenger en rask restockingsoversikt."
+            return "Ukesoversikten viser registrerte varer før anbefalte mangler og inntil tre neste oppgaver. Velg bare manglene du vil ha i handlelisten, og del, lagre PDF eller skriv den ut. Fullt inventar, egne varer, mengder og kontrollfrister finnes fortsatt nedenfor."
         case .thai:
-            return "ติดตามสิ่งของที่เก็บไว้ที่บ้านและในรถ ทำเครื่องหมายของที่มีแล้ว และใช้ตัวกรองแสดงเฉพาะของที่ขาดในหน้าการตั้งค่าเมื่อต้องการตรวจเติมอย่างรวดเร็ว"
+            return "ภาพรวมหนึ่งสัปดาห์แสดงรายการที่บันทึกไว้ก่อนสิ่งที่แนะนำแต่ยังขาด พร้อมงานถัดไปไม่เกินสามรายการ เลือกเฉพาะสิ่งที่ขาดซึ่งต้องการใส่ในรายการซื้อของ แล้วแชร์ บันทึก PDF หรือพิมพ์ได้ รายการอุปกรณ์ทั้งหมด ของที่เพิ่มเอง ปริมาณ และวันตรวจสอบยังอยู่ด้านล่าง"
         }
     }
 

@@ -1,7 +1,8 @@
 import Foundation
 
-enum EmergencyType: String, Codable, CaseIterable, Identifiable {
+enum EmergencyType: String, Codable, CaseIterable, Identifiable, Sendable {
     case powerOutage
+    case powerAndCommunicationsOutage
     case flood
     case extremeWeather
     case landslide
@@ -44,13 +45,13 @@ enum EmergencyPlanMigration {
     }
 }
 
-struct PreparednessAction: Codable, Equatable, Identifiable {
+struct PreparednessAction: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let titleKey: String
     let detailKey: String
 }
 
-struct ShelterGuidance: Codable, Equatable, Identifiable {
+struct ShelterGuidance: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let titleKey: String
     let detailKey: String
@@ -61,13 +62,13 @@ struct ShelterGuidance: Codable, Equatable, Identifiable {
     var isOfficialLocation: Bool { false }
 }
 
-struct TemplateSupplyItem: Codable, Equatable, Identifiable {
+struct TemplateSupplyItem: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let nameKey: String
     let categoryKey: String
 }
 
-struct EmergencyPlanTemplate: Codable, Equatable, Identifiable {
+struct EmergencyPlanTemplate: Codable, Equatable, Identifiable, Sendable {
     let id: String
     let type: EmergencyType
     let titleKey: String

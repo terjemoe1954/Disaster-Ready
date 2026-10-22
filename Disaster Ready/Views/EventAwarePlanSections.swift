@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct EmergencyTypePickerSection: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @Binding var selection: EmergencyType
     let language: AppLanguage
 
@@ -10,21 +12,42 @@ struct EmergencyTypePickerSection: View {
                 .font(.title3.weight(.bold))
                 .accessibilityHeading(.h2)
 
-            Picker(title, selection: $selection) {
+            Menu {
                 ForEach(EmergencyType.allCases) { emergencyType in
-                    Label(emergencyType.localizedName(in: language), systemImage: emergencyType.systemImage)
-                        .tag(emergencyType)
+                    Button {
+                        selection = emergencyType
+                    } label: {
+                        Text(emergencyType.localizedName(in: language))
+                    }
                 }
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Image(systemName: selection.systemImage)
+                    }
+
+                    Text(selection.localizedName(in: language))
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+
+                    Spacer(minLength: 8)
+
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.body.weight(.semibold))
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
             }
-            .pickerStyle(.menu)
             .tint(.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(
                 Capsule(style: .continuous)
                     .fill(.secondary.opacity(0.10))
             )
+            .accessibilityLabel("\(title): \(selection.localizedName(in: language))")
             .accessibilityIdentifier("emergencyTypePicker")
         }
         .padding(20)
@@ -45,6 +68,7 @@ private extension EmergencyType {
     var systemImage: String {
         switch self {
         case .powerOutage: "bolt.slash.fill"
+        case .powerAndCommunicationsOutage: "antenna.radiowaves.left.and.right.slash"
         case .flood: "water.waves"
         case .extremeWeather: "cloud.bolt.rain.fill"
         case .landslide: "exclamationmark.triangle.fill"

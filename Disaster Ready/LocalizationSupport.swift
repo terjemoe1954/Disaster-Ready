@@ -84,15 +84,16 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 
 enum L10n {
     static func text(_ key: String, language: AppLanguage) -> String {
+        if let bundledValue = EmergencyLocalizationResources.value(for: key, language: language) {
+            return bundledValue
+        }
+
+        let localized = bundle(for: language).localizedString(forKey: key, value: key, table: nil)
         if language == .english {
-            let localized = String(
-                localized: String.LocalizationValue(key),
-                locale: locale(for: language)
-            )
             return EmergencyContactsLocalizationResources.englishValue(for: key) ?? localized
         }
 
-        return bundle(for: language).localizedString(forKey: key, value: key, table: nil)
+        return localized
     }
 
     static func format(_ key: String, language: AppLanguage, _ arguments: CVarArg...) -> String {

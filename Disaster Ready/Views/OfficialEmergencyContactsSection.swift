@@ -16,7 +16,7 @@ struct OfficialEmergencyContactsSection: View {
                     .accessibilityHeading(.h3)
                 Text(EmergencyContactsLocalizationResources.text("official_contacts.subtitle", language: language))
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.primary)
             }
 
             if numbers.isEmpty {
@@ -118,7 +118,7 @@ struct OfficialEmergencyNumberRow: View {
                 .font(.title2.monospacedDigit().weight(.bold))
             Text(EmergencyContactsLocalizationResources.text(number.descriptionKey, language: language))
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.primary)
         }
         .accessibilityElement(children: .combine)
     }
@@ -133,6 +133,7 @@ struct OfficialEmergencyNumberRow: View {
             )
         }
         .buttonStyle(.borderedProminent)
+        .tint(Color.primary)
         .controlSize(.large)
         .accessibilityLabel(
             EmergencyContactsLocalizationResources.format(

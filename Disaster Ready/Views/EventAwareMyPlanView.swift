@@ -26,6 +26,12 @@ struct EventAwareMyPlanView: View {
 
             SafetyContextSection(language: language)
 
+            PersonalEmergencyPlanOverviewSection(
+                plan: plan,
+                household: household,
+                language: language
+            )
+
             if let template {
                 MyPlanActionsStep(template: template, language: language)
                 MyPlanShelterStep(template: template, language: language)

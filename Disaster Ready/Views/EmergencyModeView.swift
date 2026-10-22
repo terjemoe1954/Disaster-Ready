@@ -255,36 +255,65 @@ struct HomeHouseholdSafetyStatusSection: View {
 struct EmergencyModeView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedEmergencyType: EmergencyType
+    @State private var completedActionIDs: Set<String> = []
 
     let plan: HouseholdPlan?
     let household: HouseholdProfile
     let familyContacts: [FamilyContact]
     let language: AppLanguage
+    let openEmergencyPlan: () -> Void
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Spacer()
+                        Button { dismiss() } label: {
+                            Text(doneTitle)
+                                .font(.headline)
+                                .foregroundStyle(Color(uiColor: .systemBackground))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color.primary, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     EmergencyModeScenarioSection(
                         selection: $selectedEmergencyType,
+                        language: language
+                    )
+                    OfflineGuidanceStatusSection(
+                        sourceIDs: currentTemplate.sourceIDs,
                         language: language
                     )
                     EmergencyModeActionsSection(
                         emergencyType: selectedEmergencyType,
                         household: household,
-                        language: language
+                        language: language,
+                        completedActionIDs: $completedActionIDs
+                    )
+                    EmergencyModeSectionHeading(
+                        title: L10n.pick(language: language, english: "Find help", norwegian: "Finn hjelp", thai: "ค้นหาความช่วยเหลือ"),
+                        systemImage: "location.fill"
                     )
                     EmergencyModeMeetingSection(
                         meetingPoint: plan?.reunionPoint ?? "",
                         evacuationDestination: plan?.evacuationDestination ?? "",
                         language: language
                     )
-                    EmergencyModeHouseholdStatusSection(
-                        members: familyContacts.filter(\.isHouseholdMember),
-                        scenarioName: selectedEmergencyType.localizedName(in: language),
-                        meetingPoint: plan?.reunionPoint ?? "",
-                        language: language
-                    )
+                    if selectedEmergencyType == .powerAndCommunicationsOutage {
+                        CommunicationOutageOfflineSection(
+                            meetingPoint: plan?.reunionPoint ?? "",
+                            reservePlace: plan?.evacuationDestination ?? "",
+                            preparednessBuddy: household.preparednessBuddy ?? "",
+                            municipalInformationPoint: household.municipalInformationPoint ?? "",
+                            offlineDirections: household.offlineDirections ?? "",
+                            individualNeedsNote: household.individualNeedsNote ?? "",
+                            language: language
+                        )
+                    }
                     EmergencyModeContactsSection(
                         familyContacts: familyContacts,
                         officialNumbers: CountryEmergencyConfigurationCatalog.numbers(
@@ -292,18 +321,33 @@ struct EmergencyModeView: View {
                         ),
                         language: language
                     )
+                    EmergencyModeNextStepsSection(
+                        emergencyType: selectedEmergencyType,
+                        household: household,
+                        language: language,
+                        openEmergencyPlan: openEmergencyPlan
+                    )
+                    EmergencyModeHouseholdStatusSection(
+                        members: familyContacts.filter(\.isHouseholdMember),
+                        scenarioName: selectedEmergencyType.localizedName(in: language),
+                        meetingPoint: plan?.reunionPoint ?? "",
+                        language: language
+                    )
+                    EmergencyModeReadMoreSection(
+                        emergencyType: selectedEmergencyType,
+                        household: household,
+                        language: language
+                    )
                 }
                 .padding()
                 .padding(.bottom, 40)
             }
             .background(Color(.systemGroupedBackground))
+            .onChange(of: selectedEmergencyType) { _, _ in
+                completedActionIDs.removeAll()
+            }
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(doneTitle) { dismiss() }
-                }
-            }
         }
     }
 
@@ -311,9 +355,74 @@ struct EmergencyModeView: View {
         L10n.pick(language: language, english: "Emergency mode", norwegian: "Når det skjer", thai: "โหมดฉุกเฉิน")
     }
 
+    private var currentTemplate: EmergencyPlanTemplate {
+        EmergencyTemplateCatalog.provider(for: household.countryCode)?.template(
+            for: selectedEmergencyType,
+            household: household
+        ) ?? NorwayEmergencyTemplates.template(for: selectedEmergencyType, household: household)
+    }
+
     private var doneTitle: String {
         L10n.pick(language: language, english: "Done", norwegian: "Ferdig", thai: "เสร็จสิ้น")
     }
+}
+
+private struct CommunicationOutageOfflineSection: View {
+    @State private var cannotReceiveRadio = false
+
+    let meetingPoint: String
+    let reservePlace: String
+    let preparednessBuddy: String
+    let municipalInformationPoint: String
+    let offlineDirections: String
+    let individualNeedsNote: String
+    let language: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: "iphone.slash")
+                .font(.title3.weight(.bold))
+                .accessibilityHeading(.h2)
+
+            Text(explanation)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Toggle(radioToggleTitle, isOn: $cannotReceiveRadio)
+                .accessibilityIdentifier("cannotReceiveRadioToggle")
+
+            if cannotReceiveRadio {
+                Divider()
+                EmergencyModeValueRow(title: meetingTitle, value: meetingPoint, language: language)
+                EmergencyModeValueRow(title: reserveTitle, value: reservePlace, language: language)
+                EmergencyModeValueRow(title: buddyTitle, value: preparednessBuddy, language: language)
+                EmergencyModeValueRow(title: informationPointTitle, value: municipalInformationPoint, language: language)
+                EmergencyModeValueRow(title: directionsTitle, value: offlineDirections, language: language)
+                EmergencyModeValueRow(title: needsTitle, value: individualNeedsNote, language: language)
+                Text(missingRadioDetail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Label(emergencyCallDetail, systemImage: "phone.fill")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .emergencyModeCard()
+        .accessibilityIdentifier("communicationOutageOfflineSection")
+    }
+
+    private var title: String { L10n.pick(language: language, english: "Available without a connection", norwegian: "Tilgjengelig uten forbindelse", thai: "ใช้งานได้โดยไม่ต้องเชื่อมต่อ") }
+    private var explanation: String { L10n.pick(language: language, english: "The cause may be unknown. Major accidents, sabotage, or extreme space weather can disrupt services, but this app cannot determine the cause. Satellite messaging and positioning may also be unavailable or inaccurate.", norwegian: "Årsaken kan være ukjent. Store ulykker, sabotasje eller ekstremt romvær kan forstyrre tjenester, men appen kan ikke fastslå årsaken. Satellittmeldinger og posisjonering kan også være utilgjengelige eller unøyaktige.", thai: "สาเหตุอาจไม่ทราบ อุบัติเหตุขนาดใหญ่ การก่อวินาศกรรม หรือสภาพอวกาศรุนแรงอาจรบกวนบริการ แต่แอประบุสาเหตุไม่ได้ การส่งข้อความและตำแหน่งผ่านดาวเทียมอาจใช้ไม่ได้หรือคลาดเคลื่อน") }
+    private var radioToggleTitle: String { L10n.pick(language: language, english: "I cannot receive radio either", norwegian: "Jeg får heller ikke inn radio", thai: "ฉันรับสัญญาณวิทยุไม่ได้ด้วย") }
+    private var missingRadioDetail: String { L10n.pick(language: language, english: "These are your saved planning details, not verified public help centres. Consider safe travel and follow current authority instructions whenever they become available.", norwegian: "Dette er dine lagrede planopplysninger, ikke bekreftede offentlige hjelpesentre. Vurder om ferdsel er trygg, og følg myndighetenes råd når de blir tilgjengelige.", thai: "นี่คือข้อมูลแผนที่คุณบันทึกไว้ ไม่ใช่ศูนย์ช่วยเหลือสาธารณะที่ยืนยันแล้ว โปรดประเมินความปลอดภัยในการเดินทางและปฏิบัติตามคำแนะนำของทางการเมื่อได้รับ") }
+    private var emergencyCallDetail: String { L10n.pick(language: language, english: "In immediate danger, try the relevant emergency number. The app cannot tell whether voice or emergency calls are available and cannot send an emergency message.", norwegian: "Ved akutt fare: forsøk relevant nødnummer. Appen kan ikke avgjøre om tale- eller nødanrop er tilgjengelig, og kan ikke sende en nødmelding.", thai: "เมื่อมีอันตรายเร่งด่วน ให้ลองโทรหมายเลขฉุกเฉินที่เกี่ยวข้อง แอปไม่สามารถทราบว่าการโทรใช้งานได้หรือส่งข้อความฉุกเฉินแทนคุณ") }
+    private var meetingTitle: String { L10n.pick(language: language, english: "Meeting point", norwegian: "Møteplass", thai: "จุดนัดพบ") }
+    private var reserveTitle: String { L10n.pick(language: language, english: "Reserve place", norwegian: "Reserveplass", thai: "สถานที่สำรอง") }
+    private var buddyTitle: String { L10n.pick(language: language, english: "Preparedness buddy", norwegian: "Beredskapsvenn", thai: "เพื่อนเตรียมพร้อม") }
+    private var informationPointTitle: String { L10n.pick(language: language, english: "Saved municipal information point", norwegian: "Lagret kommunalt informasjonspunkt", thai: "จุดข้อมูลเทศบาลที่บันทึกไว้") }
+    private var directionsTitle: String { L10n.pick(language: language, english: "Directions without maps", norwegian: "Veibeskrivelse uten kart", thai: "เส้นทางโดยไม่ใช้แผนที่") }
+    private var needsTitle: String { L10n.pick(language: language, english: "Individual needs", norwegian: "Individuelle behov", thai: "ความต้องการเฉพาะ") }
 }
 
 private struct EmergencyModeHouseholdStatusSection: View {
@@ -602,6 +711,7 @@ private struct HouseholdSafetySummaryView: View {
 }
 
 private struct HouseholdSafetyStatusRow: View {
+    @ScaledMetric(relativeTo: .title3) private var iconWidth: CGFloat = 28
     let name: String
     let phoneNumber: String
     let status: HouseholdSafetyStatus
@@ -613,12 +723,11 @@ private struct HouseholdSafetyStatusRow: View {
             Image(systemName: systemImage)
                 .font(.title3)
                 .foregroundStyle(color)
-                .frame(width: 28)
+                .frame(width: iconWidth)
                 .accessibilityHidden(true)
 
             Text(name)
                 .font(.headline)
-                .lineLimit(1)
 
             Spacer(minLength: 8)
 
@@ -715,7 +824,8 @@ private struct EmergencyModeScenarioSection: View {
                 }
             }
             .pickerStyle(.menu)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
         }
         .emergencyModeCard()
     }
@@ -729,6 +839,7 @@ private struct EmergencyModeActionsSection: View {
     let emergencyType: EmergencyType
     let household: HouseholdProfile
     let language: AppLanguage
+    @Binding var completedActionIDs: Set<String>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -736,20 +847,35 @@ private struct EmergencyModeActionsSection: View {
                 .font(.title3.weight(.bold))
                 .accessibilityHeading(.h2)
 
-            ForEach(template.actions.prefix(3)) { action in
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.text(action.titleKey, language: language))
-                            .font(.headline)
-                        Text(L10n.text(action.detailKey, language: language))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            ForEach(Array(template.actions.prefix(3))) { action in
+                Button {
+                    if completedActionIDs.contains(action.id) {
+                        completedActionIDs.remove(action.id)
+                    } else {
+                        completedActionIDs.insert(action.id)
                     }
-                } icon: {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L10n.text(action.titleKey, language: language))
+                                .font(.headline)
+                            Text(L10n.text(action.detailKey, language: language))
+                                .font(.subheadline)
+                                .foregroundStyle(Color.primary)
+                        }
+                    } icon: {
+                        Image(systemName: completedActionIDs.contains(action.id) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(completedActionIDs.contains(action.id) ? .green : .secondary)
+                    }
                 }
+                .buttonStyle(.plain)
                 .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(completedActionIDs.contains(action.id) ? .isSelected : [])
+            }
+
+            if !completedActionIDs.isEmpty {
+                Button(resetTitle) { completedActionIDs.removeAll() }
+                    .font(.subheadline.weight(.semibold))
             }
         }
         .emergencyModeCard()
@@ -764,6 +890,113 @@ private struct EmergencyModeActionsSection: View {
 
     private var title: String {
         L10n.pick(language: language, english: "Do this first", norwegian: "Gjør dette først", thai: "ทำสิ่งนี้ก่อน")
+    }
+
+    private var resetTitle: String {
+        L10n.pick(language: language, english: "Reset actions", norwegian: "Nullstill handlinger", thai: "รีเซ็ตการดำเนินการ")
+    }
+}
+
+private struct EmergencyModeSectionHeading: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .font(.title2.bold())
+            .accessibilityHeading(.h1)
+            .padding(.top, 8)
+    }
+}
+
+private struct EmergencyModeNextStepsSection: View {
+    let emergencyType: EmergencyType
+    let household: HouseholdProfile
+    let language: AppLanguage
+    let openEmergencyPlan: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: "arrow.right.circle.fill")
+                .font(.title3.weight(.bold))
+                .accessibilityHeading(.h2)
+
+            ForEach(template.shelterGuidance.prefix(2)) { guidance in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.text(guidance.titleKey, language: language))
+                        .font(.headline)
+                    Text(L10n.text(guidance.detailKey, language: language))
+                        .font(.subheadline)
+                }
+            }
+
+            Button(action: openEmergencyPlan) {
+                Label(planTitle, systemImage: "checklist.checked")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityIdentifier("emergencyModeOpenPlanButton")
+        }
+        .emergencyModeCard()
+    }
+
+    private var template: EmergencyPlanTemplate {
+        EmergencyTemplateCatalog.provider(for: household.countryCode)?.template(for: emergencyType, household: household)
+            ?? NorwayEmergencyTemplates.template(for: emergencyType, household: household)
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Next steps", norwegian: "Neste steg", thai: "ขั้นตอนถัดไป")
+    }
+
+    private var planTitle: String {
+        L10n.pick(language: language, english: "Open my emergency plan", norwegian: "Åpne nødplanen min", thai: "เปิดแผนฉุกเฉินของฉัน")
+    }
+}
+
+private struct EmergencyModeReadMoreSection: View {
+    @State private var isExpanded = false
+
+    let emergencyType: EmergencyType
+    let household: HouseholdProfile
+    let language: AppLanguage
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(template.actions.dropFirst(3))) { action in
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(L10n.text(action.titleKey, language: language))
+                            .font(.headline)
+                        Text(L10n.text(action.detailKey, language: language))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                ForEach(template.shelterGuidance) { guidance in
+                    Text(L10n.text(guidance.safetyNoticeKey, language: language))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.top, 10)
+        } label: {
+            Label(title, systemImage: "book.closed.fill")
+                .font(.title3.weight(.bold))
+        }
+        .emergencyModeCard()
+        .accessibilityIdentifier("emergencyModeReadMoreSection")
+    }
+
+    private var template: EmergencyPlanTemplate {
+        EmergencyTemplateCatalog.provider(for: household.countryCode)?.template(for: emergencyType, household: household)
+            ?? NorwayEmergencyTemplates.template(for: emergencyType, household: household)
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Read more", norwegian: "Les mer", thai: "อ่านเพิ่มเติม")
     }
 }
 

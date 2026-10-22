@@ -41,7 +41,7 @@ enum SupplyPrioritizer {
         grab: inout [SupplyRecommendation]
     ) {
         switch emergency {
-        case .powerOutage:
+        case .powerOutage, .powerAndCommunicationsOutage:
             prioritize(["lighting", "batteries", "radio", "powerBank", "cookingMethod"], as: .critical, in: &home)
             prioritize(["warmth", "shelfStableFood", "water"], as: .high, in: &home)
             prioritize(["phone", "chargerPowerBank"], as: .critical, in: &grab)
@@ -93,12 +93,12 @@ enum SupplyPrioritizer {
             prioritize(["assistiveDevices", "medicines"], as: .critical, in: &grab)
         }
         if household.hasWoodStove {
-            home.append(item("woodStoveFuel", category: "warmth", priority: emergency == .powerOutage ? .critical : .normal, kind: .homePreparedness))
+            home.append(item("woodStoveFuel", category: "warmth", priority: [.powerOutage, .powerAndCommunicationsOutage].contains(emergency) ? .critical : .normal, kind: .homePreparedness))
         }
         if household.hasAlternativeHeating {
-            home.append(item("alternativeHeatingPreparedness", category: "warmth", priority: [.powerOutage, .extremeWeather].contains(emergency) ? .critical : .normal, kind: .homePreparedness))
+            home.append(item("alternativeHeatingPreparedness", category: "warmth", priority: [.powerOutage, .powerAndCommunicationsOutage, .extremeWeather].contains(emergency) ? .critical : .normal, kind: .homePreparedness))
         }
-        if household.hasElectricHeating, emergency == .powerOutage {
+        if household.hasElectricHeating, [.powerOutage, .powerAndCommunicationsOutage].contains(emergency) {
             prioritize(["warmth"], as: .critical, in: &home)
         }
         if household.hasEV {

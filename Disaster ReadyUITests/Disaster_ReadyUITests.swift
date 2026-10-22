@@ -14,6 +14,51 @@ final class Disaster_ReadyUITests: XCTestCase {
     }
 
     @MainActor
+    func testFirstLaunchShowsPrimaryChoicesWithoutBlockingOnboarding() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-hasSeenOnboarding", "NO",
+            "-preferredLanguageCode", "nb",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"
+        ]
+        app.resetAuthorizationStatus(for: .location)
+        app.launch()
+
+        XCTAssertTrue(app.buttons["primaryHelpNowButton"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["primaryPreparednessButton"].exists)
+        XCTAssertTrue(app.buttons["primaryEmergencyPlanButton"].exists)
+        XCTAssertTrue(app.buttons["settingsButton"].exists)
+        XCTAssertFalse(app.buttons["onboardingStartButton"].exists)
+
+        let helpButton = app.buttons["primaryHelpNowButton"]
+        scrollToHittable(helpButton, in: app)
+        helpButton.tap()
+        let offlineStatus = app.descendants(matching: .any)["offlineGuidanceStatus"]
+        for _ in 0..<6 where !offlineStatus.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(offlineStatus.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testPrimaryChoicesOpenExistingEmergencyPlanAndPreparedness() throws {
+        let app = launchEnglishApp()
+
+        let emergencyPlanButton = app.buttons["primaryEmergencyPlanButton"]
+        XCTAssertTrue(emergencyPlanButton.waitForExistence(timeout: 5))
+        scrollToHittable(emergencyPlanButton, in: app)
+        emergencyPlanButton.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["emergencyTypePicker"].waitForExistence(timeout: 5))
+
+        tabItem(named: "Overview", in: app).tap()
+        let preparednessButton = app.buttons["primaryPreparednessButton"]
+        XCTAssertTrue(preparednessButton.waitForExistence(timeout: 5))
+        scrollToHittable(preparednessButton, in: app)
+        preparednessButton.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["paymentPreparednessSection"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testCanReopenAndFinishOnboardingFromSettings() throws {
         let app = XCUIApplication()
         app.launchArguments = standardLaunchArguments(language: "nb")
@@ -43,7 +88,7 @@ final class Disaster_ReadyUITests: XCTestCase {
         app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
-        let suppliesTab = app.tabBars.buttons["Utstyr"]
+        let suppliesTab = tabItem(named: "Utstyr", in: app)
         XCTAssertTrue(suppliesTab.waitForExistence(timeout: 5))
         suppliesTab.tap()
 
@@ -64,7 +109,7 @@ final class Disaster_ReadyUITests: XCTestCase {
         app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
-        let planTab = app.tabBars.buttons["Plan"]
+        let planTab = tabItem(named: "Plan", in: app)
         XCTAssertTrue(planTab.waitForExistence(timeout: 5))
         planTab.tap()
 
@@ -78,7 +123,7 @@ final class Disaster_ReadyUITests: XCTestCase {
         app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
-        let suppliesTab = app.tabBars.buttons["Utstyr"]
+        let suppliesTab = tabItem(named: "Utstyr", in: app)
         XCTAssertTrue(suppliesTab.waitForExistence(timeout: 5))
         suppliesTab.tap()
 
@@ -120,12 +165,10 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testHomeOpensMyPlanDirectly() throws {
         let app = launchEnglishApp()
-        let button = app.buttons["homeOpenMyPlan"]
+        expandPreparednessShortcuts(in: app)
+        let button = app.buttons["preparednessOpenPlan"]
         scrollToHittable(button, in: app)
         button.tap()
-
-        let planTab = app.tabBars.buttons["Plan"]
-        XCTAssertTrue(waitUntilSelected(planTab))
 
         XCTAssertTrue(
             app.descendants(matching: .any)["emergencyTypePicker"]
@@ -136,13 +179,14 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testHomeQuickAccessOpensSuppliesAndContacts() throws {
         let app = launchEnglishApp()
-        let supplies = app.descendants(matching: .any)["homeOpenSupplies"]
+        expandPreparednessShortcuts(in: app)
+        let supplies = app.buttons["preparednessOpenSupplies"]
         scrollToHittable(supplies, in: app)
         supplies.tap()
         XCTAssertTrue(app.descendants(matching: .any)["supplySearchField"].waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Overview"].tap()
-        let contacts = app.descendants(matching: .any)["homeOpenContacts"]
+        tabItem(named: "Overview", in: app).tap()
+        let contacts = app.buttons["preparednessOpenContacts"]
         scrollToHittable(contacts, in: app)
         contacts.tap()
         XCTAssertTrue(app.navigationBars["Contacts"].waitForExistence(timeout: 5))
@@ -151,13 +195,14 @@ final class Disaster_ReadyUITests: XCTestCase {
     @MainActor
     func testHomeQuickAccessOpensHouseholdAndPaymentPreparedness() throws {
         let app = launchEnglishApp()
-        let household = app.descendants(matching: .any)["homeOpenHousehold"]
+        expandPreparednessShortcuts(in: app)
+        let household = app.buttons["preparednessOpenHousehold"]
         scrollToHittable(household, in: app)
         household.tap()
         XCTAssertTrue(app.descendants(matching: .any)["householdCountryCode"].waitForExistence(timeout: 5))
         app.buttons["homeHouseholdDone"].tap()
 
-        let payment = app.descendants(matching: .any)["homeOpenPayment"]
+        let payment = app.buttons["preparednessOpenPayment"]
         scrollToHittable(payment, in: app)
         payment.tap()
         XCTAssertTrue(app.descendants(matching: .any)["paymentPreparednessSection"].waitForExistence(timeout: 5))
@@ -189,11 +234,51 @@ final class Disaster_ReadyUITests: XCTestCase {
                 app.descendants(matching: .any)["homePreparednessOverview"]
                     .waitForExistence(timeout: 5)
             )
-            let planButton = app.buttons["homeOpenMyPlan"]
+            expandPreparednessShortcuts(in: app)
+            let planButton = app.buttons["preparednessOpenPlan"]
             scrollToHittable(planButton, in: app)
             XCTAssertFalse(planButton.label.isEmpty)
             XCTAssertFalse(planButton.label.contains("home."))
             app.terminate()
+        }
+    }
+
+    @MainActor
+    func testPrimaryEmergencyFlowSurvivesIPadRotation() throws {
+        let app = launchEnglishApp()
+        let helpButton = app.buttons["primaryHelpNowButton"]
+
+        XCTAssertTrue(helpButton.waitForExistence(timeout: 5))
+        XCUIDevice.shared.orientation = .landscapeLeft
+        XCTAssertTrue(helpButton.waitForExistence(timeout: 5))
+        scrollToHittable(helpButton, in: app)
+        helpButton.tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 5))
+
+        XCUIDevice.shared.orientation = .portrait
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testOverviewAndEmergencyModePassAccessibilityAudit() throws {
+        let app = launchEnglishApp()
+        XCTAssertTrue(app.buttons["primaryHelpNowButton"].waitForExistence(timeout: 5))
+        let auditTypes: XCUIAccessibilityAuditType = [
+            .contrast,
+            .elementDetection,
+            .hitRegion,
+            .sufficientElementDescription,
+            .trait
+        ]
+        try app.performAccessibilityAudit(for: auditTypes)
+
+        let helpButton = app.buttons["primaryHelpNowButton"]
+        scrollToHittable(helpButton, in: app)
+        helpButton.tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit(for: auditTypes) { issue in
+            print("Accessibility audit issue: \(issue)")
+            return false
         }
     }
 
@@ -213,6 +298,10 @@ final class Disaster_ReadyUITests: XCTestCase {
         return app
     }
 
+    private func tabItem(named name: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: name).firstMatch
+    }
+
     @MainActor
     private func standardLaunchArguments(language: String) -> [String] {
         [
@@ -220,6 +309,14 @@ final class Disaster_ReadyUITests: XCTestCase {
             "-preferredLanguageCode", language,
             "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"
         ]
+    }
+
+    @MainActor
+    private func expandPreparednessShortcuts(in app: XCUIApplication) {
+        let disclosure = app.buttons["preparednessShortcutsDisclosure"]
+        XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
+        scrollToHittable(disclosure, in: app)
+        disclosure.tap()
     }
 
     @MainActor

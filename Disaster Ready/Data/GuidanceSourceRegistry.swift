@@ -4,15 +4,17 @@ enum GuidanceSourceRegistry {
     /// A review date records Disaster Ready's comparison of bundled guidance.
     /// It must never be interpreted as a live authority update timestamp.
     static let reviewDateRepresentsLiveUpdate = false
+    static let contentVersion = "NO-2026.10.22"
 
-    static let norway: [GuidanceSource] = [
+    private static let baseNorway: [GuidanceSource] = [
         GuidanceSource(
             id: "dsb-self-preparedness",
             authority: "Direktoratet for samfunnssikkerhet og beredskap (DSB)",
             title: "Egenberedskap",
             url: officialURL("https://www.dsb.no/sikkerhverdag/egenberedskap/"),
             countryCode: "NO",
-            lastReviewed: reviewedDate
+            lastReviewed: reviewedDate,
+            contentVersion: contentVersion
         ),
         GuidanceSource(
             id: "dsb-flood-preparedness",
@@ -71,6 +73,39 @@ enum GuidanceSourceRegistry {
             lastReviewed: reviewedDate
         ),
         GuidanceSource(
+            id: "dsb-information-communication",
+            authority: "Direktoratet for samfunnssikkerhet og beredskap (DSB)",
+            title: "Råd hvis internett og mobilnett ikke virker",
+            url: officialURL("https://www.dsb.no/sikkerhverdag/egenberedskap/raad-hvis-mobilnett-og-internett-ikke-virker/"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate,
+            contentVersion: contentVersion
+        ),
+        GuidanceSource(
+            id: "nkom-emergency-calls",
+            authority: "Nasjonal kommunikasjonsmyndighet (Nkom)",
+            title: "Nødnummer, nødanrop og lokalisering",
+            url: officialURL("https://nkom.no/telefoni-og-telefonnummer/nodnummer-nodanrop-og-lokalisering"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
+            id: "kartverket-space-weather",
+            authority: "Kartverket",
+            title: "Romvær og posisjonstjenester",
+            url: officialURL("https://sesolstorm.kartverket.no/"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
+            id: "norwegian-space-agency-space-weather",
+            authority: "Direktoratet for romvirksomhet",
+            title: "Det farlige romværet",
+            url: officialURL("https://www.romsenter.no/laer-om-romvirksomhet/det-farlige-romvaeret"),
+            countryCode: "NO",
+            lastReviewed: reviewedDate
+        ),
+        GuidanceSource(
             id: PaymentPreparednessCatalog.norwaySourceID,
             authority: "Norges Bank / Direktoratet for samfunnssikkerhet og beredskap (DSB)",
             title: "Eigenberedskap for betalinger",
@@ -104,6 +139,18 @@ enum GuidanceSourceRegistry {
         )
     ]
 
+    static let norway: [GuidanceSource] = baseNorway.map { source in
+        GuidanceSource(
+            id: source.id,
+            authority: source.authority,
+            title: source.title,
+            url: source.url,
+            countryCode: source.countryCode,
+            lastReviewed: source.lastReviewed,
+            contentVersion: source.contentVersion ?? contentVersion
+        )
+    }
+
     /// Compatibility aliases preserve source identifiers shipped before the
     /// centralized registry without duplicating metadata in templates.
     static let aliases: [String: String] = [
@@ -133,7 +180,7 @@ enum GuidanceSourceRegistry {
     private static let reviewedDate: Date = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
-        return calendar.date(from: DateComponents(year: 2026, month: 10, day: 1)) ?? .distantPast
+        return calendar.date(from: DateComponents(year: 2026, month: 10, day: 22)) ?? .distantPast
     }()
 
     private static func officialURL(_ value: String) -> URL {

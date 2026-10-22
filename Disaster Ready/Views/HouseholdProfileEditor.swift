@@ -32,6 +32,13 @@ struct HouseholdProfileEditor: View {
                 hasEV: $profile.hasEV,
                 language: language
             )
+            HouseholdProfileOfflinePlanSection(
+                preparednessBuddy: optionalBinding(for: \HouseholdProfile.preparednessBuddy),
+                municipalInformationPoint: optionalBinding(for: \HouseholdProfile.municipalInformationPoint),
+                offlineDirections: optionalBinding(for: \HouseholdProfile.offlineDirections),
+                individualNeedsNote: optionalBinding(for: \HouseholdProfile.individualNeedsNote),
+                language: language
+            )
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
@@ -55,6 +62,44 @@ struct HouseholdProfileEditor: View {
             thai: "โปรไฟล์ครัวเรือน"
         )
     }
+
+    private func optionalBinding(for keyPath: WritableKeyPath<HouseholdProfile, String?>) -> Binding<String> {
+        Binding(
+            get: { profile[keyPath: keyPath] ?? "" },
+            set: { value in
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                profile[keyPath: keyPath] = trimmed.isEmpty ? nil : value
+            }
+        )
+    }
+}
+
+private struct HouseholdProfileOfflinePlanSection: View {
+    @Binding var preparednessBuddy: String
+    @Binding var municipalInformationPoint: String
+    @Binding var offlineDirections: String
+    @Binding var individualNeedsNote: String
+    let language: AppLanguage
+
+    var body: some View {
+        Section {
+            TextField(buddyTitle, text: $preparednessBuddy, axis: .vertical)
+            TextField(informationPointTitle, text: $municipalInformationPoint, axis: .vertical)
+            TextField(directionsTitle, text: $offlineDirections, axis: .vertical)
+            TextField(needsTitle, text: $individualNeedsNote, axis: .vertical)
+        } header: {
+            Text(title)
+        } footer: {
+            Text(footer)
+        }
+    }
+
+    private var title: String { L10n.pick(language: language, english: "Offline emergency plan", norwegian: "Nødplan uten nett", thai: "แผนฉุกเฉินแบบออฟไลน์") }
+    private var buddyTitle: String { L10n.pick(language: language, english: "Preparedness buddy or contact", norwegian: "Beredskapsvenn eller kontaktperson", thai: "เพื่อนเตรียมพร้อมหรือผู้ติดต่อ") }
+    private var informationPointTitle: String { L10n.pick(language: language, english: "Municipal information point", norwegian: "Kommunalt informasjonspunkt", thai: "จุดข้อมูลของเทศบาล") }
+    private var directionsTitle: String { L10n.pick(language: language, english: "Short directions without maps", norwegian: "Kort veibeskrivelse uten kart", thai: "เส้นทางสั้น ๆ โดยไม่ใช้แผนที่") }
+    private var needsTitle: String { L10n.pick(language: language, english: "Individual needs and power-dependent equipment", norwegian: "Individuelle behov og strømavhengige hjelpemidler", thai: "ความต้องการเฉพาะและอุปกรณ์ที่ใช้ไฟฟ้า") }
+    private var footer: String { L10n.pick(language: language, english: "Stored only with your local household profile. Verify addresses and arrangements yourself; the app does not confirm staffing or availability.", norwegian: "Lagres bare i den lokale husstandsprofilen. Kontroller adresser og avtaler selv; appen bekrefter ikke bemanning eller tilgjengelighet.", thai: "จัดเก็บไว้ในโปรไฟล์ครัวเรือนในเครื่องเท่านั้น โปรดตรวจสอบที่อยู่และข้อตกลงด้วยตนเอง แอปไม่ยืนยันบุคลากรหรือการให้บริการ") }
 }
 
 private struct HouseholdProfileLocationSection: View {

@@ -52,6 +52,6 @@ enum PaymentPreparednessCatalog {
     }
 
     static func isRelevant(to emergency: EmergencyType) -> Bool {
-        [.powerOutage, .evacuation, .extremeWeather, .warOrSecurityIncident].contains(emergency)
+        [.powerOutage, .powerAndCommunicationsOutage, .evacuation, .extremeWeather, .warOrSecurityIncident].contains(emergency)
     }
 }

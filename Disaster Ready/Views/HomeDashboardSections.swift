@@ -128,6 +128,7 @@ struct HomePreparednessSection: View {
                 Text(title)
                     .font(.title3.weight(.bold))
                     .accessibilityHeading(.h2)
+                    .accessibilityIdentifier("homePreparednessOverview")
 
                 Spacer(minLength: 12)
 
@@ -202,11 +203,11 @@ struct HomePreparednessSection: View {
             } label: {
                 Text(detailsTitle)
                     .font(.subheadline.weight(.semibold))
+                    .accessibilityIdentifier("preparednessShortcutsDisclosure")
             }
         }
         .padding(20)
         .background(DashboardCardBackground())
-        .accessibilityIdentifier("homePreparednessOverview")
     }
 
     private func checklistButton(

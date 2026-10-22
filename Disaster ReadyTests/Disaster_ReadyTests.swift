@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import CoreLocation
+import PDFKit
 import Testing
 @testable import Disaster_Ready
 
@@ -724,11 +726,227 @@ struct Disaster_ReadyTests {
         let identifiers = EmergencyType.allCases.map(\.rawValue)
 
         #expect(identifiers == [
-            "powerOutage", "flood", "extremeWeather", "landslide", "wildfire",
+            "powerOutage", "powerAndCommunicationsOutage", "flood", "extremeWeather", "landslide", "wildfire",
             "houseFire", "waterOutage", "evacuation", "hazardousRelease",
             "warOrSecurityIncident"
         ])
         #expect(Set(identifiers).count == identifiers.count)
+    }
+
+    @Test func combinedPowerAndCommunicationsOutageHasOfflineFiveActionTemplate() {
+        let template = NorwayEmergencyTemplates.template(for: .powerAndCommunicationsOutage)
+
+        #expect(template.id == "no.powerAndCommunicationsOutage")
+        #expect(template.actions.count == 5)
+        #expect(template.actions.map(\.id) == [
+            "powerAndCommunicationsOutage.checkSafety",
+            "powerAndCommunicationsOutage.openPlan",
+            "powerAndCommunicationsOutage.saveBattery",
+            "powerAndCommunicationsOutage.tryDAB",
+            "powerAndCommunicationsOutage.localInformation"
+        ])
+        #expect(Set(template.sourceIDs) == [
+            "dsb-self-preparedness",
+            "dsb-information-communication",
+            "nkom-emergency-calls",
+            "kartverket-space-weather",
+            "norwegian-space-agency-space-weather"
+        ])
+        #expect(template.actions.allSatisfy { !$0.titleKey.isEmpty && !$0.detailKey.isEmpty })
+    }
+
+    @Test func bundledOfflineGuidanceIsCompleteAndVersioned() throws {
+        let package = OfflineGuidanceCatalog.bundled
+
+        #expect(package.schemaVersion == 1)
+        #expect(!package.contentVersion.isEmpty)
+        #expect(package.templates.count == EmergencyType.allCases.count)
+        try OfflineGuidanceCatalog.validate(package)
+    }
+
+    @Test func invalidGuidanceCandidateKeepsBundledFallback() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let fileURL = directory.appendingPathComponent("guidance.json")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = OfflineGuidanceStore(fileURL: fileURL)
+        let invalid = OfflineGuidancePackage(
+            schemaVersion: OfflineGuidanceCatalog.supportedSchemaVersion,
+            contentVersion: "invalid",
+            countryCode: "NO",
+            reviewedAt: .now,
+            templates: Array(NorwayEmergencyTemplates.all.dropLast())
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        var rejected = false
+        do {
+            try await store.installCandidate(encoder.encode(invalid))
+        } catch {
+            rejected = true
+        }
+
+        #expect(rejected)
+        #expect(await store.loadLastValidPackage() == OfflineGuidanceCatalog.bundled)
+    }
+
+    @Test func supplyCoverageSeparatesRecommendedRecordedAndMissingWithoutNegatives() {
+        let language = AppLanguage.english
+        let recommendations = SupplyPrioritizer.recommendations(
+            for: .powerAndCommunicationsOutage,
+            household: HouseholdProfile(countryCode: "NO", householdSize: 2)
+        ).home
+        let firstName = recommendations[0].localizedName(in: language)
+        let duplicateRecordedItems = [
+            SupplyItem(name: firstName, detail: "", isPacked: true, storageLocation: SupplyLocation.home.rawValue),
+            SupplyItem(name: firstName, detail: "", isPacked: true, storageLocation: SupplyLocation.home.rawValue)
+        ]
+
+        let summary = SupplyCoverageCalculator.summary(
+            recommendations: recommendations,
+            savedSupplies: duplicateRecordedItems,
+            language: language
+        )
+
+        #expect(summary.recordedCount == 1)
+        #expect(summary.recommendedCount == recommendations.count)
+        #expect(summary.missingCount == max(0, recommendations.count - 1))
+        #expect(summary.items.allSatisfy { $0.missingCount >= 0 })
+        #expect(PreparednessSupplyGroup.allCases.allSatisfy { !summary.items(in: $0).isEmpty })
+    }
+
+    @Test func shoppingListSelectionPersistsUserChanges() throws {
+        let suiteName = "ShoppingListSelectionTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        ShoppingListSelectionStore.save(["water", "radio"], defaults: defaults)
+        #expect(ShoppingListSelectionStore.load(defaults: defaults) == ["water", "radio"])
+
+        ShoppingListSelectionStore.save(["radio"], defaults: defaults)
+        #expect(ShoppingListSelectionStore.load(defaults: defaults) == ["radio"])
+    }
+
+    @Test func offlineTextPDFUsesReadableMultiplePagesForLongContent() throws {
+        let lines = (1...160).map { "• Long emergency-plan line \($0) with enough content to exercise wrapping and page breaks." }
+        let data = SimpleTextPDFRenderer.render(
+            title: "Emergency plan",
+            lines: lines,
+            footer: "Created offline"
+        )
+        let document = try #require(PDFDocument(data: data))
+
+        #expect(data.starts(with: Data("%PDF".utf8)))
+        #expect(document.pageCount > 1)
+    }
+
+    @Test func familyPlanPDFIncludesGuidanceButExcludesPersonalDataByDefault() throws {
+        let content = FamilyPlanPDFContent(
+            title: "Emergency plan",
+            scenarioTitle: "Scenario",
+            scenario: "Power outage",
+            includesPersonalPlan: false,
+            meetingPointTitle: "Meeting point",
+            meetingPoint: "SECRET MEETING PLACE",
+            evacuationTitle: "Evacuation",
+            evacuationDestination: "SECRET DESTINATION",
+            shelterTitle: "Safe place",
+            shelter: "SECRET SHELTER",
+            offlineDetailsTitle: "Offline details",
+            offlineDetails: [],
+            rolesTitle: "Roles",
+            roles: [],
+            contactsTitle: "Contacts",
+            contacts: [],
+            passwordTitle: "Password",
+            familyPassword: nil,
+            guidanceTitle: "Relevant emergency guidance",
+            guidance: ["Use stored drinking water"],
+            officialNumbersTitle: "Emergency numbers",
+            officialNumbers: ["Police: 112"],
+            notSet: "Not set",
+            footer: "Created offline"
+        )
+        let document = try #require(PDFDocument(data: FamilyPlanPDFRenderer.render(content)))
+        let text = (0..<document.pageCount)
+            .compactMap { document.page(at: $0)?.string }
+            .joined(separator: "\n")
+
+        #expect(text.contains("Use stored drinking water"))
+        #expect(text.contains("Police: 112"))
+        #expect(!text.contains("SECRET MEETING PLACE"))
+        #expect(!text.contains("SECRET DESTINATION"))
+        #expect(!text.contains("SECRET SHELTER"))
+    }
+
+    @Test func familyPlanPDFPreservesLongLocalizedContentAcrossPages() throws {
+        let variants = [
+            (
+                title: "Familiens beredskapsplan",
+                scenarioTitle: "Scenario",
+                scenario: "Strøm og kommunikasjon borte",
+                meetingPointTitle: "Møtested",
+                guidanceTitle: "Relevante hendelsesråd",
+                numbersTitle: "Norske nødnumre",
+                footer: "Opprettet med Disaster Ready",
+                sentinel: "NORSK-SLUTT"
+            ),
+            (
+                title: "Family emergency plan",
+                scenarioTitle: "Scenario",
+                scenario: "Power and communications outage",
+                meetingPointTitle: "Meeting point",
+                guidanceTitle: "Relevant emergency guidance",
+                numbersTitle: "Norwegian emergency numbers",
+                footer: "Generated by Disaster Ready",
+                sentinel: "ENGLISH-END"
+            )
+        ]
+
+        for variant in variants {
+            let longName = Array(repeating: "Alexandra-Christine Nordmann-Wilhelmsen", count: 12).joined(separator: " ")
+            let guidance = (1...55).map { "\($0). Keep this complete line available offline after wrapping." }
+            let finalGuidance = try #require(guidance.last)
+            let content = FamilyPlanPDFContent(
+                title: variant.title,
+                scenarioTitle: variant.scenarioTitle,
+                scenario: variant.scenario,
+                includesPersonalPlan: true,
+                meetingPointTitle: variant.meetingPointTitle,
+                meetingPoint: "\(longName) \(variant.sentinel)",
+                evacuationTitle: "Evacuation destination",
+                evacuationDestination: "Community building, second entrance",
+                shelterTitle: "Safe place",
+                shelter: "Basement room",
+                offlineDetailsTitle: "Offline details",
+                offlineDetails: [],
+                rolesTitle: "Roles",
+                roles: [],
+                contactsTitle: "Contacts",
+                contacts: [],
+                passwordTitle: "Password",
+                familyPassword: nil,
+                guidanceTitle: variant.guidanceTitle,
+                guidance: guidance,
+                officialNumbersTitle: variant.numbersTitle,
+                officialNumbers: ["Police: 112", "Fire and rescue: 110", "Medical emergency: 113"],
+                notSet: "Not set",
+                footer: variant.footer
+            )
+            let document = try #require(PDFDocument(data: FamilyPlanPDFRenderer.render(content)))
+            let text = (0..<document.pageCount)
+                .compactMap { document.page(at: $0)?.string }
+                .joined(separator: "\n")
+
+            #expect(document.pageCount > 1)
+            #expect(text.contains(variant.title))
+            #expect(text.contains(variant.scenario))
+            #expect(text.contains(variant.sentinel))
+            #expect(text.contains(finalGuidance))
+            #expect(text.contains(variant.numbersTitle))
+            #expect(text.contains(variant.footer))
+        }
     }
 
     @Test func norwayTemplateCatalogIsCountrySpecificAndOffline() throws {
@@ -743,6 +961,55 @@ struct Disaster_ReadyTests {
         }
 
         #expect(EmergencyTemplateCatalog.provider(for: "TH") == nil)
+    }
+
+    @Test func everyNorwegianGuidanceSourceHasPublishableMetadata() {
+        #expect(!GuidanceSourceRegistry.norway.isEmpty)
+        #expect(GuidanceSourceRegistry.norway.allSatisfy { source in
+            source.countryCode == "NO"
+                && source.url.scheme == "https"
+                && !source.authority.isEmpty
+                && !source.title.isEmpty
+                && source.lastReviewed != .distantPast
+                && source.contentVersion == GuidanceSourceRegistry.contentVersion
+        })
+        #expect(GuidanceSourceRegistry.pendingSourceIDs.isEmpty)
+    }
+
+    @Test func combinedOutageUsesReviewedCommunicationAndSpaceWeatherSources() {
+        let template = NorwayEmergencyTemplates.template(
+            for: .powerAndCommunicationsOutage,
+            household: HouseholdProfile(countryCode: "NO", householdSize: 1)
+        )
+
+        #expect(template.sourceIDs.contains("dsb-information-communication"))
+        #expect(template.sourceIDs.contains("nkom-emergency-calls"))
+        #expect(template.sourceIDs.contains("kartverket-space-weather"))
+        #expect(template.sourceIDs.contains("norwegian-space-agency-space-weather"))
+        #expect(template.sourceIDs.allSatisfy { GuidanceSourceRegistry.source(for: $0) != nil })
+    }
+
+    @Test func combinedOutageTranslationsPreserveSafetyQualifications() throws {
+        for language in AppLanguage.allCases {
+            let planWarning = try #require(EmergencyLocalizationResources.value(
+                for: "action.powerAndCommunicationsOutage.open_plan.detail",
+                language: language
+            ))
+            let receptionWarning = try #require(EmergencyLocalizationResources.value(
+                for: "action.powerAndCommunicationsOutage.try_dab.detail",
+                language: language
+            ))
+            let placeWarning = try #require(EmergencyLocalizationResources.value(
+                for: "action.powerAndCommunicationsOutage.local_information.detail",
+                language: language
+            ))
+
+            #expect(!planWarning.isEmpty)
+            #expect(!receptionWarning.isEmpty)
+            #expect(!placeWarning.isEmpty)
+            #expect(planWarning != receptionWarning)
+            #expect(placeWarning != receptionWarning)
+        }
     }
 
     @Test func norwegianTemplatesFilterGasGuidanceByExplicitProfileFlag() {
@@ -1059,7 +1326,7 @@ struct Disaster_ReadyTests {
     }
 
     @Test func paymentPreparednessIsSurfacedOnlyForRelevantPlanScenarios() {
-        let relevant: Set<EmergencyType> = [.powerOutage, .evacuation, .extremeWeather, .warOrSecurityIncident]
+        let relevant: Set<EmergencyType> = [.powerOutage, .powerAndCommunicationsOutage, .evacuation, .extremeWeather, .warOrSecurityIncident]
         for emergency in EmergencyType.allCases {
             #expect(PaymentPreparednessCatalog.isRelevant(to: emergency) == relevant.contains(emergency))
         }
@@ -1315,6 +1582,27 @@ struct Disaster_ReadyTests {
         } catch {
             #expect(error as? WeatherAlertServiceError == .invalidCoordinate)
         }
+    }
+
+    @Test func locationProviderRejectsMissingAndInvalidGPSCoordinates() {
+        #expect(ShelterLocationProvider.validatedCoordinate(from: nil) == nil)
+        #expect(ShelterLocationProvider.validatedCoordinate(from: CLLocation(latitude: .nan, longitude: 10)) == nil)
+        #expect(ShelterLocationProvider.validatedCoordinate(from: CLLocation(latitude: 91, longitude: 10)) == nil)
+        #expect(ShelterLocationProvider.validatedCoordinate(from: CLLocation(latitude: 60, longitude: 181)) == nil)
+
+        let valid = ShelterLocationProvider.validatedCoordinate(from: CLLocation(latitude: 59.91, longitude: 10.75))
+        #expect(valid?.latitude == 59.91)
+        #expect(valid?.longitude == 10.75)
+    }
+
+    @Test func emptyGPSResultEndsLocationRequestWithUnavailableState() async {
+        let provider = ShelterLocationProvider()
+        provider.locationManager(CLLocationManager(), didUpdateLocations: [])
+        await Task.yield()
+
+        #expect(provider.coordinate == nil)
+        #expect(provider.error == .locationUnavailable)
+        #expect(!provider.isRequesting)
     }
 
     @Test func alertPlanMappingIsConservativeAndDoesNotMutateAlert() throws {

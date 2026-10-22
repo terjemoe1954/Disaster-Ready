@@ -56,11 +56,13 @@ final class ShelterLocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
-        let coordinate = ShelterCoordinate(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude
-        )
+        guard let coordinate = Self.validatedCoordinate(from: locations.last) else {
+            Task { @MainActor [weak self] in
+                self?.isRequesting = false
+                self?.error = .locationUnavailable
+            }
+            return
+        }
         Task { @MainActor [weak self] in
             self?.coordinate = coordinate
             self?.isRequesting = false
@@ -72,6 +74,21 @@ final class ShelterLocationProvider: NSObject, CLLocationManagerDelegate {
             self?.isRequesting = false
             self?.error = .locationUnavailable
         }
+    }
+
+    nonisolated static func validatedCoordinate(from location: CLLocation?) -> ShelterCoordinate? {
+        guard let location else { return nil }
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        guard
+            latitude.isFinite,
+            longitude.isFinite,
+            (-90...90).contains(latitude),
+            (-180...180).contains(longitude)
+        else {
+            return nil
+        }
+        return ShelterCoordinate(latitude: latitude, longitude: longitude)
     }
 }
 
