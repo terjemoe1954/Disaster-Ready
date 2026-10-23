@@ -55,6 +55,11 @@ struct SuppliesDashboardTab: View {
                 .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 220 : 160)
             }
             .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear
+                    .frame(height: 88)
+                    .accessibilityHidden(true)
+            }
             .background(Color(.systemGroupedBackground))
             .accessibilityIdentifier("suppliesScrollView")
             .onChange(of: data.inventoryScrollRequest) {
@@ -261,7 +266,7 @@ private struct PriorityMissingSupplies: View {
         )
     }
 
-    private var title: String { L10n.pick(language: language, english: "Next tasks", norwegian: "Neste oppgaver", thai: "งานถัดไป") }
+    private var title: String { L10n.pick(language: language, english: "Choose your next purchases", norwegian: "Velg neste innkjøp", thai: "เลือกสิ่งที่จะซื้อถัดไป") }
     private var emptyDetail: String { L10n.pick(language: language, english: "No recommended checklist items are currently missing. Review quantities and expiry dates in the full inventory below.", norwegian: "Ingen anbefalte sjekklistepunkter mangler nå. Kontroller mengder og holdbarhet i den fulle oversikten nedenfor.", thai: "ขณะนี้ไม่มีรายการแนะนำที่ขาด โปรดตรวจสอบปริมาณและวันหมดอายุในรายการเต็มด้านล่าง") }
 }
 
@@ -348,20 +353,53 @@ private struct ShoppingSelectionRow: View {
     let language: AppLanguage
 
     var body: some View {
-        Toggle(isOn: $isSelected) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.recommendation.localizedName(in: language))
-                    .font(.subheadline.weight(.semibold))
-                Text(missingDetail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        Button {
+            isSelected.toggle()
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? Color.green : Color.primary)
+                    .frame(width: 26)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.recommendation.localizedName(in: language))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.primary)
+                    Text(missingDetail)
+                        .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                    Text(selectionActionTitle)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.primary)
+                }
+
+                Spacer(minLength: 8)
             }
+            .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+            .background(
+                Color(uiColor: .secondarySystemBackground),
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .contentShape(Rectangle())
         }
-        .toggleStyle(.button)
+        .buttonStyle(.plain)
+        .accessibilityLabel(item.recommendation.localizedName(in: language))
+        .accessibilityValue(selectionActionTitle)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("shoppingSelection.\(item.id)")
     }
 
     private var missingDetail: String { L10n.pick(language: language, english: "Missing \(item.missingCount) checklist item", norwegian: "Mangler \(item.missingCount) sjekklistepunkt", thai: "ขาด \(item.missingCount) รายการ") }
+
+    private var selectionActionTitle: String {
+        if isSelected {
+            return L10n.pick(language: language, english: "Added to shopping list", norwegian: "Lagt til i handlelisten", thai: "เพิ่มในรายการซื้อแล้ว")
+        }
+        return L10n.pick(language: language, english: "Add to shopping list", norwegian: "Legg til i handlelisten", thai: "เพิ่มในรายการซื้อ")
+    }
 }
 
 private struct ShoppingListActions: View {

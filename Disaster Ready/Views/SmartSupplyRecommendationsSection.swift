@@ -19,49 +19,74 @@ struct SmartSupplyRecommendationsSection: View {
 
             RecommendationActionRow(
                 title: homeTitle,
-                detail: countText(homeCount),
+                detail: homeDetail,
                 systemImage: "house.fill",
+                tint: .blue,
                 action: addHome
             )
 
             RecommendationActionRow(
                 title: evacuationTitle,
-                detail: countText(evacuationCount),
+                detail: evacuationDetail,
                 systemImage: "backpack.fill",
+                tint: .orange,
                 action: addEvacuation
             )
+
+            Label(lightEvacuationNotice, systemImage: "figure.walk")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
         }
         .padding(20)
         .background(DashboardCardBackground())
     }
 
     private var title: String {
-        L10n.pick(language: language, english: "Smart supply lists", norwegian: "Smarte utstyrslister", thai: "รายการอุปกรณ์อัจฉริยะ")
+        L10n.pick(language: language, english: "Stay home or leave?", norwegian: "Bli hjemme eller dra?", thai: "อยู่บ้านหรือออกเดินทาง")
     }
 
     private var subtitle: String {
         L10n.pick(
             language: language,
-            english: "Recommendations combine the base list with the selected emergency and household profile.",
-            norwegian: "Anbefalingene kombinerer basislisten med valgt hendelse og husholdningsprofil.",
+            english: "Keep the large reserve at home. Add only a small, carryable list for evacuation.",
+            norwegian: "Behold det store lageret hjemme. Legg bare til en liten liste som kan bæres ved evakuering.",
             thai: "คำแนะนำรวมรายการพื้นฐานเข้ากับเหตุฉุกเฉินที่เลือกและโปรไฟล์ครัวเรือน"
         )
     }
 
     private var homeTitle: String {
-        L10n.pick(language: language, english: "Add home preparedness", norwegian: "Legg til hjemmeberedskap", thai: "เพิ่มอุปกรณ์เตรียมพร้อมที่บ้าน")
+        L10n.pick(language: language, english: "Stay home", norwegian: "Bli hjemme", thai: "อยู่บ้าน")
     }
 
     private var evacuationTitle: String {
-        L10n.pick(language: language, english: "Add grab / evacuation list", norwegian: "Legg til grip-/evakueringsliste", thai: "เพิ่มรายการหยิบฉวย/อพยพ")
+        L10n.pick(language: language, english: "Evacuate lightly", norwegian: "Evakuer lett", thai: "อพยพอย่างคล่องตัว")
     }
 
-    private func countText(_ count: Int) -> String {
+    private var homeDetail: String {
         L10n.pick(
             language: language,
-            english: "\(count) recommended items",
-            norwegian: "\(count) anbefalte varer",
-            thai: "รายการแนะนำ \(count) รายการ"
+            english: "\(homeCount) suggestions for the one-week reserve that stays at home.",
+            norwegian: "\(homeCount) forslag til ukeslageret som blir hjemme.",
+            thai: "คำแนะนำ \(homeCount) รายการสำหรับเสบียงหนึ่งสัปดาห์ที่เก็บไว้ที่บ้าน"
+        )
+    }
+
+    private var evacuationDetail: String {
+        L10n.pick(
+            language: language,
+            english: "\(evacuationCount) small essentials for the journey—not a one-week reserve.",
+            norwegian: "\(evacuationCount) små nødvendigheter for reisen – ikke et ukeslager.",
+            thai: "ของจำเป็นขนาดเล็ก \(evacuationCount) รายการสำหรับการเดินทาง ไม่ใช่เสบียงหนึ่งสัปดาห์"
+        )
+    }
+
+    private var lightEvacuationNotice: String {
+        L10n.pick(
+            language: language,
+            english: "Bring only what the household can carry safely. Leave bulk water, cooking equipment, and the full home reserve behind unless authorities instruct otherwise.",
+            norwegian: "Ta bare med det husstanden kan bære trygt. La store vannmengder, kokeutstyr og hele hjemmelageret bli igjen hvis ikke myndighetene sier noe annet.",
+            thai: "นำไปเฉพาะสิ่งที่ทุกคนในครัวเรือนถือได้อย่างปลอดภัย ทิ้งน้ำปริมาณมาก อุปกรณ์ทำอาหาร และเสบียงทั้งหมดไว้ที่บ้าน เว้นแต่เจ้าหน้าที่จะแนะนำเป็นอย่างอื่น"
         )
     }
 }
@@ -70,6 +95,7 @@ private struct RecommendationActionRow: View {
     let title: String
     let detail: String
     let systemImage: String
+    let tint: Color
     let action: () -> Void
 
     var body: some View {
@@ -77,7 +103,7 @@ private struct RecommendationActionRow: View {
             HStack(spacing: 12) {
                 Image(systemName: systemImage)
                     .font(.title3)
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(tint)
                     .frame(width: 28)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -90,7 +116,7 @@ private struct RecommendationActionRow: View {
 
                 Spacer()
                 Image(systemName: "plus.circle.fill")
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(tint)
             }
             .contentShape(Rectangle())
         }

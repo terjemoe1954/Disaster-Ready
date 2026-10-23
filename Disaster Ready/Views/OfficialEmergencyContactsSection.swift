@@ -87,14 +87,22 @@ struct OfficialEmergencyNumberRow: View {
             }
 
             if let source = GuidanceSourceRegistry.source(for: number.sourceID) {
-                Link(destination: source.url) {
+                Button {
+                    openURL(source.url)
+                } label: {
                     Label(EmergencyContactsLocalizationResources.text("official_contacts.source", language: language), systemImage: "arrow.up.right.square")
                         .font(.caption)
+                        .foregroundStyle(Color.primary)
+                        .underline()
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(12)
-        .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(
+            Color(uiColor: .secondarySystemBackground),
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
         .confirmationDialog(
             EmergencyContactsLocalizationResources.format("official_contacts.confirm_title", language: language, number.number),
             isPresented: $confirmsCall,
@@ -114,8 +122,10 @@ struct OfficialEmergencyNumberRow: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(EmergencyContactsLocalizationResources.text(number.titleKey, language: language))
                 .font(.headline)
+                .foregroundStyle(Color.primary)
             Text(number.number)
                 .font(.title2.monospacedDigit().weight(.bold))
+                .foregroundStyle(Color.primary)
             Text(EmergencyContactsLocalizationResources.text(number.descriptionKey, language: language))
                 .font(.footnote)
                 .foregroundStyle(Color.primary)
@@ -133,7 +143,8 @@ struct OfficialEmergencyNumberRow: View {
             )
         }
         .buttonStyle(.borderedProminent)
-        .tint(Color.primary)
+        .tint(.black)
+        .foregroundStyle(.white)
         .controlSize(.large)
         .accessibilityLabel(
             EmergencyContactsLocalizationResources.format(

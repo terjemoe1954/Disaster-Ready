@@ -86,10 +86,6 @@ struct DisasterDashboardView: View {
                             openEmergencyPlan: { selectedTab = .plan },
                             openWelcomeGuide: { showingOnboarding = true }
                         )
-                        OfficialEmergencyContactsSection(
-                            countryCode: householdProfile.countryCode,
-                            language: selectedLanguage
-                        )
                         if householdSafetySnapshot.updatedAt != nil {
                             HomeHouseholdSafetyStatusSection(
                                 snapshot: householdSafetySnapshot,
@@ -150,13 +146,6 @@ struct DisasterDashboardView: View {
                                 }
                             }
                         )
-                        OfficialWeatherAlertsSection(
-                            language: selectedLanguage,
-                            isCompact: true
-                        ) { emergencyType in
-                            selectedEmergencyType = emergencyType
-                            selectedTab = .plan
-                        }
                         HomePreparednessSection(
                             summary: homePreparednessSummary,
                             language: selectedLanguage,
@@ -293,6 +282,7 @@ struct DisasterDashboardView: View {
                     }
                 }
             }
+            .tint(Color.primary)
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -569,6 +559,11 @@ struct DisasterDashboardView: View {
             .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 220 : 160)
         }
         .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear
+                .frame(height: 88)
+                .accessibilityHidden(true)
+        }
         .background(backgroundGradient)
     }
 

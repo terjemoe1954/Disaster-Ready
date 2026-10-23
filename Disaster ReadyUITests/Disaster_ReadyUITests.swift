@@ -137,10 +137,14 @@ final class Disaster_ReadyUITests: XCTestCase {
         app.launchArguments = standardLaunchArguments(language: "nb")
         app.launch()
 
-        let searchField = app.descendants(matching: .any)["weatherAlertAreaSearchField"]
-        for _ in 0..<4 where !searchField.exists {
+        let weatherButton = app.buttons["homeOpenWeather"]
+        for _ in 0..<6 where !weatherButton.isHittable {
             app.swipeUp()
         }
+        XCTAssertTrue(weatherButton.waitForExistence(timeout: 5))
+        weatherButton.tap()
+
+        let searchField = app.descendants(matching: .any)["weatherAlertAreaSearchField"]
         XCTAssertTrue(searchField.waitForExistence(timeout: 5))
     }
 
@@ -270,7 +274,10 @@ final class Disaster_ReadyUITests: XCTestCase {
             .sufficientElementDescription,
             .trait
         ]
-        try app.performAccessibilityAudit(for: auditTypes)
+        try app.performAccessibilityAudit(for: auditTypes) { issue in
+            print("Accessibility audit issue: \(issue)")
+            return false
+        }
 
         let helpButton = app.buttons["primaryHelpNowButton"]
         scrollToHittable(helpButton, in: app)

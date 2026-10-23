@@ -672,22 +672,25 @@ struct OnboardingView: View {
                         .font(.body)
                         .foregroundStyle(.white.opacity(0.9))
 
-                    onboardingCard(
-                        icon: "wifi.slash",
-                        title: offlineTitle,
-                        body: offlineBody
+                    OnboardingSummaryCard(
+                        icon: "sos.circle.fill",
+                        title: helpTitle,
+                        detail: helpBody,
+                        tint: .red
                     )
 
-                    onboardingCard(
-                        icon: "person.3.fill",
-                        title: familyTitle,
-                        body: familyBody
+                    OnboardingSummaryCard(
+                        icon: "house.fill",
+                        title: homeTitle,
+                        detail: homeBody,
+                        tint: .blue
                     )
 
-                    onboardingCard(
-                        icon: "checklist.checked",
-                        title: suppliesTitle,
-                        body: suppliesBody
+                    OnboardingSummaryCard(
+                        icon: "backpack.fill",
+                        title: leaveTitle,
+                        detail: leaveBody,
+                        tint: .orange
                     )
 
                     Button(action: finish) {
@@ -705,76 +708,89 @@ struct OnboardingView: View {
         }
     }
 
-    private func onboardingCard(icon: String, title: String, body: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .font(.title2.weight(.bold))
-                .foregroundStyle(.white)
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(.white)
-            Text(body)
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.88))
-        }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-
     private var onboardingTitle: String {
-        L10n.pick(language: language, english: "Prepare before the network fails.", norwegian: "Forbered deg før nettet svikter.", thai: "เตรียมพร้อมก่อนที่เครือข่ายจะล้มเหลว")
+        L10n.pick(language: language, english: "Be ready. Act quickly.", norwegian: "Vær klar. Handle raskt.", thai: "เตรียมพร้อม ลงมืออย่างรวดเร็ว")
     }
 
     private var onboardingSubtitle: String {
         L10n.pick(
             language: language,
-            english: "Build local household plans, keep emergency contacts nearby, and decide early when to stay or go.",
-            norwegian: "Bygg lokale husstandsplaner, hold nødkontakter nær, og avgjør tidlig når dere skal bli eller dra.",
+            english: "The front page gives you three clear choices. Plans and essential information remain available without internet.",
+            norwegian: "Forsiden gir deg tre tydelige valg. Planer og viktig informasjon er tilgjengelig uten internett.",
             thai: "สร้างแผนครัวเรือนในเครื่อง เก็บผู้ติดต่อฉุกเฉินไว้ใกล้มือ และตัดสินใจล่วงหน้าว่าควรอยู่หรือไป"
         )
     }
 
-    private var offlineTitle: String {
-        L10n.pick(language: language, english: "Offline-first", norwegian: "Offline først", thai: "ออฟไลน์เป็นหลัก")
+    private var helpTitle: String {
+        L10n.pick(language: language, english: "1. Help now", norwegian: "1. Hjelp nå", thai: "1. ความช่วยเหลือตอนนี้")
     }
 
-    private var offlineBody: String {
+    private var helpBody: String {
         L10n.pick(
             language: language,
-            english: "The app keeps contacts, supply lists, and plans on-device so it remains useful without internet.",
-            norwegian: "Appen lagrer kontakter, utstyrslister og planer på enheten slik at den fortsatt er nyttig uten internett.",
+            english: "Open the first actions, meeting place, and emergency contacts.",
+            norwegian: "Åpne første handlinger, møteplass og nødkontakter.",
             thai: "แอปเก็บรายชื่อติดต่อ รายการเสบียง และแผนไว้ในอุปกรณ์ จึงยังใช้งานได้แม้ไม่มีอินเทอร์เน็ต"
         )
     }
 
-    private var familyTitle: String {
-        L10n.pick(language: language, english: "Family coordination", norwegian: "Familiekoordinering", thai: "การประสานงานครอบครัว")
+    private var homeTitle: String {
+        L10n.pick(language: language, english: "2. Prepare at home", norwegian: "2. Forbered hjemme", thai: "2. เตรียมพร้อมที่บ้าน")
     }
 
-    private var familyBody: String {
+    private var homeBody: String {
         L10n.pick(
             language: language,
-            english: "Save phone numbers, assign leads, and prepare scenario-specific SMS updates for review in Messages.",
-            norwegian: "Lagre telefonnumre, fordel ansvar og klargjør scenario-spesifikke SMS-oppdateringer som kontrolleres i Meldinger.",
+            english: "Keep the one-week reserve at home and review only what is missing.",
+            norwegian: "Behold ukeslageret hjemme og se bare gjennom det som mangler.",
             thai: "บันทึกหมายเลขโทรศัพท์ กำหนดผู้รับผิดชอบ และเตรียมอัปเดต SMS ตามสถานการณ์เพื่อตรวจสอบในแอปข้อความ"
         )
     }
 
-    private var suppliesTitle: String {
-        L10n.pick(language: language, english: "Supply tracking", norwegian: "Sporing av utstyr", thai: "ติดตามเสบียง")
+    private var leaveTitle: String {
+        L10n.pick(language: language, english: "3. Evacuate lightly", norwegian: "3. Evakuer lett", thai: "3. อพยพอย่างคล่องตัว")
     }
 
-    private var suppliesBody: String {
+    private var leaveBody: String {
         L10n.pick(
             language: language,
-            english: "Track what is stocked at home and in the car, and quickly focus on missing items.",
-            norwegian: "Følg med på hva som finnes hjemme og i bilen, og fokuser raskt på det som mangler.",
+            english: "Take only medicines, communication, documents, and other light essentials the household can carry.",
+            norwegian: "Ta bare med medisiner, kommunikasjon, dokumenter og andre lette nødvendigheter som husstanden kan bære.",
             thai: "ติดตามสิ่งของที่มีในบ้านและรถ และโฟกัสกับของที่ยังขาดได้อย่างรวดเร็ว"
         )
     }
 
     private var startTitle: String {
-        L10n.pick(language: language, english: "Start Planning", norwegian: "Start planlegging", thai: "เริ่มวางแผน")
+        L10n.pick(language: language, english: "Open the app", norwegian: "Åpne appen", thai: "เปิดแอป")
+    }
+}
+
+private struct OnboardingSummaryCard: View {
+    let icon: String
+    let title: String
+    let detail: String
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(tint)
+                .frame(width: 32)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.90))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }

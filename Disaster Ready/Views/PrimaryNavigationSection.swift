@@ -15,14 +15,14 @@ struct PrimaryNavigationSection: View {
             PrimaryNavigationCard(
                 title: L10n.pick(
                     language: language,
-                    english: "I need help now",
-                    norwegian: "Jeg trenger hjelp nå",
+                    english: "Help now",
+                    norwegian: "Hjelp nå",
                     thai: "ฉันต้องการความช่วยเหลือตอนนี้"
                 ),
                 detail: L10n.pick(
                     language: language,
-                    english: "Open the first actions, your saved meeting place, and emergency contacts.",
-                    norwegian: "Åpne første handlinger, lagret møteplass og nødkontakter.",
+                    english: "First actions, meeting place, and emergency contacts.",
+                    norwegian: "Første handlinger, møteplass og nødkontakter.",
                     thai: "เปิดการดำเนินการแรก จุดนัดพบที่บันทึกไว้ และผู้ติดต่อฉุกเฉิน"
                 ),
                 systemImage: "sos.circle.fill",
@@ -34,14 +34,14 @@ struct PrimaryNavigationSection: View {
             PrimaryNavigationCard(
                 title: L10n.pick(
                     language: language,
-                    english: "My preparedness",
-                    norwegian: "Min beredskap",
+                    english: "Prepare at home",
+                    norwegian: "Forbered hjemme",
                     thai: "การเตรียมพร้อมของฉัน"
                 ),
                 detail: L10n.pick(
                     language: language,
-                    english: "See supplies, payment preparedness, reminders, and practical guidance.",
-                    norwegian: "Se utstyr, betalingsberedskap, påminnelser og praktiske råd.",
+                    english: "One-week home supplies, reminders, and practical guidance.",
+                    norwegian: "Hjemmelager for én uke, påminnelser og praktiske råd.",
                     thai: "ดูสิ่งของ การเตรียมพร้อมด้านการชำระเงิน การเตือน และคำแนะนำที่ใช้ได้จริง"
                 ),
                 systemImage: "shippingbox.fill",
@@ -53,14 +53,14 @@ struct PrimaryNavigationSection: View {
             PrimaryNavigationCard(
                 title: L10n.pick(
                     language: language,
-                    english: "My emergency plan",
-                    norwegian: "Min nødplan",
+                    english: "Plan to leave",
+                    norwegian: "Planlegg å dra",
                     thai: "แผนฉุกเฉินของฉัน"
                 ),
                 detail: L10n.pick(
                     language: language,
-                    english: "Open scenarios, meeting places, contacts, roles, and your printable plan.",
-                    norwegian: "Åpne hendelser, møteplasser, kontakter, roller og utskrivbar plan.",
+                    english: "Meeting places, contacts, and a light evacuation list.",
+                    norwegian: "Møteplasser, kontakter og en lett evakueringsliste.",
                     thai: "เปิดเหตุการณ์ จุดนัดพบ ผู้ติดต่อ หน้าที่ และแผนที่พิมพ์ได้"
                 ),
                 systemImage: "checklist.checked",

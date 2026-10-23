@@ -368,6 +368,13 @@ private struct MyPlanSmartSuppliesStep: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
+            Label(lightEvacuationNotice, systemImage: "backpack.fill")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(12)
+                .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityElement(children: .combine)
+
             Label(L10n.text(plan.safetyNoticeKey, language: language), systemImage: "exclamationmark.shield.fill")
                 .font(.footnote)
                 .foregroundStyle(.orange)
@@ -403,6 +410,15 @@ private struct MyPlanSmartSuppliesStep: View {
 
     private var plan: SmartSupplyPlan {
         SupplyPrioritizer.recommendations(for: emergencyType, household: household)
+    }
+
+    private var lightEvacuationNotice: String {
+        L10n.pick(
+            language: language,
+            english: "Home supplies stay at home. For evacuation, take only light essentials the household can carry safely.",
+            norwegian: "Hjemmelageret blir hjemme. Ved evakuering tar dere bare med lette nødvendigheter som husstanden kan bære trygt.",
+            thai: "เก็บเสบียงหลักไว้ที่บ้าน เมื่ออพยพให้นำไปเฉพาะของจำเป็นน้ำหนักเบาที่ทุกคนถือได้อย่างปลอดภัย"
+        )
     }
 
     private func recommendationGroup(titleKey: String, items: [SupplyRecommendation]) -> some View {
