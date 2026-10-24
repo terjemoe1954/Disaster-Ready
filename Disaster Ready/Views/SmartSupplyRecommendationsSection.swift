@@ -66,18 +66,18 @@ struct SmartSupplyRecommendationsSection: View {
     private var homeDetail: String {
         L10n.pick(
             language: language,
-            english: "\(homeCount) suggestions for the one-week reserve that stays at home.",
-            norwegian: "\(homeCount) forslag til ukeslageret som blir hjemme.",
-            thai: "คำแนะนำ \(homeCount) รายการสำหรับเสบียงหนึ่งสัปดาห์ที่เก็บไว้ที่บ้าน"
+            english: "Add \(homeCount) suggestions and open your inventory.",
+            norwegian: "Legg til \(homeCount) forslag og åpne utstyrsoversikten.",
+            thai: "เพิ่มคำแนะนำ \(homeCount) รายการและเปิดรายการอุปกรณ์ของคุณ"
         )
     }
 
     private var evacuationDetail: String {
         L10n.pick(
             language: language,
-            english: "\(evacuationCount) small essentials for the journey—not a one-week reserve.",
-            norwegian: "\(evacuationCount) små nødvendigheter for reisen – ikke et ukeslager.",
-            thai: "ของจำเป็นขนาดเล็ก \(evacuationCount) รายการสำหรับการเดินทาง ไม่ใช่เสบียงหนึ่งสัปดาห์"
+            english: "Add \(evacuationCount) light essentials and open your inventory.",
+            norwegian: "Legg til \(evacuationCount) lette nødvendigheter og åpne utstyrsoversikten.",
+            thai: "เพิ่มของจำเป็นน้ำหนักเบา \(evacuationCount) รายการและเปิดรายการอุปกรณ์ของคุณ"
         )
     }
 

@@ -13,6 +13,61 @@ enum HomeNavigationPolicy {
     static let retainedTabs: [DashboardTab] = [.overview, .plan, .supplies, .contacts]
 }
 
+struct HomeMunicipalitySection: View {
+    let municipality: String?
+    let language: AppLanguage
+    let editMunicipality: () -> Void
+
+    var body: some View {
+        Button(action: editMunicipality) {
+            HStack(spacing: 14) {
+                Image(systemName: "location.fill")
+                    .font(.title2)
+                    .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(displayedMunicipality)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.primary)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DashboardCardBackground())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("homeMunicipalityButton")
+        .accessibilityHint(editHint)
+    }
+
+    private var displayedMunicipality: String {
+        let value = municipality?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return value.isEmpty ? missingMunicipality : value
+    }
+
+    private var title: String {
+        L10n.pick(language: language, english: "Your municipality", norwegian: "Din kommune", thai: "เทศบาลของคุณ")
+    }
+
+    private var missingMunicipality: String {
+        L10n.pick(language: language, english: "Choose municipality", norwegian: "Velg kommune", thai: "เลือกเทศบาล")
+    }
+
+    private var editHint: String {
+        L10n.pick(language: language, english: "Opens household settings", norwegian: "Åpner innstillinger for husstanden", thai: "เปิดการตั้งค่าครัวเรือน")
+    }
+}
+
 enum HomeChecklistStatus: Equatable, Sendable {
     case needsAttention
     case inProgress

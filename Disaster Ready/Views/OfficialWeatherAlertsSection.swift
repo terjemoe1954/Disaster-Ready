@@ -37,11 +37,26 @@ struct OfficialWeatherAlertsSection: View {
     @State private var message: String?
     @State private var lastCoordinate: ShelterCoordinate?
     @State private var locationProvider = ShelterLocationProvider()
+    @State private var loadedInitialArea = ""
 
     let language: AppLanguage
-    var isCompact = false
+    let isCompact: Bool
+    let initialArea: String
     let openPlan: (EmergencyType) -> Void
     private let service = METWeatherAlertService()
+
+    init(
+        language: AppLanguage,
+        isCompact: Bool = false,
+        initialArea: String = "",
+        openPlan: @escaping (EmergencyType) -> Void
+    ) {
+        self.language = language
+        self.isCompact = isCompact
+        self.initialArea = initialArea
+        self.openPlan = openPlan
+        _area = State(initialValue: initialArea)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -100,6 +115,13 @@ struct OfficialWeatherAlertsSection: View {
                 message = unavailableMessage
             }
         }
+        .task(id: initialArea) {
+            let municipality = initialArea.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !municipality.isEmpty, municipality != loadedInitialArea else { return }
+            loadedInitialArea = municipality
+            area = municipality
+            search()
+        }
     }
 
     private var searchField: some View {
@@ -156,7 +178,7 @@ struct OfficialWeatherAlertsSection: View {
 
     private let officialURL = URL(string: "https://www.met.no/vaer-og-klima/ekstremvaervarsler-og-andre-farevarsler")!
     private let licenceURL = URL(string: "https://api.met.no/doc/License")!
-    private var title: String { L10n.pick(language: language, english: "Official weather warnings", norwegian: "Offisielle farevarsler", thai: "คำเตือนสภาพอากาศทางการ") }
+    private var title: String { L10n.pick(language: language, english: "Weather and hazard warnings", norwegian: "Varsler om vær og andre farer", thai: "คำเตือนสภาพอากาศและภัยอื่น ๆ") }
     private var explanation: String { L10n.pick(language: language, english: "Official, time-sensitive MET Norway data. Search an area or request one location reading. Your coordinates stay on this device.", norwegian: "Offisielle, tidskritiske data fra MET. Søk etter et område eller be om én posisjonsmåling. Koordinatene forblir på enheten.", thai: "ข้อมูลทางการที่เปลี่ยนแปลงตามเวลาจาก MET Norway ค้นหาพื้นที่หรือขอตำแหน่งหนึ่งครั้ง พิกัดจะอยู่ในอุปกรณ์นี้เท่านั้น") }
     private var searchPlaceholder: String { L10n.pick(language: language, english: "Municipality, town, or address", norwegian: "Kommune, sted eller adresse", thai: "เทศบาล เมือง หรือที่อยู่") }
     private var searchTitle: String { L10n.pick(language: language, english: "Search", norwegian: "Søk", thai: "ค้นหา") }

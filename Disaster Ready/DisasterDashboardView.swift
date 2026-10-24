@@ -78,6 +78,20 @@ struct DisasterDashboardView: View {
             TabView(selection: $selectedTab) {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
+                        HomeMunicipalitySection(
+                            municipality: householdProfile.municipality,
+                            language: selectedLanguage,
+                            editMunicipality: { showingHomeHouseholdProfile = true }
+                        )
+                        OfficialWeatherAlertsSection(
+                            language: selectedLanguage,
+                            isCompact: true,
+                            initialArea: householdProfile.municipality ?? "",
+                            openPlan: { emergencyType in
+                                selectedEmergencyType = emergencyType
+                                selectedTab = .plan
+                            }
+                        )
                         PrimaryNavigationSection(
                             language: selectedLanguage,
                             showsWelcomeGuide: !hasSeenOnboarding,
@@ -259,8 +273,20 @@ struct DisasterDashboardView: View {
                         paymentPreparedness: $paymentPreparedness,
                         householdMemberCount: $householdMemberCount,
                         showOnlyMissing: $showOnlyMissingSupplies,
-                        addHome: addSmartHomeSupplies,
-                        addEvacuation: addSmartEvacuationSupplies,
+                        addHome: {
+                            addSmartHomeSupplies()
+                            Task { @MainActor in
+                                await Task.yield()
+                                inventoryScrollRequest += 1
+                            }
+                        },
+                        addEvacuation: {
+                            addSmartEvacuationSupplies()
+                            Task { @MainActor in
+                                await Task.yield()
+                                inventoryScrollRequest += 1
+                            }
+                        },
                         deleteItem: deleteSupplyItem
                     )
                 }
