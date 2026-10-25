@@ -430,6 +430,18 @@ struct UserManualView: View {
                     .foregroundStyle(.secondary)
 
                 manualSection(
+                    title: overviewTitle,
+                    body: overviewBody,
+                    systemImage: "rectangle.grid.1x2.fill"
+                )
+
+                manualSection(
+                    title: alertsTitle,
+                    body: alertsBody,
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+
+                manualSection(
                     title: emergencyTitle,
                     body: emergencyBody,
                     systemImage: "exclamationmark.triangle.fill"
@@ -515,6 +527,42 @@ struct UserManualView: View {
         case .thai:
             return "ใช้ Disaster Ready เพื่อเก็บแผนครัวเรือน รายชื่อติดต่อ บทบาท และรายการเสบียงไว้บนอุปกรณ์เครื่องเดียว แม้ในช่วงที่อินเทอร์เน็ตไม่เสถียร"
         }
+    }
+
+    private var overviewTitle: String {
+        L10n.pick(
+            language: language,
+            english: "The most important overview",
+            norwegian: "Oversikten «Det viktigste»",
+            thai: "ภาพรวมสิ่งสำคัญที่สุด"
+        )
+    }
+
+    private var overviewBody: String {
+        L10n.pick(
+            language: language,
+            english: "Start on Overview. The first card follows this order: Who are we, Where are we staying, What do we need, Where should we go or stay, and Where should we not be. Every row is a button. Tap a row to open the relevant contacts, household and municipality settings, equipment list, meeting and evacuation places, or official hazard information.",
+            norwegian: "Start på Oversikt. Det første kortet følger denne rekkefølgen: Hvem er vi, Hvor oppholder vi oss, Hva trenger vi, Hvor bør vi dra eller oppholde oss, og Hvor bør vi ikke være. Hele hver rad kan trykkes. Trykk for å åpne riktige kontakter, husstands- og kommuneinnstillinger, utstyrsliste, møte- og evakueringssteder eller offisiell fareinformasjon.",
+            thai: "เริ่มที่หน้าภาพรวม การ์ดแรกเรียงตามลำดับ: เราคือใคร เราอยู่ที่ไหน เราต้องการอะไร เราควรไปหรืออยู่ที่ไหน และเราไม่ควรอยู่ที่ไหน แต่ละแถวเป็นปุ่ม แตะเพื่อเปิดรายชื่อติดต่อ การตั้งค่าครัวเรือนและเทศบาล รายการอุปกรณ์ จุดนัดพบและสถานที่อพยพ หรือข้อมูลภัยทางการ"
+        )
+    }
+
+    private var alertsTitle: String {
+        L10n.pick(
+            language: language,
+            english: "Municipality and official warnings",
+            norwegian: "Kommune og offisielle farevarsler",
+            thai: "เทศบาลและคำเตือนทางการ"
+        )
+    }
+
+    private var alertsBody: String {
+        L10n.pick(
+            language: language,
+            english: "Save your municipality in the household profile. The app then searches MET Norway's current weather and hazard warnings for that area when Overview opens. Active warnings are shown directly below the most important overview and trigger a pop-up. No warning found is not a guarantee of safety. Warning searches need internet; saved plans and bundled guidance remain available offline.",
+            norwegian: "Lagre kommunen i husstandsprofilen. Når Oversikt åpnes, søker appen etter aktuelle vær- og farevarsler fra MET for området. Aktive varsler vises rett under «Det viktigste» og utløser en popup. At ingen varsler blir funnet, er ingen garanti for sikkerhet. Varselsøk krever internett; lagrede planer og innebygde råd er fortsatt tilgjengelige uten nett.",
+            thai: "บันทึกเทศบาลไว้ในโปรไฟล์ครัวเรือน เมื่อเปิดหน้าภาพรวม แอปจะค้นหาคำเตือนสภาพอากาศและภัยล่าสุดจาก MET Norway สำหรับพื้นที่นั้น คำเตือนที่ยังมีผลจะแสดงใต้ภาพรวมสิ่งสำคัญที่สุดและเปิดป๊อปอัป การไม่พบคำเตือนไม่ได้หมายความว่าปลอดภัย การค้นหาคำเตือนต้องใช้อินเทอร์เน็ต ส่วนแผนที่บันทึกไว้และคำแนะนำในแอปยังใช้แบบออฟไลน์ได้"
+        )
     }
 
     private var emergencyTitle: String {

@@ -72,16 +72,39 @@ struct DisasterDashboardView: View {
     @State private var schedulesTestReminderOnAlertDismiss = false
     @State private var transferMessage: String?
     @State private var showingTransferAlert = false
+    @State private var activeWeatherAlertMessage: String?
+    @State private var showingActiveWeatherAlert = false
+    @State private var presentedWeatherAlertIDs: Set<String> = []
 
     var body: some View {
         NavigationStack {
             TabView(selection: $selectedTab) {
                 Tab(overviewTabTitle, systemImage: "house.fill", value: DashboardTab.overview) {
                     dashboardScrollView {
-                        HomeMunicipalitySection(
+                        HomeEssentialOverviewSection(
+                            householdMemberNames: householdMembers.map(\.name),
                             municipality: householdProfile.municipality,
+                            packedSupplyCount: supplyCompletionCount,
+                            totalSupplyCount: totalSupplyCount,
+                            plannedDestination: primaryPlannedDestination,
                             language: selectedLanguage,
-                            editMunicipality: { showingHomeHouseholdProfile = true }
+                            openHousehold: { selectedTab = .contacts },
+                            openMunicipality: { showingHomeHouseholdProfile = true },
+                            openSupplies: {
+                                selectedTab = .supplies
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    inventoryScrollRequest += 1
+                                }
+                            },
+                            openDestinations: {
+                                selectedTab = .plan
+                                Task { @MainActor in
+                                    await Task.yield()
+                                    locationScrollRequest += 1
+                                }
+                            },
+                            openHazardAreas: { presentedHomeTool = .weather }
                         )
                         OfficialWeatherAlertsSection(
                             language: selectedLanguage,
@@ -90,6 +113,9 @@ struct DisasterDashboardView: View {
                             openPlan: { emergencyType in
                                 selectedEmergencyType = emergencyType
                                 selectedTab = .plan
+                            },
+                            onActiveAlerts: { alerts in
+                                presentActiveWeatherAlertIfNeeded(alerts)
                             }
                         )
                         PrimaryNavigationSection(
@@ -385,7 +411,8 @@ struct DisasterDashboardView: View {
         .sheet(item: $presentedHomeTool) { tool in
             HomeOfficialToolSheet(
                 tool: tool,
-                language: selectedLanguage
+                language: selectedLanguage,
+                initialWeatherArea: householdProfile.municipality ?? ""
             ) { emergencyType in
                 presentedHomeTool = nil
                 selectedEmergencyType = emergencyType
@@ -511,6 +538,11 @@ struct DisasterDashboardView: View {
             }
         } message: {
             Text(reminderMessage ?? "")
+        }
+        .alert(activeWeatherAlertTitle, isPresented: $showingActiveWeatherAlert) {
+            Button(showWeatherAlertsTitle) {}
+        } message: {
+            Text(activeWeatherAlertMessage ?? "")
         }
         .onChange(of: selectedLanguage) { _, newValue in
             preferredLanguageCode = newValue.rawValue
@@ -766,6 +798,42 @@ struct DisasterDashboardView: View {
         return [plan.reunionPoint, plan.evacuationDestination, plan.shelterZone]
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             .count
+    }
+
+    private var primaryPlannedDestination: String? {
+        guard let plan = currentEmergencyPlan else { return nil }
+        return [
+            plan.evacuationDestination,
+            plan.reunionPoint,
+            plan.alternativeAccommodation ?? "",
+            plan.familyFriendLocation ?? "",
+            plan.secondaryHome ?? ""
+        ].first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+
+    private func presentActiveWeatherAlertIfNeeded(_ alerts: [OfficialAlert]) {
+        let alertIDs = Set(alerts.map(\.id))
+        guard !alertIDs.isEmpty, alertIDs != presentedWeatherAlertIDs else { return }
+        presentedWeatherAlertIDs = alertIDs
+
+        let municipality = householdProfile.municipality?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let firstHeadline = alerts.first?.headline ?? alerts.first?.event ?? ""
+        if alerts.count == 1 {
+            activeWeatherAlertMessage = L10n.pick(
+                language: selectedLanguage,
+                english: "There is an active official warning for \(municipality): \(firstHeadline). See the warning details on the overview.",
+                norwegian: "Det er et aktivt offisielt farevarsel for \(municipality): \(firstHeadline). Se detaljene i oversikten.",
+                thai: "มีคำเตือนทางการที่ยังมีผลสำหรับ \(municipality): \(firstHeadline) ดูรายละเอียดในหน้าภาพรวม"
+            )
+        } else {
+            activeWeatherAlertMessage = L10n.pick(
+                language: selectedLanguage,
+                english: "There are \(alerts.count) active official warnings for \(municipality). See the warning details on the overview.",
+                norwegian: "Det er \(alerts.count) aktive offisielle farevarsler for \(municipality). Se detaljene i oversikten.",
+                thai: "มีคำเตือนทางการที่ยังมีผล \(alerts.count) รายการสำหรับ \(municipality) ดูรายละเอียดในหน้าภาพรวม"
+            )
+        }
+        showingActiveWeatherAlert = true
     }
 
     private var homePreparednessSummary: HomePreparednessSummary {
@@ -1788,6 +1856,14 @@ struct DisasterDashboardView: View {
 
     private var alertDoneTitle: String {
         L10n.pick(language: selectedLanguage, english: "OK", norwegian: "OK", thai: "ตกลง")
+    }
+
+    private var activeWeatherAlertTitle: String {
+        L10n.pick(language: selectedLanguage, english: "Warning for your area", norwegian: "Farevarsel for området ditt", thai: "คำเตือนสำหรับพื้นที่ของคุณ")
+    }
+
+    private var showWeatherAlertsTitle: String {
+        L10n.pick(language: selectedLanguage, english: "Show warnings", norwegian: "Vis farevarsler", thai: "แสดงคำเตือน")
     }
 
     private var supplyErrorTitle: String {

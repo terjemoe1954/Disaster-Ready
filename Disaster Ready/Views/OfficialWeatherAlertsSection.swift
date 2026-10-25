@@ -43,18 +43,21 @@ struct OfficialWeatherAlertsSection: View {
     let isCompact: Bool
     let initialArea: String
     let openPlan: (EmergencyType) -> Void
+    let onActiveAlerts: ([OfficialAlert]) -> Void
     private let service = METWeatherAlertService()
 
     init(
         language: AppLanguage,
         isCompact: Bool = false,
         initialArea: String = "",
-        openPlan: @escaping (EmergencyType) -> Void
+        openPlan: @escaping (EmergencyType) -> Void,
+        onActiveAlerts: @escaping ([OfficialAlert]) -> Void = { _ in }
     ) {
         self.language = language
         self.isCompact = isCompact
         self.initialArea = initialArea
         self.openPlan = openPlan
+        self.onActiveAlerts = onActiveAlerts
         _area = State(initialValue: initialArea)
     }
 
@@ -164,7 +167,11 @@ struct OfficialWeatherAlertsSection: View {
     private func refresh(coordinate: ShelterCoordinate) async {
         do {
             let result = try await service.alertSnapshot(latitude: coordinate.latitude, longitude: coordinate.longitude, languageCode: language == .norwegian ? "no" : "en")
-            snapshot = result; message = result.alerts.isEmpty ? noAlertsMessage : nil
+            snapshot = result
+            message = result.alerts.isEmpty ? noAlertsMessage : nil
+            if !result.alerts.isEmpty {
+                onActiveAlerts(result.alerts)
+            }
         } catch { snapshot = nil; message = unavailableMessage }
         isLoading = false
     }

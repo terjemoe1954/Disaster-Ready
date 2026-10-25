@@ -13,41 +13,74 @@ enum HomeNavigationPolicy {
     static let retainedTabs: [DashboardTab] = [.overview, .plan, .supplies, .contacts]
 }
 
-struct HomeMunicipalitySection: View {
+struct HomeEssentialOverviewSection: View {
+    let householdMemberNames: [String]
     let municipality: String?
+    let packedSupplyCount: Int
+    let totalSupplyCount: Int
+    let plannedDestination: String?
     let language: AppLanguage
-    let editMunicipality: () -> Void
+    let openHousehold: () -> Void
+    let openMunicipality: () -> Void
+    let openSupplies: () -> Void
+    let openDestinations: () -> Void
+    let openHazardAreas: () -> Void
 
     var body: some View {
-        Button(action: editMunicipality) {
-            HStack(spacing: 14) {
-                Image(systemName: "location.fill")
-                    .font(.title2)
-                    .foregroundStyle(.blue)
-                    .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 0) {
+            Text(sectionTitle)
+                .font(.title2.weight(.bold))
+                .padding(.horizontal, 18)
+                .padding(.top, 18)
+                .padding(.bottom, 8)
+                .accessibilityHeading(.h1)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Text(displayedMunicipality)
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(.primary)
-                }
-
-                Spacer(minLength: 8)
-
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
-                    .accessibilityHidden(true)
-            }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DashboardCardBackground())
+            HomeEssentialOverviewRow(
+                title: whoTitle,
+                detail: householdDetail,
+                systemImage: "person.2.fill",
+                color: .blue,
+                identifier: "homeEssentialHousehold",
+                action: openHousehold
+            )
+            Divider().padding(.leading, 66)
+            HomeEssentialOverviewRow(
+                title: locationTitle,
+                detail: displayedMunicipality,
+                systemImage: "location.fill",
+                color: .blue,
+                identifier: "homeEssentialMunicipality",
+                action: openMunicipality
+            )
+            Divider().padding(.leading, 66)
+            HomeEssentialOverviewRow(
+                title: needsTitle,
+                detail: suppliesDetail,
+                systemImage: "shippingbox.fill",
+                color: .green,
+                identifier: "homeEssentialSupplies",
+                action: openSupplies
+            )
+            Divider().padding(.leading, 66)
+            HomeEssentialOverviewRow(
+                title: destinationTitle,
+                detail: destinationDetail,
+                systemImage: "figure.walk.departure",
+                color: .indigo,
+                identifier: "homeEssentialDestinations",
+                action: openDestinations
+            )
+            Divider().padding(.leading, 66)
+            HomeEssentialOverviewRow(
+                title: avoidTitle,
+                detail: avoidDetail,
+                systemImage: "exclamationmark.triangle.fill",
+                color: .orange,
+                identifier: "homeEssentialHazardAreas",
+                action: openHazardAreas
+            )
         }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("homeMunicipalityButton")
-        .accessibilityHint(editHint)
+        .background(DashboardCardBackground())
     }
 
     private var displayedMunicipality: String {
@@ -55,16 +88,111 @@ struct HomeMunicipalitySection: View {
         return value.isEmpty ? missingMunicipality : value
     }
 
-    private var title: String {
-        L10n.pick(language: language, english: "Your municipality", norwegian: "Din kommune", thai: "เทศบาลของคุณ")
+    private var householdDetail: String {
+        let names = householdMemberNames
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !names.isEmpty else {
+            return L10n.pick(language: language, english: "Add the people in your household", norwegian: "Legg inn personene i husstanden", thai: "เพิ่มสมาชิกในครัวเรือน")
+        }
+        return names.formatted(.list(type: .and))
+    }
+
+    private var suppliesDetail: String {
+        guard totalSupplyCount > 0 else {
+            return L10n.pick(language: language, english: "Open the short equipment list", norwegian: "Åpne den korte utstyrslisten", thai: "เปิดรายการอุปกรณ์ฉบับย่อ")
+        }
+        return L10n.pick(
+            language: language,
+            english: "Ready: \(packedSupplyCount) of \(totalSupplyCount)",
+            norwegian: "Klart: \(packedSupplyCount) av \(totalSupplyCount)",
+            thai: "พร้อมแล้ว: \(packedSupplyCount) จาก \(totalSupplyCount)"
+        )
+    }
+
+    private var destinationDetail: String {
+        let value = plannedDestination?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return value.isEmpty
+            ? L10n.pick(language: language, english: "Choose meeting and evacuation places", norwegian: "Velg møte- og evakueringssteder", thai: "เลือกจุดนัดพบและสถานที่อพยพ")
+            : value
+    }
+
+    private var sectionTitle: String {
+        L10n.pick(language: language, english: "Most important", norwegian: "Det viktigste", thai: "สิ่งสำคัญที่สุด")
+    }
+
+    private var whoTitle: String {
+        L10n.pick(language: language, english: "Who are we?", norwegian: "Hvem er vi?", thai: "เราคือใคร?")
+    }
+
+    private var locationTitle: String {
+        L10n.pick(language: language, english: "Where are we staying?", norwegian: "Hvor oppholder vi oss?", thai: "เราอยู่ที่ไหน?")
+    }
+
+    private var needsTitle: String {
+        L10n.pick(language: language, english: "What do we need?", norwegian: "Hva trenger vi?", thai: "เราต้องการอะไร?")
+    }
+
+    private var destinationTitle: String {
+        L10n.pick(language: language, english: "Where should we go or stay?", norwegian: "Hvor bør vi dra eller oppholde oss?", thai: "เราควรไปหรืออยู่ที่ไหน?")
+    }
+
+    private var avoidTitle: String {
+        L10n.pick(language: language, english: "Where should we not be?", norwegian: "Hvor bør vi ikke være?", thai: "เราไม่ควรอยู่ที่ไหน?")
+    }
+
+    private var avoidDetail: String {
+        L10n.pick(language: language, english: "See current hazard areas and official advice", norwegian: "Se aktuelle fareområder og offisielle råd", thai: "ดูพื้นที่เสี่ยงและคำแนะนำทางการล่าสุด")
     }
 
     private var missingMunicipality: String {
         L10n.pick(language: language, english: "Choose municipality", norwegian: "Velg kommune", thai: "เลือกเทศบาล")
     }
 
-    private var editHint: String {
-        L10n.pick(language: language, english: "Opens household settings", norwegian: "Åpner innstillinger for husstanden", thai: "เปิดการตั้งค่าครัวเรือน")
+}
+
+private struct HomeEssentialOverviewRow: View {
+    let title: String
+    let detail: String
+    let systemImage: String
+    let color: Color
+    let identifier: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: systemImage)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(color, in: Circle())
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text(detail)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier)
     }
 }
 
@@ -613,6 +741,7 @@ struct HomeOfficialToolSheet: View {
 
     let tool: HomeOfficialTool
     let language: AppLanguage
+    let initialWeatherArea: String
     let openPlan: (EmergencyType) -> Void
 
     var body: some View {
@@ -621,7 +750,11 @@ struct HomeOfficialToolSheet: View {
                 VStack(alignment: .leading, spacing: 20) {
                     switch tool {
                     case .weather:
-                        OfficialWeatherAlertsSection(language: language, openPlan: openPlan)
+                        OfficialWeatherAlertsSection(
+                            language: language,
+                            initialArea: initialWeatherArea,
+                            openPlan: openPlan
+                        )
                     case .shelters:
                         PublicSheltersSection(language: language)
                     case .sources:
