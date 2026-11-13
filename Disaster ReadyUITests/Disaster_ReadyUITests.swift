@@ -8,6 +8,50 @@
 import XCTest
 
 final class Disaster_ReadyUITests: XCTestCase {
+
+    @MainActor
+    func testBirthDatePersistsAndNewPreparednessSectionsAreAvailable() throws {
+        let app = launchEnglishApp()
+        tabItem(named: "Contacts", in: app).tap()
+        let addMember = app.buttons["Add member"]
+        scrollToHittable(addMember, in: app)
+        addMember.tap()
+        let name = "000 UI preservation " + UUID().uuidString.prefix(8)
+        let nameField = app.textFields["Name"].firstMatch
+        scrollToHittable(nameField, in: app)
+        nameField.tap()
+        nameField.typeText(name)
+        app.swipeUp()
+        let birthToggle = app.switches["Add date of birth"].firstMatch
+        scrollToHittable(birthToggle, in: app)
+        birthToggle.tap()
+        let picker = app.buttons["Date Picker"].firstMatch
+        scrollToHittable(picker, in: app)
+        XCTAssertTrue(picker.exists)
+        XCTAssertTrue(app.staticTexts["Age: 0 years"].firstMatch.exists)
+        app.terminate()
+        app.launch()
+        tabItem(named: "Contacts", in: app).tap()
+        let savedName = app.textFields.matching(NSPredicate(format: "value == %@", name)).firstMatch
+        scrollToHittable(savedName, in: app)
+        XCTAssertTrue(savedName.exists)
+        let savedToggle = app.switches["Add date of birth"].firstMatch
+        XCTAssertEqual(savedToggle.value as? String, "1")
+        XCTAssertTrue(app.staticTexts["Age: 0 years"].firstMatch.exists)
+
+        tabItem(named: "Supplies", in: app).tap()
+        let mustHave = app.staticTexts["MUST HAVE · Prioritize first"]
+        scrollToHittable(mustHave, in: app)
+        XCTAssertTrue(mustHave.exists)
+        let shouldHave = app.staticTexts["SHOULD HAVE · Build gradually"]
+        scrollToHittable(shouldHave, in: app)
+        XCTAssertTrue(shouldHave.exists)
+        tabItem(named: "Contacts", in: app).tap()
+        let redCross = app.staticTexts["Røde Kors"]
+        scrollToHittable(redCross, in: app)
+        XCTAssertTrue(redCross.exists)
+        XCTAssertTrue(app.staticTexts["Norsk Folkehjelp"].exists)
+    }
     override func setUpWithError() throws {
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait

@@ -25,6 +25,7 @@ struct EventAwareMyPlanView: View {
             )
 
             SafetyContextSection(language: language)
+            AssistedEvacuationPlanningSection(language: language)
 
             PersonalEmergencyPlanOverviewSection(
                 plan: plan,
@@ -621,5 +622,34 @@ private struct MyPlanStepCard<Content: View>: View {
             guard newValue > oldValue else { return }
             isExpanded = true
         }
+    }
+}
+
+private struct AssistedEvacuationPlanningSection: View {
+    let language: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(L10n.pick(language: language,
+                english: "Plan early for people who need help",
+                norwegian: "Planlegg tidlig for dem som trenger hjelp",
+                thai: "วางแผนล่วงหน้าสำหรับผู้ที่ต้องการความช่วยเหลือ"), systemImage: "person.2.fill")
+                .font(.headline)
+            Text(L10n.pick(language: language,
+                english: "If someone is older, injured or needs assistance, assess evacuation needs and arrange help and transport early. Agree on a warm, accessible place to stay and who can accompany them. Record individual needs in the household profile.",
+                norwegian: "Hvis noen er eldre, skadet eller trenger hjelp, bør behovet for evakuering vurderes og hjelp og transport avtales tidlig. Avtal et varmt, tilgjengelig sted å bo og hvem som kan følge dem. Noter individuelle behov i husstandsprofilen.",
+                thai: "หากมีผู้สูงอายุ ผู้บาดเจ็บ หรือผู้ที่ต้องการความช่วยเหลือ ควรประเมินความจำเป็นในการอพยพและจัดเตรียมความช่วยเหลือกับการเดินทางไว้ล่วงหน้า ตกลงที่พักที่อบอุ่น เข้าถึงได้ และผู้ที่จะไปด้วย บันทึกความต้องการเฉพาะในข้อมูลครัวเรือน"))
+            Text(L10n.pick(language: language,
+                english: "Severe cold can make long walks and staying outdoors dangerous. Plan a safe route to suitable shelter. Follow instructions from authorities; contact the municipality about assistance needs. In immediate danger, seek emergency help and do not delay leaving a dangerous place to collect supplies.",
+                norwegian: "Sterk kulde kan gjøre lange turer til fots og opphold ute farlig. Planlegg en trygg vei til egnet innkvartering. Følg myndighetenes råd, og kontakt kommunen om hjelpebehov. Ved akutt fare: Søk nødhjelp og ikke utsett å forlate et farlig sted for å samle utstyr.",
+                thai: "อากาศหนาวจัดอาจทำให้การเดินไกลและการอยู่กลางแจ้งเป็นอันตราย วางแผนเส้นทางปลอดภัยไปยังที่พักที่เหมาะสม ทำตามคำแนะนำของทางการและติดต่อหน่วยงานท้องถิ่นเรื่องความช่วยเหลือ หากมีอันตรายเร่งด่วน ให้ขอความช่วยเหลือฉุกเฉินและอย่าชะลอการออกจากจุดอันตรายเพื่อเก็บอุปกรณ์"))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Link(L10n.pick(language: language, english: "Source: DSB – Preparing for cold weather (Norwegian)", norwegian: "Kilde: DSB – Slik forbereder du deg på kulda", thai: "แหล่งข้อมูล: DSB – การเตรียมรับอากาศหนาว (ภาษานอร์เวย์)"), destination: URL(string: "https://www.dsb.no/sikkerhverdag/produkter-utstyr-og-fritid/slik-forbereder-du-deg-pa-kulda/")!)
+                .font(.caption)
+        }
+        .padding(16)
+        .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityIdentifier("assistedEvacuationPlanning")
     }
 }

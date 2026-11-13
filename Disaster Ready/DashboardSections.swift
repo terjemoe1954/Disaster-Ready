@@ -1994,6 +1994,24 @@ private struct FamilyContactEditor: View {
                 Text(outsideContactTitle).tag(false)
             }
             .pickerStyle(.segmented)
+            if contact.isHouseholdMember {
+                Toggle(L10n.pick(language: language, english: "Add date of birth", norwegian: "Legg til fødselsdato", thai: "เพิ่มวันเกิด"), isOn: Binding(
+                    get: { contact.birthDate != nil },
+                    set: { contact.birthDate = $0 ? Date() : nil }
+                ))
+                if contact.birthDate != nil {
+                    DatePicker(
+                        L10n.pick(language: language, english: "Date of birth", norwegian: "Fødselsdato", thai: "วันเกิด"),
+                        selection: Binding(get: { contact.birthDate ?? Date() }, set: { contact.birthDate = $0 }),
+                        in: ...Date(), displayedComponents: .date
+                    )
+                    if let age = contact.age() {
+                        Text(L10n.pick(language: language, english: "Age: \(age) years", norwegian: "Alder: \(age) år", thai: "อายุ: \(age) ปี"))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
             TextField(L10n.text("phone_number", language: language), text: $contact.phoneNumber)
                 .textFieldStyle(.roundedBorder)
                 .keyboardType(.phonePad)

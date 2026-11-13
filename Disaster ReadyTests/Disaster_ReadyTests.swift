@@ -9,10 +9,171 @@ import Foundation
 import CoreLocation
 import PDFKit
 import Testing
+import SwiftData
 @testable import Disaster_Ready
 
 @MainActor
 struct Disaster_ReadyTests {
+
+    @Test(.enabled(if: FileManager.default.fileExists(atPath: preservationBackupURL.path)))
+    func exportedUserDataSurvivesOnDiskUpgrade() throws {
+        // The private input is copied into the simulator locally; never include it in source control.
+        let inputData = try Data(contentsOf: preservationBackupURL)
+        let original = try DisasterBackupPayload.decode(from: inputData)
+        try original.validateForImport()
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appendingPathComponent("user-copy.store")
+        func populateOldStore() throws {
+            let schema = Schema([PreBirthDateSchema.FamilyContact.self, ImportantNumber.self, HouseholdPlan.self, HouseholdRole.self, SupplyItem.self])
+            let container = try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: storeURL))
+            let context = ModelContext(container)
+            original.familyContacts.forEach { context.insert(PreBirthDateSchema.FamilyContact(name: $0.name, role: $0.role, phoneNumber: $0.phoneNumber, notes: $0.notes, isHouseholdMember: $0.isHouseholdMember ?? true)) }
+            original.importantNumbers.forEach { context.insert(ImportantNumber(label: $0.label, phoneNumber: $0.phoneNumber, notes: $0.notes)) }
+            original.householdRoles.forEach { context.insert(HouseholdRole(title: $0.title, person: $0.person, task: $0.task, systemImage: $0.systemImage)) }
+            original.supplies.forEach { context.insert(SupplyItem(name: $0.name, detail: $0.detail, isPacked: $0.isPacked, storageLocation: $0.storageLocation, quantity: $0.quantity ?? "", reviewDate: $0.reviewDate)) }
+            original.householdPlans.forEach { context.insert(HouseholdPlan(scenarioIdentifier: $0.scenarioIdentifier, reunionPoint: $0.reunionPoint, evacuationDestination: $0.evacuationDestination, shelterZone: $0.shelterZone, gasShutoffNote: $0.gasShutoffNote, medicalLead: $0.medicalLead, petLead: $0.petLead, familyPassword: $0.familyPassword, alternativeAccommodation: $0.alternativeAccommodation, familyFriendLocation: $0.familyFriendLocation, secondaryHome: $0.secondaryHome, safePlaceNote: $0.safePlaceNote, waterStopcockNote: $0.waterStopcockNote, mainElectricalPanelNote: $0.mainElectricalPanelNote, lastReviewedAt: $0.lastReviewedAt)) }
+            try context.save()
+        }
+        try populateOldStore()
+        let schema = Schema([FamilyContact.self, ImportantNumber.self, HouseholdPlan.self, HouseholdRole.self, SupplyItem.self])
+        let container = try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: storeURL))
+        let context = ModelContext(container)
+        let contacts = try context.fetch(FetchDescriptor<FamilyContact>()).map { FamilyContactSnapshot(name: $0.name, role: $0.role, phoneNumber: $0.phoneNumber, notes: $0.notes, isHouseholdMember: $0.isHouseholdMember, birthDate: $0.birthDate) }
+        let numbers = try context.fetch(FetchDescriptor<ImportantNumber>()).map { ImportantNumberSnapshot(label: $0.label, phoneNumber: $0.phoneNumber, notes: $0.notes) }
+        let roles = try context.fetch(FetchDescriptor<HouseholdRole>()).map { HouseholdRoleSnapshot(title: $0.title, person: $0.person, task: $0.task, systemImage: $0.systemImage) }
+        let supplies = try context.fetch(FetchDescriptor<SupplyItem>()).map { SupplyItemSnapshot(name: $0.name, detail: $0.detail, isPacked: $0.isPacked, storageLocation: $0.storageLocation, quantity: $0.quantity, reviewDate: $0.reviewDate) }
+        let plans = try context.fetch(FetchDescriptor<HouseholdPlan>()).map { HouseholdPlanSnapshot(scenarioIdentifier: $0.scenarioIdentifier, reunionPoint: $0.reunionPoint, evacuationDestination: $0.evacuationDestination, shelterZone: $0.shelterZone, gasShutoffNote: $0.gasShutoffNote, medicalLead: $0.medicalLead, petLead: $0.petLead, familyPassword: $0.familyPassword, alternativeAccommodation: $0.alternativeAccommodation, familyFriendLocation: $0.familyFriendLocation, secondaryHome: $0.secondaryHome, safePlaceNote: $0.safePlaceNote, waterStopcockNote: $0.waterStopcockNote, mainElectricalPanelNote: $0.mainElectricalPanelNote, lastReviewedAt: $0.lastReviewedAt) }
+        func normalized<T: Encodable>(_ records: [T]) throws -> [Data] {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys]
+            return try records.map { try encoder.encode($0) }.sorted { $0.lexicographicallyPrecedes($1) }
+        }
+        // Compare booleans so failure output cannot disclose private record contents.
+        let contactsPreserved = try normalized(contacts) == normalized(original.familyContacts.map { snapshot in
+            var normalized = snapshot
+            normalized.isHouseholdMember = snapshot.isHouseholdMember ?? true
+            return normalized
+        })
+        let numbersPreserved = try normalized(numbers) == normalized(original.importantNumbers)
+        let rolesPreserved = try normalized(roles) == normalized(original.householdRoles)
+        let suppliesPreserved = try normalized(supplies) == normalized(original.supplies.map { snapshot in
+            var normalized = snapshot
+            normalized.quantity = snapshot.quantity ?? ""
+            return normalized
+        })
+        let plansPreserved = try normalized(plans) == normalized(original.householdPlans)
+        let roundTrip = try DisasterBackupPayload.decode(from: original.encodedData())
+        let backupPreserved = roundTrip == original
+        let originalUnchanged = try Data(contentsOf: preservationBackupURL) == inputData
+        #expect(contactsPreserved)
+        #expect(numbersPreserved)
+        #expect(rolesPreserved)
+        #expect(suppliesPreserved)
+        #expect(plansPreserved)
+        #expect(backupPreserved)
+        #expect(originalUnchanged)
+    }
+
+    @Test func onDiskUpgradePreservesLegacyContactsPlansRolesAndSupplies() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appendingPathComponent("legacy.store")
+        let contactID = UUID()
+        let supplyID = UUID()
+        let reviewDate = Date(timeIntervalSince1970: 1_800_000_000)
+
+        func createOldStore() throws {
+            let schema = Schema([PreBirthDateSchema.FamilyContact.self, ImportantNumber.self, HouseholdPlan.self, HouseholdRole.self, SupplyItem.self])
+            let container = try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: storeURL))
+            let context = ModelContext(container)
+            context.insert(PreBirthDateSchema.FamilyContact(id: contactID, name: "Bevaringstest", role: "Familie", phoneNumber: "12345678", notes: "Eksisterende merknad", isHouseholdMember: true))
+            context.insert(PreBirthDateSchema.FamilyContact(name: "Kontakt utenfor", role: "Nabo", phoneNumber: "87654321", notes: "Utenfor husstanden", isHouseholdMember: false))
+            context.insert(ImportantNumber(label: "Lokalkontakt", phoneNumber: "12345678", notes: "Viktig merknad"))
+            context.insert(SupplyItem(id: supplyID, name: "Eget vannlager", detail: "Boden", isPacked: true, storageLocation: SupplyLocation.home.rawValue, quantity: "40 liter", reviewDate: reviewDate))
+            context.insert(HouseholdPlan(scenarioIdentifier: "storm", reunionPoint: "Møteplass", evacuationDestination: "Familie", shelterZone: "Kjeller", gasShutoffNote: "Ventil", medicalLead: "Ansvarlig", petLead: "Dyreansvarlig", familyPassword: "Bevart passord", alternativeAccommodation: "Overnatting", waterStopcockNote: "Vannstopper", lastReviewedAt: reviewDate))
+            context.insert(HouseholdRole(title: "Transport", person: "Bevaringstest", task: "Hjelp til transport", systemImage: "car"))
+            try context.save()
+        }
+        try createOldStore()
+
+        func migrateAndCheck() throws {
+            let schema = Schema([FamilyContact.self, ImportantNumber.self, HouseholdPlan.self, HouseholdRole.self, SupplyItem.self])
+            let container = try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: storeURL))
+            let context = ModelContext(container)
+            let contacts = try context.fetch(FetchDescriptor<FamilyContact>())
+            #expect(contacts.count == 2)
+            let member = try #require(contacts.first { $0.id == contactID })
+            #expect(member.name == "Bevaringstest")
+            #expect(member.role == "Familie")
+            #expect(member.phoneNumber == "12345678")
+            #expect(member.notes == "Eksisterende merknad")
+            #expect(member.isHouseholdMember)
+            #expect(member.birthDate == nil)
+            #expect(contacts.first { !$0.isHouseholdMember }?.notes == "Utenfor husstanden")
+            let supply = try #require(context.fetch(FetchDescriptor<SupplyItem>()).first)
+            #expect(supply.id == supplyID)
+            #expect(supply.name == "Eget vannlager")
+            #expect(supply.detail == "Boden")
+            #expect(supply.isPacked)
+            #expect(supply.storageLocation == SupplyLocation.home.rawValue)
+            #expect(supply.quantity == "40 liter")
+            #expect(supply.reviewDate == reviewDate)
+            let plan = try #require(context.fetch(FetchDescriptor<HouseholdPlan>()).first)
+            #expect(plan.reunionPoint == "Møteplass")
+            #expect(plan.evacuationDestination == "Familie")
+            #expect(plan.familyPassword == "Bevart passord")
+            #expect(plan.alternativeAccommodation == "Overnatting")
+            #expect(plan.waterStopcockNote == "Vannstopper")
+            #expect(plan.lastReviewedAt == reviewDate)
+            #expect(try context.fetch(FetchDescriptor<ImportantNumber>()).first?.notes == "Viktig merknad")
+            #expect(try context.fetch(FetchDescriptor<HouseholdRole>()).first?.task == "Hjelp til transport")
+            member.birthDate = Date(timeIntervalSince1970: 1_000_000_000)
+            try context.save()
+        }
+        try migrateAndCheck()
+        let schema = Schema([FamilyContact.self, ImportantNumber.self, HouseholdPlan.self, HouseholdRole.self, SupplyItem.self])
+        let reopened = try ModelContainer(for: schema, configurations: ModelConfiguration(schema: schema, url: storeURL))
+        let member = try #require(ModelContext(reopened).fetch(FetchDescriptor<FamilyContact>()).first { $0.id == contactID })
+        #expect(member.birthDate == Date(timeIntervalSince1970: 1_000_000_000))
+        #expect(member.notes == "Eksisterende merknad")
+    }
+
+    @Test func birthDateBackupAcceptsOldContactsAndRoundTripsNewOnes() throws {
+        let oldJSON = Data(#"{"name":"Emma","role":"Barn","phoneNumber":"12345678","notes":"Behold meg","isHouseholdMember":true}"#.utf8)
+        var snapshot = try JSONDecoder().decode(FamilyContactSnapshot.self, from: oldJSON)
+        #expect(snapshot.birthDate == nil)
+        #expect(snapshot.notes == "Behold meg")
+        snapshot.birthDate = Date(timeIntervalSince1970: 1_500_000_000)
+        let restored = try JSONDecoder().decode(FamilyContactSnapshot.self, from: JSONEncoder().encode(snapshot))
+        #expect(restored == snapshot)
+    }
+
+    @Test func ageChangesOnBirthdayAndAllowsMissingBirthDate() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let birthday = try #require(calendar.date(from: DateComponents(year: 2018, month: 11, day: 13)))
+        let before = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 12)))
+        let onBirthday = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 13)))
+        let member = FamilyContact(name: "Emma", role: "Barn", phoneNumber: "", notes: "")
+        #expect(member.age(on: before, calendar: calendar) == nil)
+        member.birthDate = birthday
+        #expect(member.age(on: before, calendar: calendar) == 7)
+        #expect(member.age(on: onBirthday, calendar: calendar) == 8)
+        #expect(member.age(on: birthday.addingTimeInterval(-86400), calendar: calendar) == nil)
+    }
+
+    @Test func equipmentTiersFollowEventPriorityWithoutChangingRecordedState() {
+        for priority in SupplyRecommendationPriority.allCases {
+            let item = SupplyCoverageItem(
+                recommendation: SupplyRecommendation(id: "light", nameKey: "light", categoryKey: "light", priority: priority, listKind: .homePreparedness),
+                group: .warmthAndLight, isRecorded: true
+            )
+            #expect(item.isEssential == (priority != .normal))
+            #expect(item.recordedCount == 1)
+        }
+    }
 
     @Test func stormScenarioRecommendsEvacuationEvaluation() async throws {
         #expect(PreparednessScenario.storm.recommendedAction(in: .english) == "Evaluate evacuation")
@@ -2853,4 +3014,38 @@ private actor ShelterHTTPClientStub: ShelterHTTPClient {
         requestCount += 1
         throw URLError(.notConnectedToInternet)
     }
+}
+
+// Exact pre-birth-date contact model, used only to exercise on-disk migration.
+private enum PreBirthDateSchema {
+@Model
+final class FamilyContact {
+    var id: UUID
+    var name: String
+    var role: String
+    var phoneNumber: String
+    var notes: String
+    var isHouseholdMember: Bool = true
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        role: String,
+        phoneNumber: String,
+        notes: String,
+        isHouseholdMember: Bool = true
+    ) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.phoneNumber = phoneNumber
+        self.notes = notes
+        self.isHouseholdMember = isHouseholdMember
+    }
+}
+}
+
+private var preservationBackupURL: URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("DataPreservationInput.json")
 }

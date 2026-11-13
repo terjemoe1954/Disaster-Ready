@@ -27,6 +27,7 @@ struct SupplyCoverageItem: Identifiable, Equatable, Sendable {
     let group: PreparednessSupplyGroup
     let isRecorded: Bool
 
+    var isEssential: Bool { recommendation.priority != .normal }
     var id: String { recommendation.id }
     var recommendedCount: Int { 1 }
     var recordedCount: Int { isRecorded ? 1 : 0 }

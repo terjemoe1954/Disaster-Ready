@@ -99,6 +99,7 @@ struct FamilyContactSnapshot: Codable, Equatable {
     var phoneNumber: String
     var notes: String
     var isHouseholdMember: Bool? = nil
+    var birthDate: Date? = nil
 }
 
 struct ImportantNumberSnapshot: Codable, Equatable {

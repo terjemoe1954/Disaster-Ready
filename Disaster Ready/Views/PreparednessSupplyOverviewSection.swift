@@ -123,7 +123,6 @@ struct SuppliesDashboardSections: View {
 
 struct PreparednessSupplyOverviewSection: View {
     @State private var selectedShoppingItemIDs = ShoppingListSelectionStore.load()
-    @State private var showsAllGroups = false
 
     let recommendations: [SupplyRecommendation]
     let savedSupplies: [SupplyItem]
@@ -136,18 +135,14 @@ struct PreparednessSupplyOverviewSection: View {
                 householdSize: householdSize,
                 language: language
             )
-            SupplyCoverageCounts(summary: summary, language: language)
-            PriorityMissingSupplies(
-                items: Array(summary.missingItems.prefix(3)),
-                selectedIDs: $selectedShoppingItemIDs,
-                language: language
-            )
-            PreparednessSupplyGroups(
-                summary: summary,
-                isExpanded: $showsAllGroups,
-                selectedIDs: $selectedShoppingItemIDs,
-                language: language
-            )
+            ForEach([true, false], id: \.self) { essential in
+                SupplyPrioritySection(
+                    items: summary.items.filter { $0.isEssential == essential },
+                    essential: essential,
+                    selectedIDs: $selectedShoppingItemIDs,
+                    language: language
+                )
+            }
             ShoppingListActions(
                 selectedItems: selectedMissingItems,
                 language: language
@@ -200,151 +195,6 @@ private struct PreparednessSupplyOverviewHeader: View {
         return L10n.pick(language: language, english: "Overview for \(householdSize) people. Counts show checklist items, not a promise of safety.", norwegian: "Oversikt for \(householdSize) personer. Tallene viser sjekklistepunkter, ikke et løfte om trygghet.", thai: "ภาพรวมสำหรับ \(householdSize) คน ตัวเลขแสดงรายการตรวจสอบ ไม่ใช่การรับรองความปลอดภัย")
     }
     private var source: String { L10n.pick(language: language, english: "Norway · Source: DSB self-preparedness guidance", norwegian: "Norge · Kilde: DSBs råd om egenberedskap", thai: "นอร์เวย์ · แหล่งข้อมูล: คำแนะนำการเตรียมพร้อมของ DSB") }
-}
-
-private struct SupplyCoverageCounts: View {
-    let summary: SupplyCoverageSummary
-    let language: AppLanguage
-
-    var body: some View {
-        HStack(spacing: 8) {
-            countCard(title: recordedTitle, value: summary.recordedCount, color: .green)
-            countCard(title: recommendedTitle, value: summary.recommendedCount, color: .blue)
-            countCard(title: missingTitle, value: summary.missingCount, color: .orange)
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    private func countCard(title: String, value: Int, color: Color) -> some View {
-        VStack(spacing: 3) {
-            Text(value, format: .number)
-                .font(.title3.bold())
-            Text(title)
-                .font(.caption)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, minHeight: 64)
-        .background(color.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var recommendedTitle: String { L10n.pick(language: language, english: "Recommended", norwegian: "Anbefalt", thai: "แนะนำ") }
-    private var recordedTitle: String { L10n.pick(language: language, english: "Recorded", norwegian: "Registrert", thai: "บันทึกแล้ว") }
-    private var missingTitle: String { L10n.pick(language: language, english: "Missing", norwegian: "Mangler", thai: "ขาด") }
-}
-
-private struct PriorityMissingSupplies: View {
-    let items: [SupplyCoverageItem]
-    @Binding var selectedIDs: Set<String>
-    let language: AppLanguage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.headline)
-            if items.isEmpty {
-                Text(emptyDetail)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            } else {
-                ForEach(items) { item in
-                    ShoppingSelectionRow(
-                        item: item,
-                        isSelected: selectionBinding(for: item.id),
-                        language: language
-                    )
-                }
-            }
-        }
-    }
-
-    private func selectionBinding(for id: String) -> Binding<Bool> {
-        Binding(
-            get: { selectedIDs.contains(id) },
-            set: { selected in
-                if selected { selectedIDs.insert(id) } else { selectedIDs.remove(id) }
-            }
-        )
-    }
-
-    private var title: String { L10n.pick(language: language, english: "Choose your next purchases", norwegian: "Velg neste innkjøp", thai: "เลือกสิ่งที่จะซื้อถัดไป") }
-    private var emptyDetail: String { L10n.pick(language: language, english: "No recommended checklist items are currently missing. Review quantities and expiry dates in the full inventory below.", norwegian: "Ingen anbefalte sjekklistepunkter mangler nå. Kontroller mengder og holdbarhet i den fulle oversikten nedenfor.", thai: "ขณะนี้ไม่มีรายการแนะนำที่ขาด โปรดตรวจสอบปริมาณและวันหมดอายุในรายการเต็มด้านล่าง") }
-}
-
-private struct PreparednessSupplyGroups: View {
-    let summary: SupplyCoverageSummary
-    @Binding var isExpanded: Bool
-    @Binding var selectedIDs: Set<String>
-    let language: AppLanguage
-
-    var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(PreparednessSupplyGroup.allCases) { group in
-                    let items = summary.items(in: group)
-                    if !items.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(groupTitle(group))
-                                .font(.headline)
-                            Text(groupCounts(items))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            ForEach(items.filter { $0.recordedCount > 0 }) { item in
-                                Label(item.recommendation.localizedName(in: language), systemImage: "checkmark.circle.fill")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.green)
-                                    .accessibilityLabel(recordedAccessibilityLabel(for: item))
-                            }
-                            ForEach(items.filter { $0.missingCount > 0 }) { item in
-                                ShoppingSelectionRow(
-                                    item: item,
-                                    isSelected: selectionBinding(for: item.id),
-                                    language: language
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(.top, 10)
-        } label: {
-            Text(L10n.pick(language: language, english: "All five groups", norwegian: "Alle fem grupper", thai: "ทั้งห้ากลุ่ม"))
-                .font(.headline)
-        }
-    }
-
-    private func selectionBinding(for id: String) -> Binding<Bool> {
-        Binding(
-            get: { selectedIDs.contains(id) },
-            set: { selected in
-                if selected { selectedIDs.insert(id) } else { selectedIDs.remove(id) }
-            }
-        )
-    }
-
-    private func recordedAccessibilityLabel(for item: SupplyCoverageItem) -> String {
-        L10n.pick(
-            language: language,
-            english: "Recorded: \(item.recommendation.localizedName(in: language))",
-            norwegian: "Registrert: \(item.recommendation.localizedName(in: language))",
-            thai: "บันทึกแล้ว: \(item.recommendation.localizedName(in: language))"
-        )
-    }
-
-    private func groupCounts(_ items: [SupplyCoverageItem]) -> String {
-        let recorded = items.reduce(0) { $0 + $1.recordedCount }
-        let missing = max(0, items.count - recorded)
-        return L10n.pick(language: language, english: "Recommended \(items.count) · recorded \(recorded) · missing \(missing)", norwegian: "Anbefalt \(items.count) · registrert \(recorded) · mangler \(missing)", thai: "แนะนำ \(items.count) · บันทึก \(recorded) · ขาด \(missing)")
-    }
-
-    private func groupTitle(_ group: PreparednessSupplyGroup) -> String {
-        switch group {
-        case .water: L10n.pick(language: language, english: "Water", norwegian: "Vann", thai: "น้ำ")
-        case .food: L10n.pick(language: language, english: "Food", norwegian: "Mat", thai: "อาหาร")
-        case .warmthAndLight: L10n.pick(language: language, english: "Warmth and light", norwegian: "Varme og lys", thai: "ความอบอุ่นและแสงสว่าง")
-        case .healthAndHygiene: L10n.pick(language: language, english: "Health and hygiene", norwegian: "Helse og hygiene", thai: "สุขภาพและสุขอนามัย")
-        case .informationAndContact: L10n.pick(language: language, english: "Information and contact", norwegian: "Informasjon og kontakt", thai: "ข้อมูลและการติดต่อ")
-        }
-    }
 }
 
 private struct ShoppingSelectionRow: View {
@@ -478,5 +328,55 @@ private enum ShoppingListPrinter {
         controller.printInfo = info
         controller.printFormatter = UISimpleTextPrintFormatter(text: text)
         controller.present(animated: true)
+    }
+}
+
+private struct SupplyPrioritySection: View {
+    let items: [SupplyCoverageItem]
+    let essential: Bool
+    @Binding var selectedIDs: Set<String>
+    let language: AppLanguage
+
+    private var tint: Color { essential ? .orange : .blue }
+    private var title: String {
+        essential
+            ? L10n.pick(language: language, english: "MUST HAVE · Prioritize first", norwegian: "MÅ HA · Prioriter først", thai: "ต้องมี · จัดหาก่อน")
+            : L10n.pick(language: language, english: "SHOULD HAVE · Build gradually", norwegian: "BØR HA · Bygg videre", thai: "ควรมี · ค่อย ๆ เพิ่ม")
+    }
+
+    var body: some View {
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Label(title, systemImage: essential ? "exclamationmark.shield.fill" : "plus.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(tint)
+                Text(L10n.pick(language: language,
+                    english: "Recorded \(items.filter(\.isRecorded).count) of \(items.count) checklist items",
+                    norwegian: "Registrert \(items.filter(\.isRecorded).count) av \(items.count) sjekklistepunkter",
+                    thai: "บันทึกแล้ว \(items.filter(\.isRecorded).count) จาก \(items.count) รายการ"))
+                    .font(.subheadline)
+                ProgressView(value: Double(items.filter(\.isRecorded).count), total: Double(items.count))
+                    .tint(tint)
+                Text(L10n.pick(language: language,
+                    english: "Priorities adapt to your household and selected event. Check quantities and expiry dates in your inventory.",
+                    norwegian: "Prioriteringen tilpasses husstanden og valgt hendelse. Kontroller mengder og holdbarhet i utstyrslisten.",
+                    thai: "ลำดับความสำคัญปรับตามครัวเรือนและเหตุการณ์ ตรวจสอบปริมาณและวันหมดอายุในรายการอุปกรณ์"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                ForEach(items) { item in
+                    if item.isRecorded {
+                        Label(item.recommendation.localizedName(in: language), systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        ShoppingSelectionRow(item: item, isSelected: Binding(
+                            get: { selectedIDs.contains(item.id) },
+                            set: { if $0 { selectedIDs.insert(item.id) } else { selectedIDs.remove(item.id) } }
+                        ), language: language)
+                    }
+                }
+            }
+            .padding(14)
+            .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+        }
     }
 }

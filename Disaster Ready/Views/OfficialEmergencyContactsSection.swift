@@ -39,6 +39,9 @@ struct OfficialEmergencyContactsSection: View {
                     language: language
                 )
             }
+            if countryCode.uppercased() == "NO" {
+                NorwegianVolunteerContacts(language: language)
+            }
         }
         .padding(14)
         .background(InsetCardBackground())
@@ -155,5 +158,40 @@ struct OfficialEmergencyNumberRow: View {
             )
         )
         .accessibilityIdentifier("callOfficialNumber.\(number.id)")
+    }
+}
+
+private struct NorwegianVolunteerContacts: View {
+    let language: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Divider()
+            Label(L10n.pick(language: language, english: "Volunteer aid organizations", norwegian: "Frivillige hjelpeorganisasjoner", thai: "องค์กรช่วยเหลืออาสาสมัคร"), systemImage: "person.2.fill")
+                .font(.headline)
+            Text(L10n.pick(language: language,
+                english: "Switchboards for planning and general enquiries, not emergency dispatch. In Norway, call 113 for immediate danger to life or health, or 112 for urgent police or rescue assistance. Local teams are not guaranteed to be available.",
+                norwegian: "Sentralbord for planlegging og generelle spørsmål, ikke nødtelefoner. Ring 113 ved akutt fare for liv og helse, eller 112 ved akutt behov for politi eller redningshjelp. Lokallag har ikke garantert tilgjengelighet.",
+                thai: "หมายเลขสำนักงานสำหรับการวางแผนและสอบถามทั่วไป ไม่ใช่หมายเลขฉุกเฉิน ในนอร์เวย์ โทร 113 เมื่อมีอันตรายเร่งด่วนต่อชีวิตหรือสุขภาพ หรือ 112 สำหรับตำรวจหรือการกู้ภัยฉุกเฉิน ทีมท้องถิ่นอาจไม่พร้อมให้บริการเสมอ"))
+                .font(.footnote)
+            contact(name: "Røde Kors", phone: "22 05 40 00", dial: "+4722054000", url: "https://www.rodekors.no/kontakt/")
+            contact(name: "Norsk Folkehjelp", phone: "22 03 77 00", dial: "+4722037700", url: "https://folkehjelp.no/kontakt-oss")
+            Text(L10n.pick(language: language, english: "Save your local team's contact in your own contacts. Numbers verified 13 November 2026.", norwegian: "Lagre kontakt til ditt lokallag blant egne kontakter. Numrene er kontrollert 13. november 2026.", thai: "บันทึกข้อมูลติดต่อทีมท้องถิ่นในรายชื่อติดต่อของคุณ ตรวจสอบหมายเลขเมื่อ 13 พฤศจิกายน 2026"))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityIdentifier("norwegianVolunteerContacts")
+    }
+
+    private func contact(name: String, phone: String, dial: String, url: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(name).font(.subheadline.bold())
+            Link(destination: URL(string: "tel:\(dial)")!) {
+                Label(phone, systemImage: "phone.fill")
+                    .frame(minHeight: 44)
+            }
+            Link(L10n.pick(language: language, english: "Contact information and local teams", norwegian: "Kontaktinformasjon og lokallag", thai: "ข้อมูลติดต่อและทีมท้องถิ่น"), destination: URL(string: url)!)
+                .font(.subheadline)
+        }
     }
 }

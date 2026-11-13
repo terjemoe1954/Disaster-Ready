@@ -1208,7 +1208,8 @@ struct DisasterDashboardView: View {
                         role: $0.role,
                         phoneNumber: $0.phoneNumber,
                         notes: $0.notes,
-                        isHouseholdMember: $0.isHouseholdMember
+                        isHouseholdMember: $0.isHouseholdMember,
+                        birthDate: $0.birthDate
                     )
                 },
                 importantNumbers: importantNumbers.map {
@@ -1451,7 +1452,8 @@ struct DisasterDashboardView: View {
                         role: $0.role,
                         phoneNumber: $0.phoneNumber,
                         notes: $0.notes,
-                        isHouseholdMember: $0.isHouseholdMember ?? true
+                        isHouseholdMember: $0.isHouseholdMember ?? true,
+                        birthDate: $0.birthDate
                     )
                 }
                 .forEach(modelContext.insert)

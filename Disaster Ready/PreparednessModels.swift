@@ -264,6 +264,7 @@ final class FamilyContact {
     var phoneNumber: String
     var notes: String
     var isHouseholdMember: Bool = true
+    var birthDate: Date? = nil
 
     init(
         id: UUID = UUID(),
@@ -271,7 +272,8 @@ final class FamilyContact {
         role: String,
         phoneNumber: String,
         notes: String,
-        isHouseholdMember: Bool = true
+        isHouseholdMember: Bool = true,
+        birthDate: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -279,6 +281,12 @@ final class FamilyContact {
         self.phoneNumber = phoneNumber
         self.notes = notes
         self.isHouseholdMember = isHouseholdMember
+        self.birthDate = birthDate
+    }
+
+    func age(on date: Date = Date(), calendar: Calendar = .current) -> Int? {
+        guard let birthDate, birthDate <= date else { return nil }
+        return calendar.dateComponents([.year], from: birthDate, to: date).year
     }
 }
 
